@@ -74,9 +74,8 @@ public class Main extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         for (String key : prefs.getAll().keySet()) {
             if (key.startsWith("profile-")) {
-                Gson gson = new Gson();
                 String profileJson = prefs.getString(key, "");
-                Profile profile = gson.fromJson(profileJson, Profile.class);
+                Profile profile = new Gson().fromJson(profileJson, Profile.class);
                 listItems.add(profile);
             }
         }

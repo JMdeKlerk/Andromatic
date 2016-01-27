@@ -4,47 +4,74 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
-import android.util.Log;
+
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Profile {
 
     private String name;
     private String ssid;
-    private ArrayList<Action> onConnectActions, onDisconnectActions;
+    private static Lock profileLock = new ReentrantLock();
+    private ArrayList<Action> actions;
 
-    public Profile(String name, String ssid) {
+    public Profile(Context context, String name, String ssid) {
         this.name = name;
         this.ssid = ssid;
-        onConnectActions = new ArrayList<>();
-        onDisconnectActions = new ArrayList<>();
+        actions = new ArrayList<>();
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        String storeProfile = new Gson().toJson(this);
+        editor.putString("profile-" + name, storeProfile).apply();
     }
 
-    public void doActions(Context context, NetworkInfo.State state) {
+    public void toggleProfile(Context context, NetworkInfo.State state) {
+        profileLock.lock();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
         switch (state) {
             case CONNECTED:
-                Main.showToast(context, "Activating profile: " + this.getName());
-                editor.putString("active", this.name).commit();
-                /*for (Action action : onConnectActions) {
-
-                }*/
+                if (!this.isActiveProfile(context)) {
+                    Main.showToast(context, "Activating profile: " + this.getName());
+                    editor.putString("active", this.name).commit();
+                }
                 break;
             case DISCONNECTED:
-                Main.showToast(context, "Deactivating profile: " + this.getName());
-                if (this.name.equals(prefs.getString("active", ""))) editor.remove("active").commit();
-                /*for (Action action : onDisconnectActions) {
-
-                }*/
+                if (this.isActiveProfile(context)) {
+                    Main.showToast(context, "Deactivating profile: " + this.getName());
+                    editor.remove("active").commit();
+                }
                 break;
         }
+        for (Action action : actions) {
+            action.doAction(context, state);
+        }
+        profileLock.unlock();
+    }
+
+    public void addNewAction(Context context, Action action) {
+        actions.add(action);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        String storeProfile = new Gson().toJson(this);
+        editor.putString("profile-" + name, storeProfile).apply();
+    }
+
+    public void removeAction(Context context, Action action) {
+        actions.remove(action);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        String storeProfile = new Gson().toJson(this);
+        editor.putString("profile-" + name, storeProfile).apply();
     }
 
     public boolean isActiveProfile(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return this.name.equals(prefs.getString("active", ""));
+    }
+
+    public ArrayList<Action> getActions() {
+        return actions;
     }
 
     public String getName() {

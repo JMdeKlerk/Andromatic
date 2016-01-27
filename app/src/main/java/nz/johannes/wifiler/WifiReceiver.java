@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.google.gson.Gson;
 
@@ -26,7 +25,6 @@ public class WifiReceiver extends BroadcastReceiver {
                 break;
             case ("android.net.wifi.STATE_CHANGE"):
                 if (!intent.hasExtra("bssid")) return;
-                Gson gson = new Gson();
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor editor = prefs.edit();
                 WifiManager manager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -39,9 +37,9 @@ public class WifiReceiver extends BroadcastReceiver {
                 }
                 for (String key : prefs.getAll().keySet()) {
                     if (key.startsWith("profile-")) {
-                        Profile profile = gson.fromJson(prefs.getString(key, ""), Profile.class);
+                        Profile profile = new Gson().fromJson(prefs.getString(key, ""), Profile.class);
                         if (profile.getSSID().equals(ssid)) {
-                            profile.doActions(context, currentState);
+                            profile.toggleProfile(context, currentState);
                         }
                     }
                 }

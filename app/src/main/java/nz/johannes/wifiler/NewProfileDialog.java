@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -30,16 +33,21 @@ public class NewProfileDialog extends Activity {
         this.getWindow().setAttributes(params);
         WifiManager manager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         ArrayList<String> knownNetworks = new ArrayList<>();
-        for (WifiConfiguration network : manager.getConfiguredNetworks()) {
-            String ssid = network.SSID.replace("\"", "");
-            if (!knownNetworks.contains(ssid)) knownNetworks.add(ssid);
+        if (manager.getConfiguredNetworks() != null) {
+            for (WifiConfiguration network : manager.getConfiguredNetworks()) {
+                String ssid = network.SSID.replace("\"", "");
+                if (!knownNetworks.contains(ssid)) knownNetworks.add(ssid);
+            }
         }
         for (ScanResult network : manager.getScanResults()) {
             if (!knownNetworks.contains(network.SSID)) knownNetworks.add(network.SSID);
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, knownNetworks);
         AutoCompleteTextView ssidBox = (AutoCompleteTextView) findViewById(R.id.ssid);
-        ssidBox.setText(manager.getConnectionInfo().getSSID());
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        String ssidText = wifi.isConnected() ? manager.getConnectionInfo().getSSID() : "";
+        ssidBox.setText(ssidText);
         ssidBox.setAdapter(adapter);
         super.onCreate(savedInstanceState);
     }
@@ -49,11 +57,7 @@ public class NewProfileDialog extends Activity {
         String name = nameField.getText().toString();
         EditText ssidField = (EditText) findViewById(R.id.ssid);
         String ssid = ssidField.getText().toString();
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        Gson gson = new Gson();
-        Profile profile = new Profile(name, ssid);
-        String storeProfile = gson.toJson(profile);
-        editor.putString("profile-" + name, storeProfile).apply();
+        Profile profile = new Profile(this, name, ssid);
         Intent returnIntent = new Intent();
         returnIntent.putExtra("profile", name);
         setResult(Activity.RESULT_OK, returnIntent);
