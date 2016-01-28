@@ -13,23 +13,6 @@ public class Action {
     private ArrayList<String> multiData;
     private NetworkInfo.State requiredState;
 
-    public Action(String command, NetworkInfo.State state) {
-        this.command = command;
-        this.requiredState = state;
-    }
-
-    public Action(String command, String data, NetworkInfo.State state) {
-        this.command = command;
-        this.data = data;
-        this.requiredState = state;
-    }
-
-    public Action(String command, ArrayList<String> data, NetworkInfo.State state) {
-        this.command = command;
-        this.multiData = data;
-        this.requiredState = state;
-    }
-
     public void doAction(Context context, NetworkInfo.State state) {
         if (!state.equals(requiredState)) return;
         switch (getCommand()) {
@@ -83,16 +66,32 @@ public class Action {
         return this.command;
     }
 
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
     public String getData() {
         return this.data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
     }
 
     public ArrayList getMultiData() {
         return this.multiData;
     }
 
+    public void setData(ArrayList<String> data) {
+        this.multiData = data;
+    }
+
     public NetworkInfo.State getRequiredState() {
         return this.requiredState;
+    }
+
+    public void setRequiredState(NetworkInfo.State state) {
+        this.requiredState = state;
     }
 
 }

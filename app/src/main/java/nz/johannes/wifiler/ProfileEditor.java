@@ -1,12 +1,16 @@
 package nz.johannes.wifiler;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -58,16 +62,51 @@ public class ProfileEditor extends AppCompatActivity {
         }
     }
 
-    public void addTrigger(View view) {
-        Action action = new Action("SET_BLUETOOTH", "enabled", NetworkInfo.State.CONNECTED);
-        profile.addNewAction(this, action);
-        //TODO
+    public void addTrigger() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final Action action = new Action();
+        final String stateChoices[] = new String[]{"On connect...", "On disconnect..."};
+        final String actionChoices[] = new String[]{"Launch app", "Kill app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
+                "Enable mobile data", "Disable mobile data", "Enable GPS", "Disable GPS", "Set brightness", "Set ringer volume", "Set media volume",
+                "Set lock mode", "Send SMS", "Send email", "Start timer", "Stop timer", "Shut down phone", "Play sound"};
+        builder.setTitle("State:");
+        builder.setItems(stateChoices, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int i) {
+                action.setRequiredState(i == 0 ? NetworkInfo.State.CONNECTED : NetworkInfo.State.DISCONNECTED);
+                builder.setTitle("Action:");
+                builder.setItems(actionChoices, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        action.setCommand(actionChoices[i]);
+                        profile.addNewAction(getBaseContext(), action);
+                        populateActionsList();
+                    }
+                });
+                builder.show();
+            }
+        });
+        builder.show();
     }
 
-    public void deleteProfile(View view) {
+    public void deleteProfile() {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         editor.remove("profile-" + profile.getName()).apply();
         finish();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_profileedit, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_add) addTrigger();
+        if (id == R.id.action_delete) deleteProfile();
+        return super.onOptionsItemSelected(item);
     }
 
 }

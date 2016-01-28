@@ -1,6 +1,7 @@
 package nz.johannes.wifiler;
 
 import android.content.Context;
+import android.net.NetworkInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,7 @@ public class ActionListViewAdapter extends ArrayAdapter<Action> {
                 command.setText(action.getCommand());
             }
             if (trigger != null) {
-                trigger.setText("On connect:");
+                trigger.setText(action.getRequiredState().equals(NetworkInfo.State.CONNECTED) ? "On connect:" : "On disconnect:");
             }
         }
         return convertView;
