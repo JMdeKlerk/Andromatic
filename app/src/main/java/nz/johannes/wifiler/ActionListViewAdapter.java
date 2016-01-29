@@ -30,6 +30,7 @@ public class ActionListViewAdapter extends ArrayAdapter<Action> {
             TextView trigger = (TextView) convertView.findViewById(R.id.trigger);
             if (command != null) {
                 command.setText(action.getCommand());
+                if (action.getData() != null) command.append(": " + action.getData());
             }
             if (trigger != null) {
                 trigger.setText(action.getRequiredState().equals(NetworkInfo.State.CONNECTED) ? "On connect:" : "On disconnect:");

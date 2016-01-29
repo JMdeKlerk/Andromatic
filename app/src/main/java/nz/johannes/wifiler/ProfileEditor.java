@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -18,6 +20,7 @@ import android.widget.ListView;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ProfileEditor extends AppCompatActivity {
 
@@ -39,14 +42,15 @@ public class ProfileEditor extends AppCompatActivity {
         final ListView actionList = (ListView) findViewById(R.id.list);
         final ArrayList<Action> listItems = new ArrayList<>();
         final ActionListViewAdapter adapter = new ActionListViewAdapter(this, R.layout.action_row, listItems);
+        registerForContextMenu(actionList);
         actionList.setAdapter(adapter);
         actionList.setClickable(true);
         actionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 actionToDelete = (Action) actionList.getItemAtPosition(position);
-                Intent showActionClickedDialog = new Intent(getApplicationContext(), ActionClickedDialog.class);
-                startActivityForResult(showActionClickedDialog, 1);
+                profile.removeAction(getBaseContext(), actionToDelete);
+                populateActionsList();
             }
         });
         for (Action action : profile.getActions()) {
@@ -69,18 +73,66 @@ public class ProfileEditor extends AppCompatActivity {
         final String actionChoices[] = new String[]{"Launch app", "Kill app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
                 "Enable mobile data", "Disable mobile data", "Enable GPS", "Disable GPS", "Set brightness", "Set ringer volume", "Set media volume",
                 "Set lock mode", "Send SMS", "Send email", "Start timer", "Stop timer", "Shut down phone", "Play sound"};
-        builder.setTitle("State:");
         builder.setItems(stateChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int i) {
                 action.setRequiredState(i == 0 ? NetworkInfo.State.CONNECTED : NetworkInfo.State.DISCONNECTED);
-                builder.setTitle("Action:");
                 builder.setItems(actionChoices, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int i) {
-                        action.setCommand(actionChoices[i]);
-                        profile.addNewAction(getBaseContext(), action);
-                        populateActionsList();
+                        final String actionChoice = actionChoices[i];
+                        switch (actionChoice) {
+                            case "Launch app":
+                            case "Kill app":
+                                final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+                                mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                                final String[] appChoices = new String[999];
+                                final List<ResolveInfo> appList = getBaseContext().getPackageManager().queryIntentActivities(mainIntent, 0);
+                                for (int x = 0; x < appList.size(); x++) {
+                                        appChoices[x] = appList.get(x).activityInfo.applicationInfo.loadLabel(getPackageManager()).toString();
+                                }
+                                builder.setItems(appChoices, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        action.setCommand(actionChoice);
+                                        action.setData(appChoices[i]);
+                                        profile.addNewAction(getBaseContext(), action);
+                                        populateActionsList();
+                                    }
+                                });
+                                builder.show();
+                                break;
+                            case "Set brightness":
+                            case "Set ringer volume":
+                            case "Set media volume":
+                                // Choose via bar
+                                break;
+                            case "Send SMS":
+                            case "Send email":
+                                // Choose recipient, contents
+                                break;
+                            case "Set lock mode":
+                                final String lockChoices[] = new String[]{"None", "PIN", "Gesture", "Fingerprint"};
+                                builder.setItems(lockChoices, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        action.setCommand(actionChoice);
+                                        action.setData(lockChoices[i]);
+                                        profile.addNewAction(getBaseContext(), action);
+                                        populateActionsList();
+                                    }
+                                });
+                                builder.show();
+                                break;
+                            case "Play sound":
+                                // Choose file
+                                break;
+                            default:
+                                action.setCommand(actionChoice);
+                                profile.addNewAction(getBaseContext(), action);
+                                populateActionsList();
+                                break;
+                        }
                     }
                 });
                 builder.show();
