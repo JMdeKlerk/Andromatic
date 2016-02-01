@@ -9,13 +9,21 @@ import android.content.pm.ResolveInfo;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 
@@ -25,7 +33,6 @@ import java.util.List;
 public class ProfileEditor extends AppCompatActivity {
 
     private Profile profile;
-    private Action actionToDelete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +46,7 @@ public class ProfileEditor extends AppCompatActivity {
     }
 
     private void populateActionsList() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final ListView actionList = (ListView) findViewById(R.id.list);
         final ArrayList<Action> listItems = new ArrayList<>();
         final ActionListViewAdapter adapter = new ActionListViewAdapter(this, R.layout.action_row, listItems);
@@ -48,9 +56,17 @@ public class ProfileEditor extends AppCompatActivity {
         actionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                actionToDelete = (Action) actionList.getItemAtPosition(position);
-                profile.removeAction(getBaseContext(), actionToDelete);
-                populateActionsList();
+                final Action actionToDelete = (Action) actionList.getItemAtPosition(position);
+                alert.setTitle("Delete action?");
+                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        profile.removeAction(getBaseContext(), actionToDelete);
+                        populateActionsList();
+                    }
+                });
+                alert.setNegativeButton("No", null);
+                alert.show();
             }
         });
         for (Action action : profile.getActions()) {
@@ -59,25 +75,18 @@ public class ProfileEditor extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            profile.removeAction(this, actionToDelete);
-        }
-    }
-
     public void addTrigger() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final Action action = new Action();
         final String stateChoices[] = new String[]{"On connect...", "On disconnect..."};
         final String actionChoices[] = new String[]{"Launch app", "Kill app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
                 "Enable mobile data", "Disable mobile data", "Enable GPS", "Disable GPS", "Set brightness", "Set ringer volume", "Set media volume",
                 "Set lock mode", "Send SMS", "Send email", "Start timer", "Stop timer", "Shut down phone", "Play sound"};
-        builder.setItems(stateChoices, new DialogInterface.OnClickListener() {
+        alert.setItems(stateChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int i) {
                 action.setRequiredState(i == 0 ? NetworkInfo.State.CONNECTED : NetworkInfo.State.DISCONNECTED);
-                builder.setItems(actionChoices, new DialogInterface.OnClickListener() {
+                alert.setItems(actionChoices, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int i) {
                         final String actionChoice = actionChoices[i];
@@ -89,9 +98,9 @@ public class ProfileEditor extends AppCompatActivity {
                                 final String[] appChoices = new String[999];
                                 final List<ResolveInfo> appList = getBaseContext().getPackageManager().queryIntentActivities(mainIntent, 0);
                                 for (int x = 0; x < appList.size(); x++) {
-                                        appChoices[x] = appList.get(x).activityInfo.applicationInfo.loadLabel(getPackageManager()).toString();
+                                    appChoices[x] = appList.get(x).activityInfo.applicationInfo.loadLabel(getPackageManager()).toString();
                                 }
-                                builder.setItems(appChoices, new DialogInterface.OnClickListener() {
+                                alert.setItems(appChoices, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int i) {
                                         action.setCommand(actionChoice);
@@ -100,20 +109,48 @@ public class ProfileEditor extends AppCompatActivity {
                                         populateActionsList();
                                     }
                                 });
-                                builder.show();
+                                alert.show();
                                 break;
                             case "Set brightness":
                             case "Set ringer volume":
                             case "Set media volume":
-                                // Choose via bar
+                                alert.setItems(null, null);
+                                alert.setView(R.layout.dialog_seekbar);
+                                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        action.setCommand(actionChoice);
+                                        SeekBar seek = (SeekBar) ((AlertDialog) dialog).findViewById(R.id.seek);
+                                        action.setData(String.valueOf(seek.getProgress() * 10));
+                                        profile.addNewAction(getBaseContext(), action);
+                                        populateActionsList();
+                                    }
+                                });
+                                alert.setNegativeButton("Cancel", null);
+                                alert.show();
                                 break;
                             case "Send SMS":
                             case "Send email":
-                                // Choose recipient, contents
+                                alert.setItems(null, null);
+                                alert.setView(R.layout.dialog_sendmessage);
+                                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        action.setCommand(actionChoice);
+                                        EditText to = (EditText) ((AlertDialog) dialog).findViewById(R.id.to);
+                                        EditText message = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
+                                        ArrayList actionData = new ArrayList();
+                                        actionData.add(to.getText().toString());
+                                        actionData.add(message.getText().toString());
+                                        action.setData(actionData);
+                                        profile.addNewAction(getBaseContext(), action);
+                                        populateActionsList();
+                                    }
+                                });
+                                alert.setNegativeButton("Cancel", null);
+                                alert.show();
                                 break;
                             case "Set lock mode":
                                 final String lockChoices[] = new String[]{"None", "PIN", "Gesture", "Fingerprint"};
-                                builder.setItems(lockChoices, new DialogInterface.OnClickListener() {
+                                alert.setItems(lockChoices, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int i) {
                                         action.setCommand(actionChoice);
@@ -122,7 +159,7 @@ public class ProfileEditor extends AppCompatActivity {
                                         populateActionsList();
                                     }
                                 });
-                                builder.show();
+                                alert.show();
                                 break;
                             case "Play sound":
                                 // Choose file
@@ -135,10 +172,10 @@ public class ProfileEditor extends AppCompatActivity {
                         }
                     }
                 });
-                builder.show();
+                alert.show();
             }
         });
-        builder.show();
+        alert.show();
     }
 
     public void deleteProfile() {

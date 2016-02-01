@@ -2,20 +2,21 @@ package nz.johannes.wifiler;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -33,11 +34,26 @@ public class Main extends AppCompatActivity {
         setSupportActionBar(toolbar);
         populateProfileList();
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent showNewProfileActivity = new Intent(getApplicationContext(), NewProfileDialog.class);
-                startActivityForResult(showNewProfileActivity, 1);
+                alert.setView(R.layout.dialog_newprofile);
+                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        EditText nameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.profile_name);
+                        String name = nameField.getText().toString();
+                        EditText ssidField = (EditText) ((AlertDialog) dialog).findViewById(R.id.ssid);
+                        String ssid = ssidField.getText().toString();
+                        Profile profile = new Profile(getBaseContext(), name, ssid);
+                        Intent profileEditor = new Intent(getApplicationContext(), ProfileEditor.class);
+                        profileEditor.putExtra("profile", name);
+                        startActivity(profileEditor);
+                    }
+                });
+                alert.setNegativeButton("Cancel", null);
+                alert.show();
             }
         });
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

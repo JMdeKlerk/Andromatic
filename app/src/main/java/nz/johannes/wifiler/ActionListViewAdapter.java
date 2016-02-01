@@ -31,6 +31,7 @@ public class ActionListViewAdapter extends ArrayAdapter<Action> {
             if (command != null) {
                 command.setText(action.getCommand());
                 if (action.getData() != null) command.append(": " + action.getData());
+                if (action.getMultiData() != null) command.append(": " + action.getMultiData().get(0));
             }
             if (trigger != null) {
                 trigger.setText(action.getRequiredState().equals(NetworkInfo.State.CONNECTED) ? "On connect:" : "On disconnect:");
