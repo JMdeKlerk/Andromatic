@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.NetworkInfo;
@@ -80,31 +81,35 @@ public class ProfileEditor extends AppCompatActivity {
         final Action action = new Action();
         final String stateChoices[] = new String[]{"On connect...", "On disconnect..."};
         final String actionChoices[] = new String[]{"Launch app", "Kill app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
-                "Enable mobile data", "Disable mobile data", "Enable GPS", "Disable GPS", "Set brightness", "Set ringer volume", "Set media volume",
-                "Set lock mode", "Send SMS", "Send email", "Start timer", "Stop timer", "Shut down phone", "Play sound"};
+                "Enable GPS", "Disable GPS", "Set brightness", "Set ringer volume", "Set media volume", "Set lock mode", "Send SMS", "Send email",
+                "Start timer", "Stop timer", "Shut down phone"};
         alert.setItems(stateChoices, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int i) {
-                action.setRequiredState(i == 0 ? NetworkInfo.State.CONNECTED : NetworkInfo.State.DISCONNECTED);
+            public void onClick(DialogInterface dialog, int which) {
+                action.setRequiredState(which == 0 ? NetworkInfo.State.CONNECTED : NetworkInfo.State.DISCONNECTED);
                 alert.setItems(actionChoices, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int i) {
-                        final String actionChoice = actionChoices[i];
+                    public void onClick(DialogInterface dialog, int which) {
+                        final String actionChoice = actionChoices[which];
                         switch (actionChoice) {
                             case "Launch app":
                             case "Kill app":
-                                final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-                                mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-                                final String[] appChoices = new String[999];
-                                final List<ResolveInfo> appList = getBaseContext().getPackageManager().queryIntentActivities(mainIntent, 0);
-                                for (int x = 0; x < appList.size(); x++) {
-                                    appChoices[x] = appList.get(x).activityInfo.applicationInfo.loadLabel(getPackageManager()).toString();
+                                PackageManager pm = getPackageManager();
+                                final ArrayList<String> appChoices = new ArrayList<>();
+                                final ArrayList<String> appChoiceIntents = new ArrayList<>();
+                                List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+                                for (ApplicationInfo packageInfo : packages) {
+                                    appChoices.add(pm.getApplicationLabel(packageInfo).toString());
+                                    appChoiceIntents.add(packageInfo.packageName);
                                 }
-                                alert.setItems(appChoices, new DialogInterface.OnClickListener() {
+                                alert.setItems(appChoices.toArray(new String[appChoices.size()]), new DialogInterface.OnClickListener() {
                                     @Override
-                                    public void onClick(DialogInterface dialog, int i) {
+                                    public void onClick(DialogInterface dialog, int which) {
                                         action.setCommand(actionChoice);
-                                        action.setData(appChoices[i]);
+                                        ArrayList actionData = new ArrayList();
+                                        actionData.add(appChoices.get(which));
+                                        actionData.add(appChoiceIntents.get(which));
+                                        action.setData(actionData);
                                         profile.addNewAction(getBaseContext(), action);
                                         populateActionsList();
                                     }
@@ -152,17 +157,14 @@ public class ProfileEditor extends AppCompatActivity {
                                 final String lockChoices[] = new String[]{"None", "PIN", "Gesture", "Fingerprint"};
                                 alert.setItems(lockChoices, new DialogInterface.OnClickListener() {
                                     @Override
-                                    public void onClick(DialogInterface dialog, int i) {
+                                    public void onClick(DialogInterface dialog, int which) {
                                         action.setCommand(actionChoice);
-                                        action.setData(lockChoices[i]);
+                                        action.setData(lockChoices[which]);
                                         profile.addNewAction(getBaseContext(), action);
                                         populateActionsList();
                                     }
                                 });
                                 alert.show();
-                                break;
-                            case "Play sound":
-                                // Choose file
                                 break;
                             default:
                                 action.setCommand(actionChoice);

@@ -1,8 +1,12 @@
 package nz.johannes.wifiler;
 
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 
 import java.util.ArrayList;
 
@@ -13,51 +17,59 @@ public class Action {
     private ArrayList<String> multiData;
     private NetworkInfo.State requiredState;
 
+    private Intent intent;
+
     public void doAction(Context context, NetworkInfo.State state) {
         if (!state.equals(requiredState)) return;
-        switch (getCommand()) {
-            case "LAUNCH_APP":
+        switch (command) {
+            case "Launch app":
+                PackageManager pm = context.getPackageManager();
+                intent = pm.getLaunchIntentForPackage(multiData.get(1));
+                context.startActivity(intent);
                 break;
-            case "KILL_APP":
+            case "Kill app":
+                ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+                activityManager.killBackgroundProcesses(multiData.get(1));
                 break;
-            case "SET_WIFI":
+            case "Enable wifi":
+                ((WifiManager) context.getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(true);
                 break;
-            case "SET_BLUETOOTH":
-                BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-                if (getData().equals("enabled")) adapter.enable();
-                if (getData().equals("disabled")) adapter.disable();
+            case "Disable wifi":
+                ((WifiManager) context.getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(false);
                 break;
-            case "SET_MOBILE_DATA":
+            case "Enable bluetooth":
+                BluetoothAdapter.getDefaultAdapter().enable();
                 break;
-            case "SET_GPS":
+            case "Disable bluetooth":
+                BluetoothAdapter.getDefaultAdapter().disable();
                 break;
-            case "SET_RINGER_VOLUME":
+            case "Enable GPS":
+                intent = new Intent("android.location.GPS_ENABLED_CHANGE");
+                intent.putExtra("enabled", true);
+                context.sendBroadcast(intent);
                 break;
-            case "SET_VIBRATION":
+            case "Disable GPS":
+                intent = new Intent("android.location.GPS_ENABLED_CHANGE");
+                intent.putExtra("enabled", false);
+                context.sendBroadcast(intent);
                 break;
-            case "SET_BRIGHTNESS":
+            case "Set brightness":
                 break;
-            case "SET_LOCK_MODE":
+            case "Set ringer volume":
                 break;
-            case "SEND_MESSAGE":
+            case "Set media volume":
                 break;
-            case "SEND_EMAIL":
+            case "Set lock mode":
                 break;
-            case "SET_MEDIA_VOLUME":
+            case "Send SMS":
                 break;
-            case "SET_ALARM":
+            case "Send email":
                 break;
-            case "CANCEL_ALARM":
+            case "Start timer":
                 break;
-            case "SET_CALENDAR_EVENT":
+            case "Stop timer":
                 break;
-            case "CANCEL_CALENDAR_EVENT":
-                break;
-            case "START_TIMER":
-                break;
-            case "STOP_TIMER":
-                break;
-            case "PLAY_SOUND":
+            case "Shut down phone":
                 break;
         }
     }
@@ -82,7 +94,7 @@ public class Action {
         return this.multiData;
     }
 
-    public void setData(ArrayList<String> data) {
+    public void setData(ArrayList data) {
         this.multiData = data;
     }
 
