@@ -25,10 +25,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".NewProfileDialog"
-            android:theme="@style/Theme.AppCompat.Light.Dialog">
-        </activity>
-        <activity
             android:name=".ProfileEditor">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

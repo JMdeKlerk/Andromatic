@@ -30,7 +30,7 @@ public class ActionListViewAdapter extends ArrayAdapter<Action> {
             TextView trigger = (TextView) convertView.findViewById(R.id.trigger);
             if (command != null) {
                 command.setText(action.getCommand());
-                if (action.getData() != null) command.append(": " + action.getData());
+                if (action.getData() != -1) command.append(": " + action.getData());
                 if (action.getMultiData() != null) command.append(": " + action.getMultiData().get(0));
             }
             if (trigger != null) {

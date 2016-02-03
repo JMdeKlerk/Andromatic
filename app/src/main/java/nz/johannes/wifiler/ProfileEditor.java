@@ -80,9 +80,9 @@ public class ProfileEditor extends AppCompatActivity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final Action action = new Action();
         final String stateChoices[] = new String[]{"On connect...", "On disconnect..."};
-        final String actionChoices[] = new String[]{"Launch app", "Kill app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
-                "Enable GPS", "Disable GPS", "Set brightness", "Set ringer volume", "Set media volume", "Set lock mode", "Send SMS", "Send email",
-                "Start timer", "Stop timer", "Shut down phone"};
+        final String actionChoices[] = new String[]{"Launch app", "Kill app", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
+                "Enable GPS", "Disable GPS", "Set brightness", "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode",
+                "Send SMS", "Send email"};
         alert.setItems(stateChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -118,6 +118,7 @@ public class ProfileEditor extends AppCompatActivity {
                                 break;
                             case "Set brightness":
                             case "Set ringer volume":
+                            case "Set notification volume":
                             case "Set media volume":
                                 alert.setItems(null, null);
                                 alert.setView(R.layout.dialog_seekbar);
@@ -125,7 +126,7 @@ public class ProfileEditor extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int id) {
                                         action.setCommand(actionChoice);
                                         SeekBar seek = (SeekBar) ((AlertDialog) dialog).findViewById(R.id.seek);
-                                        action.setData(String.valueOf(seek.getProgress() * 10));
+                                        action.setData(seek.getProgress() * 10);
                                         profile.addNewAction(getBaseContext(), action);
                                         populateActionsList();
                                     }
@@ -159,7 +160,7 @@ public class ProfileEditor extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         action.setCommand(actionChoice);
-                                        action.setData(lockChoices[which]);
+                                        action.setData(which);
                                         profile.addNewAction(getBaseContext(), action);
                                         populateActionsList();
                                     }
