@@ -3,9 +3,14 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".Main">
     <item
-        android:id="@+id/action_add"
+        android:id="@+id/action_addTrigger"
         android:orderInCategory="100"
-        android:title="Add new..."
+        android:title="Add new trigger"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_addAction"
+        android:orderInCategory="100"
+        android:title="Add new action"
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_delete"

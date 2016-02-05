@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -12,6 +13,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,9 +37,11 @@ public class Main extends AppCompatActivity {
         populateProfileList();
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        //final String[] triggerChoices = new String[]{"Battery level", "Bluetooth connected", "Location", "SMS received", "Time", "Wifi connected"};
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 alert.setView(R.layout.dialog_newprofile);
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override

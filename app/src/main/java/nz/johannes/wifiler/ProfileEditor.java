@@ -1,9 +1,11 @@
 package nz.johannes.wifiler;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -21,10 +23,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 
@@ -77,12 +77,15 @@ public class ProfileEditor extends AppCompatActivity {
     }
 
     public void addTrigger() {
+
+    }
+
+    public void addAction() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final Action action = new Action();
         final String stateChoices[] = new String[]{"On connect...", "On disconnect..."};
-        final String actionChoices[] = new String[]{"Launch app", "Kill app", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
-                "Enable GPS", "Disable GPS", "Set brightness", "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode",
-                "Send SMS", "Send email"};
+        final String actionChoices[] = new String[]{"Launch app", "Kill app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
+                "Set brightness", "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode", "Send SMS", "Send email"};
         alert.setItems(stateChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -96,11 +99,14 @@ public class ProfileEditor extends AppCompatActivity {
                             case "Kill app":
                                 PackageManager pm = getPackageManager();
                                 final ArrayList<String> appChoices = new ArrayList<>();
-                                final ArrayList<String> appChoiceIntents = new ArrayList<>();
-                                List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-                                for (ApplicationInfo packageInfo : packages) {
-                                    appChoices.add(pm.getApplicationLabel(packageInfo).toString());
-                                    appChoiceIntents.add(packageInfo.packageName);
+                                final ArrayList<String> appChoicePackage = new ArrayList<>();
+                                final ArrayList<String> appChoiceName = new ArrayList<>();
+                                Intent main = new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER);
+                                List<ResolveInfo> packages = pm.queryIntentActivities(main, 0);
+                                for (ResolveInfo appInfo : packages) {
+                                    appChoices.add(appInfo.loadLabel(pm).toString());
+                                    appChoicePackage.add(appInfo.activityInfo.packageName);
+                                    appChoiceName.add(appInfo.activityInfo.name);
                                 }
                                 alert.setItems(appChoices.toArray(new String[appChoices.size()]), new DialogInterface.OnClickListener() {
                                     @Override
@@ -108,7 +114,8 @@ public class ProfileEditor extends AppCompatActivity {
                                         action.setCommand(actionChoice);
                                         ArrayList actionData = new ArrayList();
                                         actionData.add(appChoices.get(which));
-                                        actionData.add(appChoiceIntents.get(which));
+                                        actionData.add(appChoicePackage.get(which));
+                                        actionData.add(appChoiceName.get(which));
                                         action.setData(actionData);
                                         profile.addNewAction(getBaseContext(), action);
                                         populateActionsList();
@@ -144,6 +151,7 @@ public class ProfileEditor extends AppCompatActivity {
                                         EditText to = (EditText) ((AlertDialog) dialog).findViewById(R.id.to);
                                         EditText message = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
                                         ArrayList actionData = new ArrayList();
+                                        actionData.add("Some loser");
                                         actionData.add(to.getText().toString());
                                         actionData.add(message.getText().toString());
                                         action.setData(actionData);
@@ -196,7 +204,8 @@ public class ProfileEditor extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_add) addTrigger();
+        if (id == R.id.action_addTrigger) addTrigger();
+        if (id == R.id.action_addAction) addAction();
         if (id == R.id.action_delete) deleteProfile();
         return super.onOptionsItemSelected(item);
     }

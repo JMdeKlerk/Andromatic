@@ -16,6 +16,7 @@ public class Profile {
     private String name;
     private String ssid;
     private static Lock profileLock = new ReentrantLock();
+    private ArrayList<Trigger> triggers;
     private ArrayList<Action> actions;
 
     public Profile(Context context, String name, String ssid) {
@@ -51,6 +52,20 @@ public class Profile {
         profileLock.unlock();
     }
 
+    public void addNewTrigger(Context context, Trigger trigger) {
+        triggers.add(trigger);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        String storeProfile = new Gson().toJson(this);
+        editor.putString("profile-" + name, storeProfile).apply();
+    }
+
+    public void removeTrigger(Context context, Trigger trigger) {
+        triggers.remove(trigger);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        String storeProfile = new Gson().toJson(this);
+        editor.putString("profile-" + name, storeProfile).apply();
+    }
+
     public void addNewAction(Context context, Action action) {
         actions.add(action);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
@@ -68,6 +83,10 @@ public class Profile {
     public boolean isActiveProfile(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return this.name.equals(prefs.getString("active", ""));
+    }
+
+    public ArrayList<Trigger> getTrigger() {
+        return triggers;
     }
 
     public ArrayList<Action> getActions() {
