@@ -14,14 +14,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Profile {
 
     private String name;
-    private String ssid;
     private static Lock profileLock = new ReentrantLock();
     private ArrayList<Trigger> triggers;
     private ArrayList<Action> actions;
 
-    public Profile(Context context, String name, String ssid) {
+    public Profile(Context context, String name) {
         this.name = name;
-        this.ssid = ssid;
+        triggers = new ArrayList<>();
         actions = new ArrayList<>();
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeProfile = new Gson().toJson(this);
@@ -85,7 +84,7 @@ public class Profile {
         return this.name.equals(prefs.getString("active", ""));
     }
 
-    public ArrayList<Trigger> getTrigger() {
+    public ArrayList<Trigger> getTriggers() {
         return triggers;
     }
 
@@ -95,10 +94,6 @@ public class Profile {
 
     public String getName() {
         return this.name;
-    }
-
-    public String getSSID() {
-        return this.ssid;
     }
 
 }

@@ -27,16 +27,12 @@ public class ProfileListViewAdapter extends ArrayAdapter<Profile> {
         if (profile != null) {
             ImageView activeIcon = (ImageView) convertView.findViewById(R.id.activeIcon);
             TextView profileName = (TextView) convertView.findViewById(R.id.name);
-            TextView profileSSID = (TextView) convertView.findViewById(R.id.ssid);
             if (activeIcon != null) {
                 activeIcon.setBackgroundResource(profile.isActiveProfile(getContext()) ?
                         android.R.drawable.checkbox_on_background : android.R.drawable.checkbox_off_background);
             }
             if (profileName != null) {
                 profileName.setText(profile.getName());
-            }
-            if (profileSSID != null) {
-                profileSSID.setText("SSID: " + profile.getSSID());
             }
         }
         return convertView;

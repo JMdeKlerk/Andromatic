@@ -37,7 +37,6 @@ public class Main extends AppCompatActivity {
         populateProfileList();
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        //final String[] triggerChoices = new String[]{"Battery level", "Bluetooth connected", "Location", "SMS received", "Time", "Wifi connected"};
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -48,9 +47,7 @@ public class Main extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         EditText nameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.profile_name);
                         String name = nameField.getText().toString();
-                        EditText ssidField = (EditText) ((AlertDialog) dialog).findViewById(R.id.ssid);
-                        String ssid = ssidField.getText().toString();
-                        Profile profile = new Profile(getBaseContext(), name, ssid);
+                        Profile profile = new Profile(getBaseContext(), name);
                         Intent profileEditor = new Intent(getApplicationContext(), ProfileEditor.class);
                         profileEditor.putExtra("profile", name);
                         startActivity(profileEditor);

@@ -29,7 +29,7 @@ public class WifiReceiver extends BroadcastReceiver {
             for (String key : prefs.getAll().keySet()) {
                 if (key.startsWith("profile-")) {
                     Profile profile = new Gson().fromJson(prefs.getString(key, ""), Profile.class);
-                    if (profile.getSSID().equals(ssid)) {
+                    if (profile.getTriggers().contains(ssid)) {
                         profile.toggleProfile(context, currentState);
                     }
                 }

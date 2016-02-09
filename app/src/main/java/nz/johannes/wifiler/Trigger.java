@@ -9,4 +9,12 @@ public class Trigger {
         this.type = type;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public String getMatch() {
+        return match;
+    }
+
 }
