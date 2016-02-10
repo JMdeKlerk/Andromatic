@@ -17,4 +17,8 @@ public class Trigger {
         return match;
     }
 
+    public void setMatch(String match) {
+        this.match = match;
+    }
+
 }

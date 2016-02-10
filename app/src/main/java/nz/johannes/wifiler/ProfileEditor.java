@@ -1,11 +1,11 @@
 package nz.johannes.wifiler;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
@@ -33,7 +33,7 @@ public class ProfileEditor extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profileedit);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         String profileName = getIntent().getStringExtra("profile");
         profile = new Gson().fromJson(prefs.getString("profile-" + profileName, ""), Profile.class);
         setTitle(profile.getName());
@@ -54,7 +54,7 @@ public class ProfileEditor extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Trigger triggerToDelete = (Trigger) triggerList.getItemAtPosition(position);
-                alert.setTitle("Delete action?");
+                alert.setTitle("Delete trigger?");
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -68,6 +68,15 @@ public class ProfileEditor extends AppCompatActivity {
         });
         for (Trigger trigger : profile.getTriggers()) {
             listItems.add(trigger);
+        }
+        if (listItems.isEmpty()) {
+            listItems.add(new Trigger("<None>"));
+            triggerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    addTrigger(null);
+                }
+            });
         }
         adapter.notifyDataSetChanged();
         setDynamicListHeight(triggerList);
@@ -100,42 +109,67 @@ public class ProfileEditor extends AppCompatActivity {
         for (Action action : profile.getActions()) {
             listItems.add(action);
         }
+        if (listItems.isEmpty()) {
+            Action filler = new Action();
+            filler.setCommand("<None>");
+            listItems.add(filler);
+            actionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    addAction(null);
+                }
+            });
+        }
         adapter.notifyDataSetChanged();
         setDynamicListHeight(actionList);
     }
 
-    public static void setDynamicListHeight(ListView mListView) {
-        ListAdapter mListAdapter = mListView.getAdapter();
-        if (mListAdapter == null) return;
-        int height = 0;
-        int desiredWidth = View.MeasureSpec.makeMeasureSpec(mListView.getWidth(), View.MeasureSpec.UNSPECIFIED);
-        for (int i = 0; i < mListAdapter.getCount(); i++) {
-            View listItem = mListAdapter.getView(i, null, mListView);
-            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-            height += listItem.getMeasuredHeight();
-        }
-        ViewGroup.LayoutParams params = mListView.getLayoutParams();
-        params.height = height + (mListView.getDividerHeight() * (mListAdapter.getCount() - 1));
-        mListView.setLayoutParams(params);
-        mListView.requestLayout();
-    }
-
-    public void addTrigger() {
+    public void addTrigger(View view) {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final String[] triggerChoices = new String[]{"Battery level", "Bluetooth connected", "Bluetooth disconnected", "Location", "SMS received",
+        final String[] triggerChoices = new String[]{"Battery low", "Bluetooth connected", "Bluetooth disconnected", "Location", "SMS received",
                 "Time", "Wifi connected", "Wifi disconnected"};
         alert.setItems(triggerChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Trigger trigger = new Trigger(triggerChoices[which]);
-                profile.addNewTrigger(getBaseContext(), trigger);
-                populateTriggerList();
+                final Trigger trigger = new Trigger(triggerChoices[which]);
+                switch (triggerChoices[which]) {
+                    case "Bluetooth connected":
+                    case "Bluetooth disconnected":
+                        break;
+                    case "Location":
+                        break;
+                    case "SMS received":
+                        break;
+                    case "Time":
+                        break;
+                    case "Wifi connected":
+                    case "Wifi disconnected":
+                        alert.setItems(null, null);
+                        alert.setView(R.layout.dialog_ssidname);
+                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                EditText ssidField = (EditText) ((AlertDialog) dialog).findViewById(R.id.ssid_name);
+                                String ssid = ssidField.getText().toString();
+                                trigger.setMatch(ssid);
+                                profile.addNewTrigger(getBaseContext(), trigger);
+                                populateTriggerList();
+                            }
+                        });
+                        alert.setNegativeButton("Cancel", null);
+                        alert.show();
+                        break;
+                    default:
+                        profile.addNewTrigger(getBaseContext(), trigger);
+                        populateTriggerList();
+                        break;
+                }
             }
         });
         alert.show();
     }
 
-    public void addAction() {
+    public void addAction(View view) {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final Action action = new Action();
         final String actionChoices[] = new String[]{"Launch app", "Kill app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
@@ -251,10 +285,26 @@ public class ProfileEditor extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_addTrigger) addTrigger();
-        if (id == R.id.action_addAction) addAction();
+        if (id == R.id.action_addTrigger) addTrigger(null);
+        if (id == R.id.action_addAction) addAction(null);
         if (id == R.id.action_delete) deleteProfile();
         return super.onOptionsItemSelected(item);
+    }
+
+    public static void setDynamicListHeight(ListView mListView) {
+        ListAdapter mListAdapter = mListView.getAdapter();
+        if (mListAdapter == null) return;
+        int height = 0;
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(mListView.getWidth(), View.MeasureSpec.UNSPECIFIED);
+        for (int i = 0; i < mListAdapter.getCount(); i++) {
+            View listItem = mListAdapter.getView(i, null, mListView);
+            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            height += listItem.getMeasuredHeight();
+        }
+        ViewGroup.LayoutParams params = mListView.getLayoutParams();
+        params.height = height + (mListView.getDividerHeight() * (mListAdapter.getCount() - 1));
+        mListView.setLayoutParams(params);
+        mListView.requestLayout();
     }
 
 }

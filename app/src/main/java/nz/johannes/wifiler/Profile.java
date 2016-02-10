@@ -2,7 +2,6 @@ package nz.johannes.wifiler;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
@@ -27,26 +26,15 @@ public class Profile {
         editor.putString("profile-" + name, storeProfile).apply();
     }
 
-    public void toggleProfile(Context context, NetworkInfo.State state) {
+    public void enable(Context context) {
+        if (this.isActiveProfile(context)) return;
         profileLock.lock();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
-        switch (state) {
-            case CONNECTED:
-                if (!this.isActiveProfile(context)) {
-                    Main.showToast(context, "Activating profile: " + this.getName());
-                    editor.putString("active", this.name).commit();
-                }
-                break;
-            case DISCONNECTED:
-                if (this.isActiveProfile(context)) {
-                    Main.showToast(context, "Deactivating profile: " + this.getName());
-                    editor.remove("active").commit();
-                }
-                break;
-        }
+        Main.showToast(context, "Activating profile: " + this.getName());
+        editor.putString("active", this.name).commit();
         for (Action action : actions) {
-            action.doAction(context, state);
+            action.doAction(context);
         }
         profileLock.unlock();
     }

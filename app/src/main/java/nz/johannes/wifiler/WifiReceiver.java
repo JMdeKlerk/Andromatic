@@ -29,8 +29,17 @@ public class WifiReceiver extends BroadcastReceiver {
             for (String key : prefs.getAll().keySet()) {
                 if (key.startsWith("profile-")) {
                     Profile profile = new Gson().fromJson(prefs.getString(key, ""), Profile.class);
-                    if (profile.getTriggers().contains(ssid)) {
-                        profile.toggleProfile(context, currentState);
+                    if (currentState.equals(NetworkInfo.State.CONNECTED)) {
+                        for (Trigger trigger : profile.getTriggers()) {
+                            if (trigger.getType().equals("Wifi connected") && trigger.getMatch().equals(ssid))
+                                profile.enable(context);
+                        }
+                    } else {
+                        for (Trigger trigger : profile.getTriggers()) {
+                            if (trigger.getType().equals("Wifi disconnected") && trigger.getMatch().equals(ssid))
+                                profile.enable(context);
+                        }
+                        break;
                     }
                 }
             }
