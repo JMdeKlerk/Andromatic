@@ -83,13 +83,8 @@ public class Main extends AppCompatActivity {
                 startActivity(profileEditor);
             }
         });
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        for (String key : prefs.getAll().keySet()) {
-            if (key.startsWith("profile-")) {
-                String profileJson = prefs.getString(key, "");
-                Profile profile = new Gson().fromJson(profileJson, Profile.class);
-                listItems.add(profile);
-            }
+        for (Profile profile : getAllStoredProfiles(this)) {
+            listItems.add(profile);
         }
         adapter.notifyDataSetChanged();
     }
@@ -115,6 +110,18 @@ public class Main extends AppCompatActivity {
         if (id == R.id.action_settings) return true;
         if (id == R.id.action_exit) finish();
         return super.onOptionsItemSelected(item);
+    }
+
+    public static ArrayList<Profile> getAllStoredProfiles(Context context) {
+        ArrayList<Profile> profiles = new ArrayList<>();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        for (String key : prefs.getAll().keySet()) {
+            if (key.startsWith("profile-")) {
+                Profile profile = new Gson().fromJson(prefs.getString(key, ""), Profile.class);
+                profiles.add(profile);
+            }
+        }
+        return profiles;
     }
 
     public static void showToast(Context context, String message) {

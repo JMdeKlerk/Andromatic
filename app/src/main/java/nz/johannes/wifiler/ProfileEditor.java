@@ -54,6 +54,10 @@ public class ProfileEditor extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Trigger triggerToDelete = (Trigger) triggerList.getItemAtPosition(position);
+                if (triggerToDelete.getType().equals("Add new...")) {
+                    addTrigger();
+                    return;
+                }
                 alert.setTitle("Delete trigger?");
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
@@ -66,18 +70,8 @@ public class ProfileEditor extends AppCompatActivity {
                 alert.show();
             }
         });
-        for (Trigger trigger : profile.getTriggers()) {
-            listItems.add(trigger);
-        }
-        if (listItems.isEmpty()) {
-            listItems.add(new Trigger("<None>"));
-            triggerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    addTrigger(null);
-                }
-            });
-        }
+        for (Trigger trigger : profile.getTriggers()) listItems.add(trigger);
+        listItems.add(new Trigger("Add new..."));
         adapter.notifyDataSetChanged();
         setDynamicListHeight(triggerList);
     }
@@ -94,6 +88,10 @@ public class ProfileEditor extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Action actionToDelete = (Action) actionList.getItemAtPosition(position);
+                if (actionToDelete.getCommand().equals("Add new...")) {
+                    addAction();
+                    return;
+                }
                 alert.setTitle("Delete action?");
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
@@ -106,28 +104,19 @@ public class ProfileEditor extends AppCompatActivity {
                 alert.show();
             }
         });
-        for (Action action : profile.getActions()) {
-            listItems.add(action);
-        }
-        if (listItems.isEmpty()) {
-            Action filler = new Action();
-            filler.setCommand("<None>");
-            listItems.add(filler);
-            actionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    addAction(null);
-                }
-            });
-        }
+        for (Action action : profile.getActions()) listItems.add(action);
+        Action addNew = new Action();
+        addNew.setCommand("Add new...");
+        listItems.add(addNew);
         adapter.notifyDataSetChanged();
         setDynamicListHeight(actionList);
     }
 
-    public void addTrigger(View view) {
+    public void addTrigger() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final String[] triggerChoices = new String[]{"Battery low", "Bluetooth connected", "Bluetooth disconnected", "Location", "SMS received",
-                "Time", "Wifi connected", "Wifi disconnected"};
+        final String[] triggerChoices = new String[]{"Battery low", "Bluetooth connected", "Bluetooth disconnected", "Charger inserted",
+                "Charger removed", "Headphones inserted", "Headphones removed", "Location", "SMS received", "Time", "Wifi connected",
+                "Wifi disconnected"};
         alert.setItems(triggerChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -169,7 +158,7 @@ public class ProfileEditor extends AppCompatActivity {
         alert.show();
     }
 
-    public void addAction(View view) {
+    public void addAction() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final Action action = new Action();
         final String actionChoices[] = new String[]{"Launch app", "Kill app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
@@ -285,8 +274,8 @@ public class ProfileEditor extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_addTrigger) addTrigger(null);
-        if (id == R.id.action_addAction) addAction(null);
+        if (id == R.id.action_addTrigger) addTrigger();
+        if (id == R.id.action_addAction) addAction();
         if (id == R.id.action_delete) deleteProfile();
         return super.onOptionsItemSelected(item);
     }
