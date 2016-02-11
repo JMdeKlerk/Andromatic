@@ -1,4 +1,4 @@
-package nz.johannes.wifiler;
+package nz.johannes.andromatic;
 
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;

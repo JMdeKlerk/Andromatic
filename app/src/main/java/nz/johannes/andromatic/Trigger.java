@@ -1,4 +1,4 @@
-package nz.johannes.wifiler;
+package nz.johannes.andromatic;
 
 public class Trigger {
 

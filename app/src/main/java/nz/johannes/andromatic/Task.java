@@ -1,4 +1,4 @@
-package nz.johannes.wifiler;
+package nz.johannes.andromatic;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,66 +10,57 @@ import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Profile {
+public class Task {
 
     private String name;
-    private static Lock profileLock = new ReentrantLock();
+    private static Lock taskLock = new ReentrantLock();
     private ArrayList<Trigger> triggers;
     private ArrayList<Action> actions;
 
-    public Profile(Context context, String name) {
+    public Task(Context context, String name) {
         this.name = name;
         triggers = new ArrayList<>();
         actions = new ArrayList<>();
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        String storeProfile = new Gson().toJson(this);
-        editor.putString("profile-" + name, storeProfile).apply();
+        String storeTask = new Gson().toJson(this);
+        editor.putString("task-" + name, storeTask).apply();
     }
 
-    public void enable(Context context) {
-        if (this.isActiveProfile(context)) return;
-        profileLock.lock();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-        Main.showToast(context, "Activating profile: " + this.getName());
-        editor.putString("active", this.name).commit();
+    public void runTask(Context context) {
+        taskLock.lock();
+        Main.showToast(context, "Running task: " + this.getName());
         for (Action action : actions) {
             action.doAction(context);
         }
-        profileLock.unlock();
+        taskLock.unlock();
     }
 
     public void addNewTrigger(Context context, Trigger trigger) {
         triggers.add(trigger);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        String storeProfile = new Gson().toJson(this);
-        editor.putString("profile-" + name, storeProfile).apply();
+        String storeTask = new Gson().toJson(this);
+        editor.putString("task-" + name, storeTask).apply();
     }
 
     public void removeTrigger(Context context, Trigger trigger) {
         triggers.remove(trigger);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        String storeProfile = new Gson().toJson(this);
-        editor.putString("profile-" + name, storeProfile).apply();
+        String storeTask = new Gson().toJson(this);
+        editor.putString("task-" + name, storeTask).apply();
     }
 
     public void addNewAction(Context context, Action action) {
         actions.add(action);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        String storeProfile = new Gson().toJson(this);
-        editor.putString("profile-" + name, storeProfile).apply();
+        String storeTask = new Gson().toJson(this);
+        editor.putString("task-" + name, storeTask).apply();
     }
 
     public void removeAction(Context context, Action action) {
         actions.remove(action);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        String storeProfile = new Gson().toJson(this);
-        editor.putString("profile-" + name, storeProfile).apply();
-    }
-
-    public boolean isActiveProfile(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return this.name.equals(prefs.getString("active", ""));
+        String storeTask = new Gson().toJson(this);
+        editor.putString("task-" + name, storeTask).apply();
     }
 
     public ArrayList<Trigger> getTriggers() {

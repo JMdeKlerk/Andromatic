@@ -1,4 +1,4 @@
-package nz.johannes.wifiler;
+package nz.johannes.andromatic;
 
 import android.app.Activity;
 import android.content.Context;
@@ -32,20 +32,20 @@ public class Main extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        populateProfileList();
+        populateTaskList();
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                alert.setView(R.layout.dialog_newprofile);
+                alert.setView(R.layout.dialog_newtask);
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        EditText nameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.profile_name);
+                        EditText nameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.task_name);
                         String name = nameField.getText().toString();
-                        Profile profile = new Profile(getBaseContext(), name);
-                        populateProfileList();
+                        Task task = new Task(getBaseContext(), name);
+                        populateTaskList();
                     }
                 });
                 alert.setNegativeButton("Cancel", null);
@@ -63,28 +63,48 @@ public class Main extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        populateProfileList();
+        populateTaskList();
         super.onResume();
     }
 
-    private void populateProfileList() {
-        final ListView profileList = (ListView) findViewById(R.id.list);
-        final ArrayList<Profile> listItems = new ArrayList<>();
-        final ProfileListViewAdapter adapter = new ProfileListViewAdapter(this, R.layout.profile_row, listItems);
-        profileList.setAdapter(adapter);
-        profileList.setClickable(true);
-        profileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+    private void populateTaskList() {
+        final ListView taskList = (ListView) findViewById(R.id.list);
+        final ArrayList<Task> listItems = new ArrayList<>();
+        final TaskListViewAdapter adapter = new TaskListViewAdapter(this, R.layout.task_row, listItems);
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        taskList.setAdapter(adapter);
+        taskList.setClickable(true);
+        taskList.setLongClickable(true);
+        taskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent profileEditor = new Intent(getApplicationContext(), ProfileEditor.class);
-                Profile profile = (Profile) profileList.getItemAtPosition(position);
-                String toEdit = profile.getName();
-                profileEditor.putExtra("profile", toEdit);
-                startActivity(profileEditor);
+                Intent taskEditor = new Intent(getApplicationContext(), TaskEditor.class);
+                Task task = (Task) taskList.getItemAtPosition(position);
+                String toEdit = task.getName();
+                taskEditor.putExtra("task", toEdit);
+                startActivity(taskEditor);
             }
         });
-        for (Profile profile : getAllStoredProfiles(this)) {
-            listItems.add(profile);
+        taskList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                alert.setTitle("Delete task?");
+                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Task task = (Task) taskList.getItemAtPosition(position);
+                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+                        editor.remove("task-" + task.getName()).apply();
+                        populateTaskList();
+                    }
+                });
+                alert.setNegativeButton("No", null);
+                alert.show();
+                return true;
+            }
+        });
+        for (Task task : getAllStoredTasks(this)) {
+            listItems.add(task);
         }
         adapter.notifyDataSetChanged();
     }
@@ -92,9 +112,9 @@ public class Main extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            Intent profileEditor = new Intent(getApplicationContext(), ProfileEditor.class);
-            profileEditor.putExtra("profile", data.getStringExtra("profile"));
-            startActivity(profileEditor);
+            Intent taskEditor = new Intent(getApplicationContext(), TaskEditor.class);
+            taskEditor.putExtra("task", data.getStringExtra("task"));
+            startActivity(taskEditor);
         }
     }
 
@@ -112,16 +132,16 @@ public class Main extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public static ArrayList<Profile> getAllStoredProfiles(Context context) {
-        ArrayList<Profile> profiles = new ArrayList<>();
+    public static ArrayList<Task> getAllStoredTasks(Context context) {
+        ArrayList<Task> tasks = new ArrayList<>();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         for (String key : prefs.getAll().keySet()) {
-            if (key.startsWith("profile-")) {
-                Profile profile = new Gson().fromJson(prefs.getString(key, ""), Profile.class);
-                profiles.add(profile);
+            if (key.startsWith("task-")) {
+                Task task = new Gson().fromJson(prefs.getString(key, ""), Task.class);
+                tasks.add(task);
             }
         }
-        return profiles;
+        return tasks;
     }
 
     public static void showToast(Context context, String message) {

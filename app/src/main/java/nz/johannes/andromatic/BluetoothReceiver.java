@@ -1,4 +1,4 @@
-package nz.johannes.wifiler;
+package nz.johannes.andromatic;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -12,9 +12,9 @@ public class BluetoothReceiver extends BroadcastReceiver {
         BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
         String deviceName = bluetoothDevice.getName();
         String connType = (intent.getAction().equals(BluetoothDevice.ACTION_ACL_CONNECTED)) ? "Bluetooth connected" : "Bluetooth disconnected";
-        for (Profile profile : Main.getAllStoredProfiles(context)) {
-            for (Trigger trigger : profile.getTriggers()) {
-                if (trigger.getType().equals(connType) && trigger.getMatch().equals(deviceName)) profile.enable(context);
+        for (Task task : Main.getAllStoredTasks(context)) {
+            for (Trigger trigger : task.getTriggers()) {
+                if (trigger.getType().equals(connType) && trigger.getMatch().equals(deviceName)) task.runTask(context);
             }
         }
     }

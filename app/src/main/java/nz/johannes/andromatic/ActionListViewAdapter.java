@@ -1,4 +1,4 @@
-package nz.johannes.wifiler;
+package nz.johannes.andromatic;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,9 +9,9 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class TriggerListViewAdapter extends ArrayAdapter<Trigger> {
+public class ActionListViewAdapter extends ArrayAdapter<Action> {
 
-    public TriggerListViewAdapter(Context context, int resource, List<Trigger> items) {
+    public ActionListViewAdapter(Context context, int resource, List<Action> items) {
         super(context, resource, items);
     }
 
@@ -22,12 +22,16 @@ public class TriggerListViewAdapter extends ArrayAdapter<Trigger> {
             vi = LayoutInflater.from(getContext());
             convertView = vi.inflate(R.layout.default_list_row, null);
         }
-        Trigger trigger = getItem(position);
-        if (trigger != null) {
+        Action action = getItem(position);
+        if (action != null) {
             TextView type = (TextView) convertView.findViewById(R.id.type);
+            TextView detail = (TextView) convertView.findViewById(R.id.detail);
             if (type != null) {
-                type.setText(trigger.getType());
-                if (trigger.getMatch() != null) type.append(": " + trigger.getMatch());
+                type.setText(action.getCommand());
+            }
+            if (detail != null) {
+                if (action.getData() != -1) detail.append(String.valueOf(action.getData()));
+                if (action.getMultiData() != null) detail.append(String.valueOf(action.getMultiData().get(0)));
             }
         }
         return convertView;

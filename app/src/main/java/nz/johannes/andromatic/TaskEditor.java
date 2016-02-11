@@ -1,6 +1,5 @@
-package nz.johannes.wifiler;
+package nz.johannes.andromatic;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,22 +24,21 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfileEditor extends AppCompatActivity {
+public class TaskEditor extends AppCompatActivity {
 
-    private Profile profile;
+    private Task task;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profileedit);
+        setContentView(R.layout.activity_taskedit);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        String profileName = getIntent().getStringExtra("profile");
-        profile = new Gson().fromJson(prefs.getString("profile-" + profileName, ""), Profile.class);
-        setTitle(profile.getName());
+        String taskName = getIntent().getStringExtra("task");
+        task = new Gson().fromJson(prefs.getString("task-" + taskName, ""), Task.class);
+        setTitle(task.getName());
         populateTriggerList();
         populateActionsList();
     }
-
 
     private void populateTriggerList() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -62,7 +60,7 @@ public class ProfileEditor extends AppCompatActivity {
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        profile.removeTrigger(getBaseContext(), triggerToDelete);
+                        task.removeTrigger(getBaseContext(), triggerToDelete);
                         populateTriggerList();
                     }
                 });
@@ -70,7 +68,7 @@ public class ProfileEditor extends AppCompatActivity {
                 alert.show();
             }
         });
-        for (Trigger trigger : profile.getTriggers()) listItems.add(trigger);
+        for (Trigger trigger : task.getTriggers()) listItems.add(trigger);
         listItems.add(new Trigger("Add new..."));
         adapter.notifyDataSetChanged();
         setDynamicListHeight(triggerList);
@@ -96,7 +94,7 @@ public class ProfileEditor extends AppCompatActivity {
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        profile.removeAction(getBaseContext(), actionToDelete);
+                        task.removeAction(getBaseContext(), actionToDelete);
                         populateActionsList();
                     }
                 });
@@ -104,7 +102,7 @@ public class ProfileEditor extends AppCompatActivity {
                 alert.show();
             }
         });
-        for (Action action : profile.getActions()) listItems.add(action);
+        for (Action action : task.getActions()) listItems.add(action);
         Action addNew = new Action();
         addNew.setCommand("Add new...");
         listItems.add(addNew);
@@ -141,7 +139,7 @@ public class ProfileEditor extends AppCompatActivity {
                                 EditText ssidField = (EditText) ((AlertDialog) dialog).findViewById(R.id.ssid_name);
                                 String ssid = ssidField.getText().toString();
                                 trigger.setMatch(ssid);
-                                profile.addNewTrigger(getBaseContext(), trigger);
+                                task.addNewTrigger(getBaseContext(), trigger);
                                 populateTriggerList();
                             }
                         });
@@ -149,7 +147,7 @@ public class ProfileEditor extends AppCompatActivity {
                         alert.show();
                         break;
                     default:
-                        profile.addNewTrigger(getBaseContext(), trigger);
+                        task.addNewTrigger(getBaseContext(), trigger);
                         populateTriggerList();
                         break;
                 }
@@ -190,7 +188,7 @@ public class ProfileEditor extends AppCompatActivity {
                                 actionData.add(appChoicePackage.get(which));
                                 actionData.add(appChoiceName.get(which));
                                 action.setData(actionData);
-                                profile.addNewAction(getBaseContext(), action);
+                                task.addNewAction(getBaseContext(), action);
                                 populateActionsList();
                             }
                         });
@@ -207,7 +205,7 @@ public class ProfileEditor extends AppCompatActivity {
                                 action.setCommand(actionChoice);
                                 SeekBar seek = (SeekBar) ((AlertDialog) dialog).findViewById(R.id.seek);
                                 action.setData(seek.getProgress() * 10);
-                                profile.addNewAction(getBaseContext(), action);
+                                task.addNewAction(getBaseContext(), action);
                                 populateActionsList();
                             }
                         });
@@ -228,7 +226,7 @@ public class ProfileEditor extends AppCompatActivity {
                                 actionData.add(to.getText().toString());
                                 actionData.add(message.getText().toString());
                                 action.setData(actionData);
-                                profile.addNewAction(getBaseContext(), action);
+                                task.addNewAction(getBaseContext(), action);
                                 populateActionsList();
                             }
                         });
@@ -242,7 +240,7 @@ public class ProfileEditor extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 action.setCommand(actionChoice);
                                 action.setData(which);
-                                profile.addNewAction(getBaseContext(), action);
+                                task.addNewAction(getBaseContext(), action);
                                 populateActionsList();
                             }
                         });
@@ -250,34 +248,13 @@ public class ProfileEditor extends AppCompatActivity {
                         break;
                     default:
                         action.setCommand(actionChoice);
-                        profile.addNewAction(getBaseContext(), action);
+                        task.addNewAction(getBaseContext(), action);
                         populateActionsList();
                         break;
                 }
             }
         });
         alert.show();
-    }
-
-    public void deleteProfile() {
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        editor.remove("profile-" + profile.getName()).apply();
-        finish();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_profileedit, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_addTrigger) addTrigger();
-        if (id == R.id.action_addAction) addAction();
-        if (id == R.id.action_delete) deleteProfile();
-        return super.onOptionsItemSelected(item);
     }
 
     public static void setDynamicListHeight(ListView mListView) {

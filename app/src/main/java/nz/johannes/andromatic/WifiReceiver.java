@@ -1,4 +1,4 @@
-package nz.johannes.wifiler;
+package nz.johannes.andromatic;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,9 +17,9 @@ public class WifiReceiver extends BroadcastReceiver {
             NetworkInfo.State currentState = netInfo.getState();
             String ssid = manager.getConnectionInfo().getSSID().replace("\"", "");
             String connType = (currentState.equals(NetworkInfo.State.CONNECTED)) ? "Wifi connected" : "Wifi disconnected";
-            for (Profile profile : Main.getAllStoredProfiles(context)) {
-                for (Trigger trigger : profile.getTriggers()) {
-                    if (trigger.getType().equals(connType) && trigger.getMatch().equals(ssid)) profile.enable(context);
+            for (Task task : Main.getAllStoredTasks(context)) {
+                for (Trigger trigger : task.getTriggers()) {
+                    if (trigger.getType().equals(connType) && trigger.getMatch().equals(ssid)) task.runTask(context);
                 }
             }
         }

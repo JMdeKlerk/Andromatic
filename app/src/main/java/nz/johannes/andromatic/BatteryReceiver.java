@@ -1,4 +1,4 @@
-package nz.johannes.wifiler;
+package nz.johannes.andromatic;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,9 +20,9 @@ public class BatteryReceiver extends BroadcastReceiver {
                 type = "Battery low";
                 break;
         }
-        for (Profile profile : Main.getAllStoredProfiles(context)) {
-            for (Trigger trigger : profile.getTriggers()) {
-                if (trigger.getType().equals(type)) profile.enable(context);
+        for (Task task : Main.getAllStoredTasks(context)) {
+            for (Trigger trigger : task.getTriggers()) {
+                if (trigger.getType().equals(type)) task.runTask(context);
             }
         }
     }
