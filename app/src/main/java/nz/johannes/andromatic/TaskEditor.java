@@ -9,14 +9,14 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 
 import com.google.gson.Gson;
@@ -48,13 +48,23 @@ public class TaskEditor extends AppCompatActivity {
         registerForContextMenu(triggerList);
         triggerList.setAdapter(adapter);
         triggerList.setClickable(true);
+        triggerList.setLongClickable(true);
         triggerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Trigger triggerToDelete = (Trigger) triggerList.getItemAtPosition(position);
                 if (triggerToDelete.getType().equals("Add new...")) {
                     addTrigger();
-                    return;
+                }
+            }
+        });
+        triggerList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final Trigger triggerToDelete = (Trigger) triggerList.getItemAtPosition(position);
+                if (triggerToDelete.getType().equals("Add new...")) {
+                    addTrigger();
+                    return true;
                 }
                 alert.setTitle("Delete trigger?");
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -66,6 +76,7 @@ public class TaskEditor extends AppCompatActivity {
                 });
                 alert.setNegativeButton("No", null);
                 alert.show();
+                return true;
             }
         });
         for (Trigger trigger : task.getTriggers()) listItems.add(trigger);
@@ -82,13 +93,23 @@ public class TaskEditor extends AppCompatActivity {
         registerForContextMenu(actionList);
         actionList.setAdapter(adapter);
         actionList.setClickable(true);
+        actionList.setLongClickable(true);
         actionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Action actionToDelete = (Action) actionList.getItemAtPosition(position);
                 if (actionToDelete.getCommand().equals("Add new...")) {
                     addAction();
-                    return;
+                }
+            }
+        });
+        actionList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final Action actionToDelete = (Action) actionList.getItemAtPosition(position);
+                if (actionToDelete.getCommand().equals("Add new...")) {
+                    addAction();
+                    return true;
                 }
                 alert.setTitle("Delete action?");
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -100,6 +121,7 @@ public class TaskEditor extends AppCompatActivity {
                 });
                 alert.setNegativeButton("No", null);
                 alert.show();
+                return true;
             }
         });
         for (Action action : task.getActions()) listItems.add(action);
@@ -111,6 +133,7 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     public void addTrigger() {
+        // TODO: Bluetooth, headphones, location, time
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final String[] triggerChoices = new String[]{"Battery low", "Bluetooth connected", "Bluetooth disconnected", "Charger inserted",
                 "Charger removed", "Headphones inserted", "Headphones removed", "Location", "SMS received", "Time", "Wifi connected",
@@ -126,6 +149,24 @@ public class TaskEditor extends AppCompatActivity {
                     case "Location":
                         break;
                     case "SMS received":
+                        alert.setItems(null, null);
+                        alert.setView(R.layout.dialog_incomingmessage);
+                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                EditText matchText = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
+                                RadioButton exact = (RadioButton) ((AlertDialog) dialog).findViewById(R.id.radio_exact);
+                                String match = matchText.getText().toString();
+                                trigger.setMatch(match);
+                                ArrayList<String> extras = new ArrayList();
+                                extras.add(exact.isChecked() ? "Exact" : "Partial");
+                                trigger.setExtraData(extras);
+                                task.addNewTrigger(getBaseContext(), trigger);
+                                populateTriggerList();
+                            }
+                        });
+                        alert.setNegativeButton("Cancel", null);
+                        alert.show();
                         break;
                     case "Time":
                         break;

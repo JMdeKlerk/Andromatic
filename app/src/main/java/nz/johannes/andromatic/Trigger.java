@@ -1,9 +1,12 @@
 package nz.johannes.andromatic;
 
+import java.util.ArrayList;
+
 public class Trigger {
 
     private String type;
     private String match;
+    private ArrayList<String> extraData;
 
     public Trigger(String type) {
         this.type = type;
@@ -19,6 +22,14 @@ public class Trigger {
 
     public void setMatch(String match) {
         this.match = match;
+    }
+
+    public ArrayList<String> getExtraData() {
+        return extraData;
+    }
+
+    public void setExtraData(ArrayList data) {
+        this.extraData = data;
     }
 
 }
