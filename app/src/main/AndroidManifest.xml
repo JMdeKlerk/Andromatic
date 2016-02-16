@@ -33,34 +33,6 @@
                 android:value="nz.johannes.andromatic.Main"/>
         </activity>
 
-        <receiver
-            android:name="nz.johannes.andromatic.BatteryReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
-                <action android:name="android.intent.action.BATTERY_LOW"/>
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="nz.johannes.andromatic.BluetoothReceiver">
-            <intent-filter>
-                <action android:name="android.bluetooth.device.action.ACL_CONNECTED"/>
-                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED"/>
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".SmsReceiver">
-            <intent-filter android:priority="1000">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="nz.johannes.andromatic.WifiReceiver">
-            <intent-filter>
-                <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
-                <action android:name="android.net.wifi.STATE_CHANGE"/>
-            </intent-filter>
-        </receiver>
-
     </application>
 
 </manifest>

@@ -70,7 +70,7 @@ public class Main extends AppCompatActivity {
     private void populateTaskList() {
         final ListView taskList = (ListView) findViewById(R.id.list);
         final ArrayList<Task> listItems = new ArrayList<>();
-        final TaskListViewAdapter adapter = new TaskListViewAdapter(this, R.layout.task_row, listItems);
+        final Task.TaskListViewAdapter adapter = new Task().new TaskListViewAdapter(this, R.layout.task_row, listItems);
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         taskList.setAdapter(adapter);
         taskList.setClickable(true);

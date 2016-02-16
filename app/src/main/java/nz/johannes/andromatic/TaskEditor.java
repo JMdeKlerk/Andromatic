@@ -44,7 +44,7 @@ public class TaskEditor extends AppCompatActivity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final ListView triggerList = (ListView) findViewById(R.id.triggerList);
         final ArrayList<Trigger> listItems = new ArrayList<>();
-        final TriggerListViewAdapter adapter = new TriggerListViewAdapter(this, R.layout.default_list_row, listItems);
+        final Trigger.TriggerListViewAdapter adapter = new Trigger().new TriggerListViewAdapter(this, R.layout.default_list_row, listItems);
         registerForContextMenu(triggerList);
         triggerList.setAdapter(adapter);
         triggerList.setClickable(true);
@@ -89,7 +89,7 @@ public class TaskEditor extends AppCompatActivity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final ListView actionList = (ListView) findViewById(R.id.actionList);
         final ArrayList<Action> listItems = new ArrayList<>();
-        final ActionListViewAdapter adapter = new ActionListViewAdapter(this, R.layout.default_list_row, listItems);
+        final Action.ActionListViewAdapter adapter = new Action().new ActionListViewAdapter(this, R.layout.default_list_row, listItems);
         registerForContextMenu(actionList);
         actionList.setAdapter(adapter);
         actionList.setClickable(true);
