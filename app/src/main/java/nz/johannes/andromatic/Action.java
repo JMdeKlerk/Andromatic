@@ -111,12 +111,13 @@ public class Action {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            Action action = getItem(position);
+            boolean hasExtraData = (action.getData() != -1 || action.getMultiData() != null);
             if (convertView == null) {
                 LayoutInflater vi;
                 vi = LayoutInflater.from(getContext());
-                convertView = vi.inflate(R.layout.default_list_row, null);
+                convertView = hasExtraData ? vi.inflate(R.layout.default_list_row, null) : vi.inflate(R.layout.list_row_nodetail, null);
             }
-            Action action = getItem(position);
             if (action != null) {
                 TextView type = (TextView) convertView.findViewById(R.id.type);
                 TextView detail = (TextView) convertView.findViewById(R.id.detail);
@@ -124,8 +125,26 @@ public class Action {
                     type.setText(action.getCommand());
                 }
                 if (detail != null) {
-                    if (action.getData() != -1) detail.append(String.valueOf(action.getData()));
-                    if (action.getMultiData() != null) detail.append(String.valueOf(action.getMultiData().get(0)));
+                    if (hasExtraData) switch (action.getCommand()) {
+                        case ("Launch app"):
+                        case ("Kill app"):
+                            detail.setText("App: " + action.getMultiData().get(0));
+                            break;
+                        case "Set brightness":
+                        case "Set ringer volume":
+                        case "Set notification volume":
+                        case "Set media volume":
+                            detail.setText(action.getData() + " percent");
+                            break;
+                        case "Send SMS":
+                        case "Send email":
+                            detail.setText("To: " + action.getMultiData().get(0) + " (" + action.getMultiData().get(1) + ")");
+                            break;
+                        case "Set lock mode":
+                            String lockChoices[] = new String[]{"None", "PIN", "Gesture", "Fingerprint"};
+                            detail.setText(lockChoices[action.getData()]);
+                            break;
+                    }
                 }
             }
             return convertView;

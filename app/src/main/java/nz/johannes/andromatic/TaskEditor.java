@@ -145,6 +145,20 @@ public class TaskEditor extends AppCompatActivity {
                 switch (triggerChoices[which]) {
                     case "Bluetooth connected":
                     case "Bluetooth disconnected":
+                        alert.setItems(null, null);
+                        alert.setView(R.layout.dialog_ssidname);
+                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                EditText ssidField = (EditText) ((AlertDialog) dialog).findViewById(R.id.ssid_name);
+                                String ssid = ssidField.getText().toString();
+                                trigger.setMatch(ssid);
+                                task.addNewTrigger(getBaseContext(), trigger);
+                                populateTriggerList();
+                            }
+                        });
+                        alert.setNegativeButton("Cancel", null);
+                        alert.show();
                         break;
                     case "Location":
                         break;
@@ -263,7 +277,7 @@ public class TaskEditor extends AppCompatActivity {
                                 EditText to = (EditText) ((AlertDialog) dialog).findViewById(R.id.to);
                                 EditText message = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
                                 ArrayList actionData = new ArrayList();
-                                actionData.add("Some loser");
+                                actionData.add("TODO: NAME");
                                 actionData.add(to.getText().toString());
                                 actionData.add(message.getText().toString());
                                 action.setData(actionData);

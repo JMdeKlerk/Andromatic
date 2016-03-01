@@ -8,68 +8,76 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Telephony;
 import android.telephony.SmsMessage;
 
 public class ReceiverManager extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
+        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            manageReceivers(context);
+        }
+        if (intent.getAction().equals("android.intent.action.ACTION_SHUTDOWN")) {
+            unregisterAll(context);
+        }
     }
 
-    public static void registerBatteryReceiver(Context context) {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.intent.action.ACTION_POWER_CONNECTED");
-        filter.addAction("android.intent.action.ACTION_POWER_DISCONNECTED");
-        filter.addAction("android.intent.action.BATTERY_LOW");
-        context.registerReceiver(batteryReceiver, filter);
+    public static void manageReceivers(Context context) {
+        unregisterAll(context);
+        for (Task task : Main.getAllStoredTasks(context)) {
+            for (Trigger trigger : task.getTriggers()) {
+                switch (trigger.getType()) {
+                    case "Battery low":
+                    case "Charger inserted":
+                    case "Charger removed":
+                        IntentFilter batteryFilter = new IntentFilter();
+                        batteryFilter.addAction("android.intent.action.ACTION_POWER_CONNECTED");
+                        batteryFilter.addAction("android.intent.action.ACTION_POWER_DISCONNECTED");
+                        batteryFilter.addAction("android.intent.action.BATTERY_LOW");
+                        context.registerReceiver(batteryReceiver, batteryFilter);
+                        break;
+                    case "Bluetooth connected":
+                    case "Bluetooth disconnected":
+                        IntentFilter bluetoothFilter = new IntentFilter();
+                        bluetoothFilter.addAction("android.bluetooth.device.action.ACL_CONNECTED");
+                        bluetoothFilter.addAction("android.bluetooth.device.action.ACL_DISCONNECTED");
+                        context.registerReceiver(blueToothReceiver, bluetoothFilter);
+                        break;
+                    case "Headphones inserted":
+                    case "Headphones removed":
+                        IntentFilter headphoneFilter = new IntentFilter();
+                        headphoneFilter.addAction("android.intent.action.HEADSET_PLUG");
+                        context.registerReceiver(headphoneReceiver, headphoneFilter);
+                        break;
+                    case "SMS received":
+                        IntentFilter smsFilter = new IntentFilter();
+                        smsFilter.addAction("android.provider.Telephony.SMS_RECEIVED");
+                        context.registerReceiver(smsReceiver, smsFilter);
+                        break;
+                    case "Wifi connected":
+                    case "Wifi disconnected":
+                        IntentFilter wifiFilter = new IntentFilter();
+                        wifiFilter.addAction("android.net.wifi.STATE_CHANGE");
+                        context.registerReceiver(wifiReceiver, wifiFilter);
+                        break;
+                }
+            }
+        }
     }
 
-    public static void unregisterBatteryReceiver(Context context) {
-        context.unregisterReceiver(batteryReceiver);
-    }
+    private static void unregisterAll(Context context) {
+        BroadcastReceiver[] receivers = new BroadcastReceiver[]{batteryReceiver, blueToothReceiver, headphoneReceiver, smsReceiver, wifiReceiver};
+        for (BroadcastReceiver receiver : receivers) {
+            try {
+                context.unregisterReceiver(receiver);
+            } catch (IllegalArgumentException ex) {
 
-    public static void registerBluetoothReceiver(Context context) {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.bluetooth.device.action.ACL_CONNECTED");
-        filter.addAction("android.bluetooth.device.action.ACL_DISCONNECTED");
-        context.registerReceiver(blueToothReceiver, filter);
-    }
-
-    public static void unregisterBluetoothReceiver(Context context) {
-        context.unregisterReceiver(blueToothReceiver);
-    }
-
-    public static void registerHeadphoneReceiver(Context context) {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.intent.action.HEADSET_PLUG");
-        context.registerReceiver(headphoneReceiver, filter);
-    }
-
-    public static void unregisterHeadphoneReceiver(Context context) {
-        context.unregisterReceiver(headphoneReceiver);
-    }
-
-    public static void registerSmsReceiver(Context context) {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
-        context.registerReceiver(smsReceiver, filter);
-    }
-
-    public static void unregisterSmsReceiver(Context context) {
-        context.unregisterReceiver(smsReceiver);
-    }
-
-    public static void registerWifiReceiver(Context context) {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.net.wifi.STATE_CHANGE");
-        context.registerReceiver(wifiReceiver, filter);
-    }
-
-    public static void unregisterWifiReceiver(Context context) {
-        context.unregisterReceiver(wifiReceiver);
+            }
+        }
     }
 
     private static BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
@@ -113,8 +121,8 @@ public class ReceiverManager extends BroadcastReceiver {
     private static BroadcastReceiver headphoneReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) ?
-                    "Headphones inserted" : "Headphones removed";
+            if (isInitialStickyBroadcast()) return;
+            String action = (intent.getIntExtra("state", -1) == 1) ? "Headphones inserted" : "Headphones removed";
             for (Task task : Main.getAllStoredTasks(context)) {
                 for (Trigger trigger : task.getTriggers()) {
                     if (trigger.getType().equals(action)) task.runTask(context);
@@ -126,21 +134,23 @@ public class ReceiverManager extends BroadcastReceiver {
     private static BroadcastReceiver smsReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            SmsMessage[] messages;
+            if (Build.VERSION.SDK_INT >= 19) messages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
+            else {
+                Bundle bundle = intent.getExtras();
+                Object[] pdus = (Object[]) bundle.get("pdus");
+                messages = new SmsMessage[pdus.length];
+                for (int i = 0; i < messages.length; i++) messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+            }
             for (Task task : Main.getAllStoredTasks(context)) {
                 for (Trigger trigger : task.getTriggers()) {
                     if (trigger.getType().equals("SMS received")) {
-                        Bundle bundle = intent.getExtras();
-                        Object[] pdus = (Object[]) bundle.get("pdus");
-                        SmsMessage[] messages = new SmsMessage[pdus.length];
-                        for (int i = 0; i < messages.length; i++) {
-                            messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                            String body = messages[i].getMessageBody();
-                            if (trigger.getExtraData().get(0).equals("Exact") && body.equals(trigger.getMatch())) {
+                        for (SmsMessage message : messages) {
+                            String body = message.getMessageBody();
+                            if (trigger.getExtraData().get(0).equals("Exact") && body.equals(trigger.getMatch()))
                                 task.runTask(context);
-                            }
-                            if (trigger.getExtraData().get(0).equals("Partial") && body.contains(trigger.getMatch())) {
+                            if (trigger.getExtraData().get(0).equals("Partial") && body.contains(trigger.getMatch()))
                                 task.runTask(context);
-                            }
                         }
                     }
                 }
@@ -151,8 +161,9 @@ public class ReceiverManager extends BroadcastReceiver {
     private static BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String ssid = "";
+            if (isInitialStickyBroadcast()) return;
             if (!intent.hasExtra("bssid")) return;
+            String ssid = "";
             WifiManager manager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             NetworkInfo netInfo = (NetworkInfo) intent.getExtras().get("networkInfo");
             NetworkInfo.State currentState = netInfo.getState();

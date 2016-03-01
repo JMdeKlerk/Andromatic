@@ -1,6 +1,7 @@
 package nz.johannes.andromatic;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,17 +53,35 @@ public class Trigger {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            Trigger trigger = getItem(position);
             if (convertView == null) {
                 LayoutInflater vi;
                 vi = LayoutInflater.from(getContext());
-                convertView = vi.inflate(R.layout.default_list_row, null);
+                convertView = (trigger.getMatch() != null) ?
+                        vi.inflate(R.layout.default_list_row, null) : vi.inflate(R.layout.list_row_nodetail, null);
             }
-            Trigger trigger = getItem(position);
             if (trigger != null) {
                 TextView type = (TextView) convertView.findViewById(R.id.type);
+                TextView detail = (TextView) convertView.findViewById(R.id.detail);
                 if (type != null) {
                     type.setText(trigger.getType());
-                    if (trigger.getMatch() != null) type.append(": " + trigger.getMatch());
+                    if (trigger.getMatch() != null) switch (trigger.getType()) {
+                        // TODO: Location
+                        case "Bluetooth connected":
+                        case "Bluetooth disconnected":
+                            detail.setText("Device name: " + trigger.getMatch());
+                            break;
+                        case "Time":
+                            detail.setText(trigger.getMatch() + (trigger.getExtraData().get(0) == null ? "Once" : "Every day"));
+                            break;
+                        case "SMS received":
+                            detail.setText(trigger.getExtraData().get(0) + " match: \"" + trigger.getMatch() + "\"");
+                            break;
+                        case "Wifi connected":
+                        case "Wifi disconnected":
+                            detail.setText("SSID: " + trigger.getMatch());
+                            break;
+                    }
                 }
             }
             return convertView;

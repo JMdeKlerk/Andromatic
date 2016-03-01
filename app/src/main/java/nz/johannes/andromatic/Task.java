@@ -50,6 +50,7 @@ public class Task {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
+        ReceiverManager.manageReceivers(context);
     }
 
     public void removeTrigger(Context context, Trigger trigger) {
@@ -57,6 +58,7 @@ public class Task {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
+        ReceiverManager.manageReceivers(context);
     }
 
     public void addNewAction(Context context, Action action) {
