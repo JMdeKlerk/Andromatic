@@ -72,7 +72,7 @@ public class Trigger {
                             detail.setText("Device name: " + trigger.getMatch());
                             break;
                         case "Time":
-                            detail.setText(trigger.getMatch() + (trigger.getExtraData().get(0) == null ? "Once" : "Every day"));
+                            detail.setText(trigger.getMatch());
                             break;
                         case "SMS received":
                             detail.setText(trigger.getExtraData().get(0) + " match: \"" + trigger.getMatch() + "\"");

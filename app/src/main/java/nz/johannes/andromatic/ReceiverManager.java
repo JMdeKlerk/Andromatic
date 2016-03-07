@@ -1,5 +1,7 @@
 package nz.johannes.andromatic;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,6 +15,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
+import android.util.Log;
+
+import java.util.Calendar;
 
 public class ReceiverManager extends BroadcastReceiver {
 
@@ -58,6 +63,20 @@ public class ReceiverManager extends BroadcastReceiver {
                         smsFilter.addAction("android.provider.Telephony.SMS_RECEIVED");
                         context.registerReceiver(smsReceiver, smsFilter);
                         break;
+                    case "Time":
+                        IntentFilter alarmFilter = new IntentFilter();
+                        alarmFilter.addAction("nz.johannes.ALARM_ACTION");
+                        context.registerReceiver(alarmReceiver, alarmFilter);
+                        AlarmManager aManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                        Intent intent = new Intent("nz.johannes.ALARM_ACTION");
+                        intent.putExtra("Task", task.getName());
+                        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(trigger.getExtraData().get(0)));
+                        calendar.set(Calendar.MINUTE, Integer.parseInt(trigger.getExtraData().get(1)));
+                        calendar.set(Calendar.SECOND, 0);
+                        aManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
+                        break;
                     case "Wifi connected":
                     case "Wifi disconnected":
                         IntentFilter wifiFilter = new IntentFilter();
@@ -70,7 +89,10 @@ public class ReceiverManager extends BroadcastReceiver {
     }
 
     private static void unregisterAll(Context context) {
-        BroadcastReceiver[] receivers = new BroadcastReceiver[]{batteryReceiver, blueToothReceiver, headphoneReceiver, smsReceiver, wifiReceiver};
+        AlarmManager aManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        aManager.cancel(PendingIntent.getBroadcast(context, 0, new Intent("nz.johannes.ALARM_ACTION"), PendingIntent.FLAG_CANCEL_CURRENT));
+        BroadcastReceiver[] receivers = new BroadcastReceiver[]{alarmReceiver, batteryReceiver, blueToothReceiver, headphoneReceiver, smsReceiver,
+                wifiReceiver};
         for (BroadcastReceiver receiver : receivers) {
             try {
                 context.unregisterReceiver(receiver);
@@ -79,6 +101,14 @@ public class ReceiverManager extends BroadcastReceiver {
             }
         }
     }
+
+
+    private static BroadcastReceiver alarmReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("Log", "Received " + intent.getStringExtra("Task"));
+        }
+    };
 
     private static BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
         @Override

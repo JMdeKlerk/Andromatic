@@ -21,4 +21,14 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"/>
 
+    <TextView
+        android:id="@+id/empty"
+        android:text="We've come up empty!\n Press the + button to add a new task."
+        android:layout_width="fill_parent"
+        android:textColor="#999999"
+        android:layout_height="fill_parent"
+        style="@android:style/TextAppearance.Medium"
+        android:gravity="center">
+    </TextView>
+
 </RelativeLayout>

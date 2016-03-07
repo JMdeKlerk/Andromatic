@@ -12,6 +12,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -75,6 +76,7 @@ public class Main extends AppCompatActivity {
         final Task.TaskListViewAdapter adapter = new Task().new TaskListViewAdapter(this, R.layout.task_row, listItems);
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         taskList.setAdapter(adapter);
+        taskList.setEmptyView(findViewById(R.id.empty));
         taskList.setClickable(true);
         taskList.setLongClickable(true);
         taskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -121,7 +123,10 @@ public class Main extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) return true;
+        if (id == R.id.action_settings) {
+            Intent settings = new Intent(this, Settings.class);
+            startActivity(settings);
+        }
         if (id == R.id.action_exit) finish();
         return super.onOptionsItemSelected(item);
     }
@@ -140,9 +145,9 @@ public class Main extends AppCompatActivity {
 
     public static void showToast(Context context, String message) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int duration = prefs.getInt("toastDuration", Toast.LENGTH_SHORT);
-        if (duration == 0) new Toast(context).makeText(context, message, Toast.LENGTH_SHORT).show();
-        if (duration == 1) new Toast(context).makeText(context, message, Toast.LENGTH_LONG).show();
+        String duration = prefs.getString("toastDuration", "1");
+        if (duration.equals("1")) new Toast(context).makeText(context, message, Toast.LENGTH_SHORT).show();
+        if (duration.equals("2")) new Toast(context).makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
 }

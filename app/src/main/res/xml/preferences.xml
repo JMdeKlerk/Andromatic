@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/ToastDuration"
+        android:entryValues="@array/ToastDurationIntervalValues"
+        android:key="toastDuration"
+        android:summary="Time for toast alerts to remain on screen"
+        android:title="Toast duration" />
+</PreferenceScreen>

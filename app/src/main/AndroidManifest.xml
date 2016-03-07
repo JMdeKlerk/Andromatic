@@ -26,8 +26,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".TaskEditor">
+        <activity android:name=".TaskEditor">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="nz.johannes.andromatic.Main"/>
+        </activity>
+        <activity android:name=".Settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nz.johannes.andromatic.Main"/>
