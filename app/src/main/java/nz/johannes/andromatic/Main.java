@@ -60,13 +60,11 @@ public class Main extends AppCompatActivity {
             String ssid = manager.getConnectionInfo().getSSID().replace("\"", "");
             editor.putString("lastConnectedSSID", ssid).apply();
         }
-        ReceiverManager.manageReceivers(this);
     }
 
     @Override
     protected void onResume() {
         populateTaskList();
-        ReceiverManager.manageReceivers(this);
         super.onResume();
     }
 
@@ -99,7 +97,6 @@ public class Main extends AppCompatActivity {
                         Task task = (Task) taskList.getItemAtPosition(position);
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
                         editor.remove("task-" + task.getName()).apply();
-                        ReceiverManager.manageReceivers(getBaseContext());
                         populateTaskList();
                     }
                 });
