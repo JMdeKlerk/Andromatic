@@ -137,10 +137,11 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     public void addTrigger() {
-        // TODO: Time
+        // TODO: Time (interval), sms by sender
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final String[] triggerChoices = new String[]{"Battery low", "Bluetooth connected", "Bluetooth disconnected", "Charger inserted",
-                "Charger removed", "Headphones inserted", "Headphones removed", "SMS received", "Time", "Wifi connected", "Wifi disconnected"};
+                "Charger removed", "SMS received (content)", "SMS received (sender)", "Time (interval)", "Time (specific)", "Wifi connected",
+                "Wifi disconnected"};
         alert.setItems(triggerChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -149,13 +150,13 @@ public class TaskEditor extends AppCompatActivity {
                     case "Bluetooth connected":
                     case "Bluetooth disconnected":
                         alert.setItems(null, null);
-                        alert.setView(R.layout.dialog_ssidname);
+                        alert.setView(R.layout.dialog_devicename);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                EditText ssidField = (EditText) ((AlertDialog) dialog).findViewById(R.id.ssid_name);
-                                String ssid = ssidField.getText().toString();
-                                trigger.setMatch(ssid);
+                                EditText deviceNameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.device_name);
+                                String device = deviceNameField.getText().toString();
+                                trigger.setMatch(device);
                                 task.addNewTrigger(getBaseContext(), trigger);
                                 populateTriggerList();
                             }
@@ -163,7 +164,7 @@ public class TaskEditor extends AppCompatActivity {
                         alert.setNegativeButton("Cancel", null);
                         alert.show();
                         break;
-                    case "SMS received":
+                    case "SMS received (content)":
                         alert.setItems(null, null);
                         alert.setView(R.layout.dialog_incomingmessage);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -183,7 +184,25 @@ public class TaskEditor extends AppCompatActivity {
                         alert.setNegativeButton("Cancel", null);
                         alert.show();
                         break;
-                    case "Time":
+                    case "SMS received (sender)":
+                        alert.setItems(null, null);
+                        alert.setView(R.layout.dialog_incomingsmssender);
+                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                EditText senderField = (EditText) ((AlertDialog) dialog).findViewById(R.id.sender);
+                                String sender = senderField.getText().toString();
+                                trigger.setMatch(sender);
+                                task.addNewTrigger(getBaseContext(), trigger);
+                                populateTriggerList();
+                            }
+                        });
+                        alert.setNegativeButton("Cancel", null);
+                        alert.show();
+                        break;
+                    case "Time (interval)":
+                        break;
+                    case "Time (specific)":
                         TimePickerDialog timePicker = new TimePickerDialog(TaskEditor.this, new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {

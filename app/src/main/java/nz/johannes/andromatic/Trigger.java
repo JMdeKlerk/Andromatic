@@ -65,15 +65,16 @@ public class Trigger {
                 if (type != null) {
                     type.setText(trigger.getType());
                     if (trigger.getMatch() != null) switch (trigger.getType()) {
-                        // TODO: Location
                         case "Bluetooth connected":
                         case "Bluetooth disconnected":
                             detail.setText("Device name: " + trigger.getMatch());
                             break;
-                        case "Time":
+                        case "Time (interval)":
+                        case "Time (specific)":
+                        case "SMS received (sender)":
                             detail.setText(trigger.getMatch());
                             break;
-                        case "SMS received":
+                        case "SMS received (content)":
                             detail.setText(trigger.getExtraData().get(0) + " match: \"" + trigger.getMatch() + "\"");
                             break;
                         case "Wifi connected":

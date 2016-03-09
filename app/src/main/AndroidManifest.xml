@@ -37,6 +37,12 @@
                 android:value="nz.johannes.andromatic.Main"/>
         </activity>
 
+        <receiver android:name=".AlarmReceiver">
+            <intent-filter>
+                <action android:name="nz.johannes.ALARM_INTENT"/>
+                <data android:scheme="http"/>
+            </intent-filter>
+        </receiver>
         <receiver android:name=".BatteryReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
@@ -50,17 +56,12 @@
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".HeadphoneReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.HEADSET_PLUG"/>
-            </intent-filter>
-        </receiver>
         <receiver android:name=".SmsReceiver">
             <intent-filter android:priority="1000">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".SmsReceiver">
+        <receiver android:name=".WifiReceiver">
             <intent-filter>
                 <action android:name="android.net.wifi.STATE_CHANGE"/>
             </intent-filter>

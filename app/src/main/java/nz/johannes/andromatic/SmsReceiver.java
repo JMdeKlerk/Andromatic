@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Telephony;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsMessage;
+import android.util.Log;
 
 public class SmsReceiver extends BroadcastReceiver {
 
@@ -22,13 +24,19 @@ public class SmsReceiver extends BroadcastReceiver {
         }
         for (Task task : Main.getAllStoredTasks(context)) {
             for (Trigger trigger : task.getTriggers()) {
-                if (trigger.getType().equals("SMS received")) {
+                if (trigger.getType().equals("SMS received (content)")) {
                     for (SmsMessage message : messages) {
                         String body = message.getMessageBody();
                         if (trigger.getExtraData().get(0).equals("Exact") && body.equals(trigger.getMatch()))
                             task.runTask(context);
                         if (trigger.getExtraData().get(0).equals("Partial") && body.contains(trigger.getMatch()))
                             task.runTask(context);
+                    }
+                }
+                if (trigger.getType().equals("SMS received (sender)")) {
+                    for (SmsMessage message : messages) {
+                        String sender = message.getOriginatingAddress();
+                        if (PhoneNumberUtils.compare(sender, trigger.getMatch())) task.runTask(context);
                     }
                 }
             }
