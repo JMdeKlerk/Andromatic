@@ -137,7 +137,6 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     public void addTrigger() {
-        // TODO: Time (interval), sms by sender
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final String[] triggerChoices = new String[]{"Battery low", "Bluetooth connected", "Bluetooth disconnected", "Charger inserted",
                 "Charger removed", "SMS received (content)", "SMS received (sender)", "Time (interval)", "Time (specific)", "Wifi connected",
@@ -201,6 +200,16 @@ public class TaskEditor extends AppCompatActivity {
                         alert.show();
                         break;
                     case "Time (interval)":
+                        final String timeChoices[] = new String[]{"1 minute", "5 minutes", "10 minutes", "30 minutes", "60 minutes", "120 minutes"};
+                        alert.setItems(timeChoices, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                trigger.setMatch(timeChoices[which]);
+                                task.addNewTrigger(getBaseContext(), trigger);
+                                populateTriggerList();
+                            }
+                        });
+                        alert.show();
                         break;
                     case "Time (specific)":
                         TimePickerDialog timePicker = new TimePickerDialog(TaskEditor.this, new TimePickerDialog.OnTimeSetListener() {
@@ -256,7 +265,7 @@ public class TaskEditor extends AppCompatActivity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final Action action = new Action();
         final String actionChoices[] = new String[]{"Launch app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
-                "Set brightness", "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode", "Send SMS", "Send email"};
+                "Set brightness", "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode", "Send SMS"};
         alert.setItems(actionChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -309,7 +318,6 @@ public class TaskEditor extends AppCompatActivity {
                         alert.show();
                         break;
                     case "Send SMS":
-                    case "Send email":
                         alert.setItems(null, null);
                         alert.setView(R.layout.dialog_sendmessage);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {

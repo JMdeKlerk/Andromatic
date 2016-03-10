@@ -97,6 +97,7 @@ public class Main extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Task task = (Task) taskList.getItemAtPosition(position);
+                        task.unsetAlarms(getBaseContext());
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
                         editor.remove("task-" + task.getName()).apply();
                         populateTaskList();
@@ -128,6 +129,12 @@ public class Main extends AppCompatActivity {
         }
         if (id == R.id.action_exit) finish();
         return super.onOptionsItemSelected(item);
+    }
+
+    public static Task getTask(Context context, String key) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        Task task = new Gson().fromJson(prefs.getString("task-" + key, ""), Task.class);
+        return task;
     }
 
     public static ArrayList<Task> getAllStoredTasks(Context context) {

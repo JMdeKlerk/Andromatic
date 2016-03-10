@@ -73,9 +73,6 @@ public class Action {
             case "Send SMS":
                 SmsManager.getDefault().sendTextMessage(multiData.get(1), null, multiData.get(2), null, null);
                 break;
-            case "Send email":
-                //TODO
-                break;
         }
     }
 

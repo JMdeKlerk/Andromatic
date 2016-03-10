@@ -51,19 +51,21 @@ public class Task {
     }
 
     public void addNewTrigger(Context context, Trigger trigger) {
+        unsetAlarms(context);
         triggers.add(trigger);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
-        manageAlarms(context);
+        setAlarms(context);
     }
 
     public void removeTrigger(Context context, Trigger trigger) {
-        manageAlarms(context);
+        unsetAlarms(context);
         triggers.remove(trigger);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
+        setAlarms(context);
     }
 
     public void addNewAction(Context context, Action action) {
@@ -80,20 +82,46 @@ public class Task {
         editor.putString("task-" + name, storeTask).apply();
     }
 
-    public void manageAlarms(Context context) {
+    public void setAlarms(Context context) {
+        Intent alarm = new Intent("nz.johannes.ALARM_INTENT");
         AlarmManager aManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         for (Trigger trigger : triggers) {
-            if (trigger.getType().equals("Time (specific)")) {
-                Intent alarm = new Intent("nz.johannes.ALARM_INTENT");
-                alarm.setData(Uri.parse("http://" + this.getName() + this.triggers.indexOf(trigger)));
+            if (trigger.getType().equals("Time (interval)")) {
+                alarm.setData(Uri.parse("task://" + name + "/" + this.triggers.indexOf(trigger)));
                 PendingIntent pi = PendingIntent.getBroadcast(context, 0, alarm, 0);
-                aManager.cancel(pi);
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.SECOND, 0);
+                switch (trigger.getMatch()) {
+                    case "1 minute":
+                        calendar.add(Calendar.MINUTE, 1);
+                        break;
+                    case "5 minutes":
+                        do calendar.add(Calendar.MINUTE, 1);
+                        while (calendar.get(Calendar.MINUTE) % 5 != 0);
+                        break;
+                    case "10 minutes":
+                        do calendar.add(Calendar.MINUTE, 1);
+                        while (calendar.get(Calendar.MINUTE) % 10 != 0);
+                        break;
+                    case "30 minutes":
+                        do calendar.add(Calendar.MINUTE, 1);
+                        while (calendar.get(Calendar.MINUTE) % 30 != 0);
+                        break;
+                    case "60 minutes":
+                        calendar.set(Calendar.MINUTE, 0);
+                        calendar.add(Calendar.HOUR_OF_DAY, 1);
+                        break;
+                    case "120 minutes":
+                        calendar.set(Calendar.MINUTE, 0);
+                        do calendar.add(Calendar.HOUR_OF_DAY, 1);
+                        while (calendar.get(Calendar.HOUR_OF_DAY) % 2 != 0);
+                        break;
+                }
+                if (android.os.Build.VERSION.SDK_INT >= 19) aManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+                else aManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
             }
-        }
-        for (Trigger trigger : triggers) {
             if (trigger.getType().equals("Time (specific)")) {
-                Intent alarm = new Intent("nz.johannes.ALARM_INTENT");
-                alarm.setData(Uri.parse("http://" + this.getName() + this.triggers.indexOf(trigger)));
+                alarm.setData(Uri.parse("task://" + name + "/" + this.triggers.indexOf(trigger)));
                 PendingIntent pi = PendingIntent.getBroadcast(context, 0, alarm, 0);
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(trigger.getExtraData().get(0)));
@@ -102,6 +130,18 @@ public class Task {
                 if (calendar.getTimeInMillis() < System.currentTimeMillis()) calendar.add(Calendar.HOUR_OF_DAY, 24);
                 if (android.os.Build.VERSION.SDK_INT >= 19) aManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
                 else aManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+            }
+        }
+    }
+
+    public void unsetAlarms(Context context) {
+        Intent alarm = new Intent("nz.johannes.ALARM_INTENT");
+        AlarmManager aManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        for (Trigger trigger : triggers) {
+            if (trigger.getType().equals("Time (interval)") || trigger.getType().equals("Time (specific)")) {
+                alarm.setData(Uri.parse("task://" + name + this.triggers.indexOf(trigger)));
+                PendingIntent pi = PendingIntent.getBroadcast(context, 0, alarm, 0);
+                aManager.cancel(pi);
             }
         }
     }
