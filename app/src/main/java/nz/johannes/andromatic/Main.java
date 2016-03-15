@@ -2,14 +2,19 @@ package nz.johannes.andromatic;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +24,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -26,6 +33,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Main extends AppCompatActivity {
 
@@ -40,12 +48,15 @@ public class Main extends AppCompatActivity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                alert.setView(R.layout.dialog_newtask);
+            public void onClick(View v) {
+                View view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
+                AutoCompleteTextView textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                textView.setHint("Name");
+                alert.setView(view);
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        EditText nameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.task_name);
+                        AutoCompleteTextView nameField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
                         String name = nameField.getText().toString();
                         Task task = new Task(getBaseContext(), name);
                         populateTaskList();
@@ -147,6 +158,41 @@ public class Main extends AppCompatActivity {
             }
         }
         return tasks;
+    }
+
+    public static ArrayAdapter getTextViewAdapter(Context context, String type) {
+        switch (type) {
+            case "bluetooth":
+                //TODO
+            case "contacts":
+                ArrayList<String> contacts = new ArrayList<>();
+                ContentResolver cr = context.getContentResolver();
+                Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+                while (cursor.moveToNext()) {
+                    String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    contacts.add(name);
+                }
+                cursor.close();
+                String[] contactsArray = new String[contacts.size()];
+                contacts.toArray(contactsArray);
+                return new ArrayAdapter<>(context, android.R.layout.simple_dropdown_item_1line, contactsArray);
+            case "ssids":
+                WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+                ArrayList<String> networks = new ArrayList<>();
+                for (WifiConfiguration network : wifi.getConfiguredNetworks()) {
+                    String ssid = network.SSID.replace("\"", "");
+                    if (!networks.contains(ssid)) networks.add (ssid);
+                }
+                for (ScanResult network : wifi.getScanResults()) {
+                    String ssid = network.SSID;
+                    if (!networks.contains(ssid)) networks.add(ssid);
+                }
+                String[] networksArray = new String[networks.size()];
+                networks.toArray(networksArray);
+                return new ArrayAdapter<>(context, android.R.layout.simple_dropdown_item_1line, networksArray);
+            default:
+                return null;
+        }
     }
 
     public static void showToast(Context context, String message) {

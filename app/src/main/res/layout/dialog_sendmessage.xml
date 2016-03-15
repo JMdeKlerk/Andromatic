@@ -13,12 +13,12 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:orientation="vertical">
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/to"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.2"
-            android:hint="To"
+            android:hint="Name/number"
             android:textSize="16sp"/>
 
         <EditText

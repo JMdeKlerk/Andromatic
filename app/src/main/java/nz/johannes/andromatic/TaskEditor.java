@@ -10,27 +10,29 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class TaskEditor extends AppCompatActivity {
 
     private Task task;
+    private View view;
+    private AutoCompleteTextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,11 +151,14 @@ public class TaskEditor extends AppCompatActivity {
                     case "Bluetooth connected":
                     case "Bluetooth disconnected":
                         alert.setItems(null, null);
-                        alert.setView(R.layout.dialog_devicename);
+                        view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
+                        textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                        textView.setHint("Device name");
+                        alert.setView(view);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                EditText deviceNameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.device_name);
+                                AutoCompleteTextView deviceNameField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
                                 String device = deviceNameField.getText().toString();
                                 trigger.setMatch(device);
                                 task.addNewTrigger(getBaseContext(), trigger);
@@ -173,7 +178,7 @@ public class TaskEditor extends AppCompatActivity {
                                 RadioButton exact = (RadioButton) ((AlertDialog) dialog).findViewById(R.id.radio_exact);
                                 String match = matchText.getText().toString();
                                 trigger.setMatch(match);
-                                ArrayList<String> extras = new ArrayList();
+                                ArrayList<String> extras = new ArrayList<>();
                                 extras.add(exact.isChecked() ? "Exact" : "Partial");
                                 trigger.setExtraData(extras);
                                 task.addNewTrigger(getBaseContext(), trigger);
@@ -185,11 +190,15 @@ public class TaskEditor extends AppCompatActivity {
                         break;
                     case "SMS received (sender)":
                         alert.setItems(null, null);
-                        alert.setView(R.layout.dialog_incomingsmssender);
+                        view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
+                        textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                        textView.setHint("Name/number");
+                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "contacts"));
+                        alert.setView(view);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                EditText senderField = (EditText) ((AlertDialog) dialog).findViewById(R.id.sender);
+                                AutoCompleteTextView senderField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
                                 String sender = senderField.getText().toString();
                                 trigger.setMatch(sender);
                                 task.addNewTrigger(getBaseContext(), trigger);
@@ -237,11 +246,15 @@ public class TaskEditor extends AppCompatActivity {
                     case "Wifi connected":
                     case "Wifi disconnected":
                         alert.setItems(null, null);
-                        alert.setView(R.layout.dialog_ssidname);
+                        view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
+                        textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                        textView.setHint("SSID");
+                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "ssids"));
+                        alert.setView(view);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                EditText ssidField = (EditText) ((AlertDialog) dialog).findViewById(R.id.ssid_name);
+                                EditText ssidField = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
                                 String ssid = ssidField.getText().toString();
                                 trigger.setMatch(ssid);
                                 task.addNewTrigger(getBaseContext(), trigger);
@@ -265,14 +278,13 @@ public class TaskEditor extends AppCompatActivity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final Action action = new Action();
         final String actionChoices[] = new String[]{"Launch app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
-                "Set brightness", "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode", "Send SMS"};
+                "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode", "Send SMS"};
         alert.setItems(actionChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 final String actionChoice = actionChoices[which];
                 switch (actionChoice) {
                     case "Launch app":
-                    case "Kill app":
                         PackageManager pm = getPackageManager();
                         final ArrayList<String> appChoices = new ArrayList<>();
                         final ArrayList<String> appChoicePackage = new ArrayList<>();
@@ -299,12 +311,27 @@ public class TaskEditor extends AppCompatActivity {
                         });
                         alert.show();
                         break;
-                    case "Set brightness":
                     case "Set ringer volume":
                     case "Set notification volume":
                     case "Set media volume":
                         alert.setItems(null, null);
-                        alert.setView(R.layout.dialog_seekbar);
+                        view = getLayoutInflater().inflate(R.layout.dialog_seekbar, null);
+                        ((SeekBar) view.findViewById(R.id.seek)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                            @Override
+                            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                TextView seekText = (TextView) view.findViewById(R.id.seek_text);
+                                seekText.setText(progress * 10 + "%");
+                            }
+
+                            @Override
+                            public void onStartTrackingTouch(SeekBar seekBar) {
+                            }
+
+                            @Override
+                            public void onStopTrackingTouch(SeekBar seekBar) {
+                            }
+                        });
+                        alert.setView(view);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 action.setCommand(actionChoice);
@@ -318,8 +345,10 @@ public class TaskEditor extends AppCompatActivity {
                         alert.show();
                         break;
                     case "Send SMS":
+                        view = getLayoutInflater().inflate(R.layout.dialog_sendmessage, null);
+                        ((AutoCompleteTextView) view.findViewById(R.id.to)).setHint("Test");
                         alert.setItems(null, null);
-                        alert.setView(R.layout.dialog_sendmessage);
+                        alert.setView(view);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 action.setCommand(actionChoice);

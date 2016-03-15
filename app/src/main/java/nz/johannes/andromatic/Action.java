@@ -33,10 +33,6 @@ public class Action {
                 intent.setComponent(component);
                 context.startActivity(intent);
                 break;
-            case "Kill app":
-                ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-                activityManager.killBackgroundProcesses(multiData.get(1));
-                break;
             case "Enable wifi":
                 ((WifiManager) context.getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(true);
                 break;
@@ -48,9 +44,6 @@ public class Action {
                 break;
             case "Disable bluetooth":
                 BluetoothAdapter.getDefaultAdapter().disable();
-                break;
-            case "Set brightness":
-                //TODO
                 break;
             case "Set ringer volume":
                 AudioManager ringerManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -117,6 +119,7 @@ public class Task {
                         while (calendar.get(Calendar.HOUR_OF_DAY) % 2 != 0);
                         break;
                 }
+                Log.i("Log", "Set for " + new Date(calendar.getTimeInMillis()) + " - done");
                 if (android.os.Build.VERSION.SDK_INT >= 19) aManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
                 else aManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
             }
