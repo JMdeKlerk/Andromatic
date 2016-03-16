@@ -141,8 +141,7 @@ public class TaskEditor extends AppCompatActivity {
     public void addTrigger() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final String[] triggerChoices = new String[]{"Battery low", "Bluetooth connected", "Bluetooth disconnected", "Charger inserted",
-                "Charger removed", "SMS received (content)", "SMS received (sender)", "Time (interval)", "Time (specific)", "Wifi connected",
-                "Wifi disconnected"};
+                "Charger removed", "Interval", "SMS received", "Time", "Wifi connected", "Wifi disconnected"};
         alert.setItems(triggerChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -168,58 +167,71 @@ public class TaskEditor extends AppCompatActivity {
                         alert.setNegativeButton("Cancel", null);
                         alert.show();
                         break;
-                    case "SMS received (content)":
-                        alert.setItems(null, null);
-                        alert.setView(R.layout.dialog_incomingmessage);
-                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    case "SMS received":
+                        final String[] typeChoices = new String[]{"Content", "Sender"};
+                        alert.setItems(typeChoices, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                EditText matchText = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
-                                RadioButton exact = (RadioButton) ((AlertDialog) dialog).findViewById(R.id.radio_exact);
-                                String match = matchText.getText().toString();
-                                trigger.setMatch(match);
-                                ArrayList<String> extras = new ArrayList<>();
-                                extras.add(exact.isChecked() ? "Exact" : "Partial");
-                                trigger.setExtraData(extras);
-                                task.addNewTrigger(getBaseContext(), trigger);
-                                populateTriggerList();
+                                switch (typeChoices[which]) {
+                                    case "Content":
+                                        alert.setItems(null, null);
+                                        alert.setView(R.layout.dialog_incomingmessage);
+                                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                EditText matchText = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
+                                                RadioButton exact = (RadioButton) ((AlertDialog) dialog).findViewById(R.id.radio_exact);
+                                                String match = matchText.getText().toString();
+                                                trigger.setMatch(match);
+                                                ArrayList<String> extras = new ArrayList<>();
+                                                extras.add("Content");
+                                                extras.add(exact.isChecked() ? "Exact" : "Partial");
+                                                trigger.setExtraData(extras);
+                                                task.addNewTrigger(getBaseContext(), trigger);
+                                                populateTriggerList();
+                                            }
+                                        });
+                                        alert.setNegativeButton("Cancel", null);
+                                        alert.show();
+                                        break;
+                                    case "Sender":
+                                        alert.setItems(null, null);
+                                        view = getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
+                                        textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                                        textView.setHint("Name/number");
+                                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "contacts"));
+                                        textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                            @Override
+                                            public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+                                                String selection = ((TextView) view).getText().toString();
+                                                selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
+                                                textView.setText(selection);
+                                            }
+                                        });
+                                        alert.setView(view);
+                                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                AutoCompleteTextView senderField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
+                                                String sender = senderField.getText().toString();
+                                                trigger.setMatch(sender);
+                                                ArrayList<String> extras = new ArrayList<>();
+                                                extras.add("Sender");
+                                                extras.add(Main.getNameFromNumber(getBaseContext(), sender));
+                                                trigger.setExtraData(extras);
+                                                task.addNewTrigger(getBaseContext(), trigger);
+                                                populateTriggerList();
+                                            }
+                                        });
+                                        alert.setNegativeButton("Cancel", null);
+                                        alert.show();
+                                        break;
+                                }
                             }
                         });
-                        alert.setNegativeButton("Cancel", null);
                         alert.show();
                         break;
-                    case "SMS received (sender)":
-                        alert.setItems(null, null);
-                        view = getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
-                        textView = (AutoCompleteTextView) view.findViewById(R.id.text);
-                        textView.setHint("Name/number");
-                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "contacts"));
-                        textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            @Override
-                            public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                                String selection = ((TextView) view).getText().toString();
-                                selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
-                                textView.setText(selection);
-                            }
-                        });
-                        alert.setView(view);
-                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                AutoCompleteTextView senderField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
-                                String sender = senderField.getText().toString();
-                                trigger.setMatch(sender);
-                                ArrayList<String> data = new ArrayList<>();
-                                data.add(Main.getNameFromNumber(getBaseContext(), sender));
-                                trigger.setExtraData(data);
-                                task.addNewTrigger(getBaseContext(), trigger);
-                                populateTriggerList();
-                            }
-                        });
-                        alert.setNegativeButton("Cancel", null);
-                        alert.show();
-                        break;
-                    case "Time (interval)":
+                    case "Interval":
                         final String timeChoices[] = new String[]{"1 minute", "5 minutes", "10 minutes", "30 minutes", "60 minutes", "120 minutes"};
                         alert.setItems(timeChoices, new DialogInterface.OnClickListener() {
                             @Override
@@ -231,7 +243,7 @@ public class TaskEditor extends AppCompatActivity {
                         });
                         alert.show();
                         break;
-                    case "Time (specific)":
+                    case "Time":
                         TimePickerDialog timePicker = new TimePickerDialog(TaskEditor.this, new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {

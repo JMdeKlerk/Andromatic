@@ -88,7 +88,7 @@ public class Task {
         Intent alarm = new Intent("nz.johannes.ALARM_INTENT");
         AlarmManager aManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         for (Trigger trigger : triggers) {
-            if (trigger.getType().equals("Time (interval)")) {
+            if (trigger.getType().equals("Interval")) {
                 alarm.setData(Uri.parse("task://" + name + "/" + this.triggers.indexOf(trigger)));
                 PendingIntent pi = PendingIntent.getBroadcast(context, 0, alarm, 0);
                 Calendar calendar = Calendar.getInstance();
@@ -123,7 +123,7 @@ public class Task {
                 if (android.os.Build.VERSION.SDK_INT >= 19) aManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
                 else aManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
             }
-            if (trigger.getType().equals("Time (specific)")) {
+            if (trigger.getType().equals("Time")) {
                 alarm.setData(Uri.parse("task://" + name + "/" + this.triggers.indexOf(trigger)));
                 PendingIntent pi = PendingIntent.getBroadcast(context, 0, alarm, 0);
                 Calendar calendar = Calendar.getInstance();
@@ -141,7 +141,7 @@ public class Task {
         Intent alarm = new Intent("nz.johannes.ALARM_INTENT");
         AlarmManager aManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         for (Trigger trigger : triggers) {
-            if (trigger.getType().equals("Time (interval)") || trigger.getType().equals("Time (specific)")) {
+            if (trigger.getType().equals("Interval") || trigger.getType().equals("Time")) {
                 alarm.setData(Uri.parse("task://" + name + this.triggers.indexOf(trigger)));
                 PendingIntent pi = PendingIntent.getBroadcast(context, 0, alarm, 0);
                 aManager.cancel(pi);

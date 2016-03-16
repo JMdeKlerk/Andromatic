@@ -24,16 +24,16 @@ public class SmsReceiver extends BroadcastReceiver {
         }
         for (Task task : Main.getAllStoredTasks(context)) {
             for (Trigger trigger : task.getTriggers()) {
-                if (trigger.getType().equals("SMS received (content)")) {
+                if (trigger.getType().equals("SMS received") && trigger.getExtraData().get(0).equals("Content")) {
                     for (SmsMessage message : messages) {
                         String body = message.getMessageBody();
-                        if (trigger.getExtraData().get(0).equals("Exact") && body.equals(trigger.getMatch()))
+                        if (trigger.getExtraData().get(1).equals("Exact") && body.equalsIgnoreCase(trigger.getMatch()))
                             task.runTask(context);
-                        if (trigger.getExtraData().get(0).equals("Partial") && body.contains(trigger.getMatch()))
+                        if (trigger.getExtraData().get(1).equals("Partial") && body.toLowerCase().contains(trigger.getMatch().toLowerCase()))
                             task.runTask(context);
                     }
                 }
-                if (trigger.getType().equals("SMS received (sender)")) {
+                if (trigger.getType().equals("SMS received") && trigger.getExtraData().get(0).equals("Sender")) {
                     for (SmsMessage message : messages) {
                         String sender = message.getOriginatingAddress();
                         if (PhoneNumberUtils.compare(sender, trigger.getMatch())) task.runTask(context);

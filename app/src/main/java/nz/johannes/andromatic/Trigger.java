@@ -69,14 +69,14 @@ public class Trigger {
                         case "Bluetooth disconnected":
                             detail.setText("Device name: " + trigger.getMatch());
                             break;
-                        case "Time (interval)":
-                        case "Time (specific)":
-                        case "SMS received (sender)":
-                            if (trigger.getExtraData().get(0) != null) detail.setText(trigger.getExtraData().get(0) + " (" + trigger.getMatch() + ")");
-                            else detail.setText(trigger.getMatch());
-                            break;
-                        case "SMS received (content)":
-                            detail.setText(trigger.getExtraData().get(0) + " match: \"" + trigger.getMatch() + "\"");
+                        case "Interval":
+                        case "Time":
+                        case "SMS received":
+                            if (trigger.getExtraData().get(0).equals("Sender")) {
+                                if (trigger.getExtraData().get(1) != null)
+                                    detail.setText(trigger.getExtraData().get(1) + " (" + trigger.getMatch() + ")");
+                                else detail.setText(trigger.getMatch());
+                            } else detail.setText(trigger.getExtraData().get(1) + " match: \"" + trigger.getMatch() + "\"");
                             break;
                         case "Wifi connected":
                         case "Wifi disconnected":
