@@ -151,7 +151,7 @@ public class TaskEditor extends AppCompatActivity {
                     case "Bluetooth connected":
                     case "Bluetooth disconnected":
                         alert.setItems(null, null);
-                        view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
+                        view = getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
                         textView = (AutoCompleteTextView) view.findViewById(R.id.text);
                         textView.setHint("Device name");
                         alert.setView(view);
@@ -190,10 +190,18 @@ public class TaskEditor extends AppCompatActivity {
                         break;
                     case "SMS received (sender)":
                         alert.setItems(null, null);
-                        view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
+                        view = getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
                         textView = (AutoCompleteTextView) view.findViewById(R.id.text);
                         textView.setHint("Name/number");
                         textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "contacts"));
+                        textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+                                String selection = ((TextView) view).getText().toString();
+                                selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
+                                textView.setText(selection);
+                            }
+                        });
                         alert.setView(view);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
@@ -201,6 +209,9 @@ public class TaskEditor extends AppCompatActivity {
                                 AutoCompleteTextView senderField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
                                 String sender = senderField.getText().toString();
                                 trigger.setMatch(sender);
+                                ArrayList<String> data = new ArrayList<>();
+                                data.add(Main.getNameFromNumber(getBaseContext(), sender));
+                                trigger.setExtraData(data);
                                 task.addNewTrigger(getBaseContext(), trigger);
                                 populateTriggerList();
                             }
@@ -246,7 +257,7 @@ public class TaskEditor extends AppCompatActivity {
                     case "Wifi connected":
                     case "Wifi disconnected":
                         alert.setItems(null, null);
-                        view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
+                        view = getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
                         textView = (AutoCompleteTextView) view.findViewById(R.id.text);
                         textView.setHint("SSID");
                         textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "ssids"));
@@ -346,7 +357,17 @@ public class TaskEditor extends AppCompatActivity {
                         break;
                     case "Send SMS":
                         view = getLayoutInflater().inflate(R.layout.dialog_sendmessage, null);
-                        ((AutoCompleteTextView) view.findViewById(R.id.to)).setHint("Test");
+                        textView = (AutoCompleteTextView) view.findViewById(R.id.to);
+                        textView.setHint("Test");
+                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "contacts"));
+                        textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+                                String selection = ((TextView) view).getText().toString();
+                                selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
+                                textView.setText(selection);
+                            }
+                        });
                         alert.setItems(null, null);
                         alert.setView(view);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -355,7 +376,7 @@ public class TaskEditor extends AppCompatActivity {
                                 EditText to = (EditText) ((AlertDialog) dialog).findViewById(R.id.to);
                                 EditText message = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
                                 ArrayList actionData = new ArrayList();
-                                actionData.add("TODO: NAME");
+                                actionData.add(Main.getNameFromNumber(getBaseContext(), to.getText().toString()));
                                 actionData.add(to.getText().toString());
                                 actionData.add(message.getText().toString());
                                 action.setData(actionData);

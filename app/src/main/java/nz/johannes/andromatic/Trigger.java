@@ -72,7 +72,8 @@ public class Trigger {
                         case "Time (interval)":
                         case "Time (specific)":
                         case "SMS received (sender)":
-                            detail.setText(trigger.getMatch());
+                            if (trigger.getExtraData().get(0) != null) detail.setText(trigger.getExtraData().get(0) + " (" + trigger.getMatch() + ")");
+                            else detail.setText(trigger.getMatch());
                             break;
                         case "SMS received (content)":
                             detail.setText(trigger.getExtraData().get(0) + " match: \"" + trigger.getMatch() + "\"");

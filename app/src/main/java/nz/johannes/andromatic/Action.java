@@ -116,9 +116,8 @@ public class Action {
                 }
                 if (detail != null) {
                     if (hasExtraData) switch (action.getCommand()) {
-                        case ("Launch app"):
-                        case ("Kill app"):
-                            detail.setText("App: " + action.getMultiData().get(0));
+                        case "Launch app":
+                            detail.setText((String) action.getMultiData().get(0));
                             break;
                         case "Set brightness":
                         case "Set ringer volume":
@@ -128,7 +127,7 @@ public class Action {
                             break;
                         case "Send SMS":
                         case "Send email":
-                            detail.setText("To: " + action.getMultiData().get(0) + " (" + action.getMultiData().get(1) + ")");
+                            detail.setText(action.getMultiData().get(0) + " (" + action.getMultiData().get(1) + ")");
                             break;
                         case "Set lock mode":
                             String lockChoices[] = new String[]{"None", "PIN", "Gesture", "Fingerprint"};

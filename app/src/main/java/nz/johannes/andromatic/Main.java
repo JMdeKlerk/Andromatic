@@ -1,14 +1,12 @@
 package nz.johannes.andromatic;
 
-import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -19,21 +17,21 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main extends AppCompatActivity {
 
@@ -50,13 +48,13 @@ public class Main extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 View view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
-                AutoCompleteTextView textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                EditText textView = (EditText) view.findViewById(R.id.text);
                 textView.setHint("Name");
                 alert.setView(view);
                 alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        AutoCompleteTextView nameField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
+                        EditText nameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
                         String name = nameField.getText().toString();
                         Task task = new Task(getBaseContext(), name);
                         populateTaskList();
@@ -160,28 +158,45 @@ public class Main extends AppCompatActivity {
         return tasks;
     }
 
+    public static String getNameFromNumber(Context context, String number) {
+        ContentResolver cr = context.getContentResolver();
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
+        Cursor cursor = cr.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
+        if (cursor == null) return null;
+        String contactName = null;
+        if (cursor.moveToFirst()) {
+            contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+        }
+        cursor.close();
+        return contactName;
+    }
+
     public static ArrayAdapter getTextViewAdapter(Context context, String type) {
         switch (type) {
             case "bluetooth":
                 //TODO
             case "contacts":
                 ArrayList<String> contacts = new ArrayList<>();
-                ContentResolver cr = context.getContentResolver();
-                Cursor cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-                while (cursor.moveToNext()) {
-                    String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                    contacts.add(name);
+                Cursor people = context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+                while (people.moveToNext()) {
+                    String contactName = people.getString(people.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                    String contactId = people.getString(people.getColumnIndex(ContactsContract.Contacts._ID));
+                    Cursor phones = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
+                    while (phones.moveToNext()) {
+                        String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        contacts.add(contactName + " (" + phoneNumber + ")");
+                    }
+                    phones.close();
                 }
-                cursor.close();
-                String[] contactsArray = new String[contacts.size()];
-                contacts.toArray(contactsArray);
-                return new ArrayAdapter<>(context, android.R.layout.simple_dropdown_item_1line, contactsArray);
+                people.close();
+                return new ArrayAdapter<>(context, android.R.layout.simple_dropdown_item_1line, contacts);
             case "ssids":
                 WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
                 ArrayList<String> networks = new ArrayList<>();
                 for (WifiConfiguration network : wifi.getConfiguredNetworks()) {
                     String ssid = network.SSID.replace("\"", "");
-                    if (!networks.contains(ssid)) networks.add (ssid);
+                    if (!networks.contains(ssid)) networks.add(ssid);
                 }
                 for (ScanResult network : wifi.getScanResults()) {
                     String ssid = network.SSID;
