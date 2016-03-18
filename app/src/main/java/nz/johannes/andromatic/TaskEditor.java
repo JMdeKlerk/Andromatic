@@ -43,6 +43,7 @@ public class TaskEditor extends AppCompatActivity {
         task = new Gson().fromJson(prefs.getString("task-" + taskName, ""), Task.class);
         setTitle(task.getName());
         populateTriggerList();
+        populateConditionsList();
         populateActionsList();
     }
 
@@ -58,8 +59,8 @@ public class TaskEditor extends AppCompatActivity {
         triggerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final Trigger triggerToDelete = (Trigger) triggerList.getItemAtPosition(position);
-                if (triggerToDelete.getType().equals("Add new...")) {
+                final Trigger trigger = (Trigger) triggerList.getItemAtPosition(position);
+                if (trigger.getType().equals("Add new...")) {
                     addTrigger();
                 }
             }
@@ -91,6 +92,51 @@ public class TaskEditor extends AppCompatActivity {
         setDynamicListHeight(triggerList);
     }
 
+    private void populateConditionsList() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final ListView conditionList = (ListView) findViewById(R.id.conditionList);
+        final ArrayList<Condition> listItems = new ArrayList<>();
+        final Condition.ConditionListViewAdapter adapter = new Condition().new ConditionListViewAdapter(this, R.layout.default_list_row, listItems);
+        registerForContextMenu(conditionList);
+        conditionList.setAdapter(adapter);
+        conditionList.setClickable(true);
+        conditionList.setLongClickable(true);
+        conditionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final Condition condition = (Condition) conditionList.getItemAtPosition(position);
+                if (condition.getType().equals("Add new...")) {
+                    addCondition();
+                }
+            }
+        });
+        conditionList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final Condition conditionToDelete = (Condition) conditionList.getItemAtPosition(position);
+                if (conditionToDelete.getType().equals("Add new...")) {
+                    addCondition();
+                    return true;
+                }
+                alert.setTitle("Delete trigger?");
+                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        task.removeCondition(getBaseContext(), conditionToDelete);
+                        populateConditionsList();
+                    }
+                });
+                alert.setNegativeButton("No", null);
+                alert.show();
+                return true;
+            }
+        });
+        for (Condition condition : task.getConditions()) listItems.add(condition);
+        listItems.add(new Condition("Add new..."));
+        adapter.notifyDataSetChanged();
+        setDynamicListHeight(conditionList);
+    }
+
     private void populateActionsList() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final ListView actionList = (ListView) findViewById(R.id.actionList);
@@ -103,8 +149,8 @@ public class TaskEditor extends AppCompatActivity {
         actionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final Action actionToDelete = (Action) actionList.getItemAtPosition(position);
-                if (actionToDelete.getCommand().equals("Add new...")) {
+                final Action action = (Action) actionList.getItemAtPosition(position);
+                if (action.getCommand().equals("Add new...")) {
                     addAction();
                 }
             }
@@ -153,6 +199,7 @@ public class TaskEditor extends AppCompatActivity {
                         view = getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
                         textView = (AutoCompleteTextView) view.findViewById(R.id.text);
                         textView.setHint("Device name");
+                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "bluetooth"));
                         alert.setView(view);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
@@ -295,6 +342,13 @@ public class TaskEditor extends AppCompatActivity {
             }
         });
         alert.show();
+    }
+
+    public void addCondition() {
+        //TODO
+        Condition condition = new Condition("Wifi is connected");
+        task.addNewCondition(getBaseContext(), condition);
+        populateConditionsList();
     }
 
     public void addAction() {

@@ -1,5 +1,7 @@
 package nz.johannes.andromatic;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,14 +26,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Main extends AppCompatActivity {
 
@@ -174,7 +173,14 @@ public class Main extends AppCompatActivity {
     public static ArrayAdapter getTextViewAdapter(Context context, String type) {
         switch (type) {
             case "bluetooth":
-                //TODO
+                BluetoothAdapter bluetooth = BluetoothAdapter.getDefaultAdapter();
+                ArrayList<String> devices = new ArrayList<>();
+                for (BluetoothDevice device : bluetooth.getBondedDevices()) {
+                    devices.add(device.getName());
+                }
+                String[] devicesArray = new String[devices.size()];
+                devices.toArray(devicesArray);
+                return new ArrayAdapter<>(context, android.R.layout.simple_dropdown_item_1line, devicesArray);
             case "contacts":
                 ArrayList<String> contacts = new ArrayList<>();
                 Cursor people = context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);

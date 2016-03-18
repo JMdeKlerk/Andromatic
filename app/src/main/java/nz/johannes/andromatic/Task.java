@@ -28,6 +28,7 @@ public class Task {
     private String name;
     private static Lock taskLock = new ReentrantLock();
     private ArrayList<Trigger> triggers;
+    private ArrayList<Condition> conditions;
     private ArrayList<Action> actions;
 
     public Task() {
@@ -37,6 +38,7 @@ public class Task {
     public Task(Context context, String name) {
         this.name = name;
         triggers = new ArrayList<>();
+        conditions = new ArrayList<>();
         actions = new ArrayList<>();
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
@@ -45,6 +47,9 @@ public class Task {
 
     public void runTask(Context context) {
         taskLock.lock();
+        for (Condition condition : conditions) {
+            if (!condition.check()) return;
+        }
         Main.showToast(context, "Running task: " + this.getName());
         for (Action action : actions) {
             action.doAction(context);
@@ -68,6 +73,20 @@ public class Task {
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
         setAlarms(context);
+    }
+
+    public void addNewCondition(Context context, Condition condition) {
+        conditions.add(condition);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        String storeTask = new Gson().toJson(this);
+        editor.putString("task-" + name, storeTask).apply();
+    }
+
+    public void removeCondition(Context context, Condition condition) {
+        conditions.remove(condition);
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        String storeTask = new Gson().toJson(this);
+        editor.putString("task-" + name, storeTask).apply();
     }
 
     public void addNewAction(Context context, Action action) {
@@ -151,6 +170,10 @@ public class Task {
 
     public ArrayList<Trigger> getTriggers() {
         return triggers;
+    }
+
+    public ArrayList<Condition> getConditions() {
+        return conditions;
     }
 
     public ArrayList<Action> getActions() {
