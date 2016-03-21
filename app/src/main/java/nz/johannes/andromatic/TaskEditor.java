@@ -1,6 +1,10 @@
 package nz.johannes.andromatic;
 
+import android.app.Activity;
 import android.app.TimePickerDialog;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,6 +37,7 @@ public class TaskEditor extends AppCompatActivity {
     private Task task;
     private View view;
     private AutoCompleteTextView textView;
+    private Activity activity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +47,23 @@ public class TaskEditor extends AppCompatActivity {
         String taskName = getIntent().getStringExtra("task");
         task = new Gson().fromJson(prefs.getString("task-" + taskName, ""), Task.class);
         setTitle(task.getName());
+        activity = this;
         populateTriggerList();
         populateConditionsList();
         populateActionsList();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        populateTriggerList();
+        populateConditionsList();
+        populateActionsList();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Main.showToast(this, String.valueOf(resultCode));
     }
 
     private void populateTriggerList() {
@@ -460,7 +479,8 @@ public class TaskEditor extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 action.setCommand(actionChoice);
                                 action.setData(which);
-                                task.addNewAction(getBaseContext(), action);
+                                if (Main.checkOrRequestDeviceAdmin(getBaseContext(), activity)) task.addNewAction(getBaseContext(), action);
+                                else task.addNewActionToWaitList(getBaseContext(), action);
                                 populateActionsList();
                             }
                         });

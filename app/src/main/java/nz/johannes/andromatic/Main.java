@@ -1,7 +1,10 @@
 package nz.johannes.andromatic;
 
+import android.app.Activity;
+import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -157,6 +160,13 @@ public class Main extends AppCompatActivity {
         return tasks;
     }
 
+    public static void showToast(Context context, String message) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String duration = prefs.getString("toastDuration", "1");
+        if (duration.equals("1")) new Toast(context).makeText(context, message, Toast.LENGTH_SHORT).show();
+        if (duration.equals("2")) new Toast(context).makeText(context, message, Toast.LENGTH_LONG).show();
+    }
+
     public static String getNameFromNumber(Context context, String number) {
         ContentResolver cr = context.getContentResolver();
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
@@ -168,6 +178,16 @@ public class Main extends AppCompatActivity {
         }
         cursor.close();
         return contactName;
+    }
+
+    public static boolean checkOrRequestDeviceAdmin(Context context, Activity activity) {
+        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        ComponentName component = new ComponentName(context, DeviceAdmin.class);
+        if (dpm.isAdminActive(component)) return true;
+        Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, component);
+        activity.startActivityForResult(intent, 1);
+        return false;
     }
 
     public static ArrayAdapter getTextViewAdapter(Context context, String type) {
@@ -214,13 +234,6 @@ public class Main extends AppCompatActivity {
             default:
                 return null;
         }
-    }
-
-    public static void showToast(Context context, String message) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String duration = prefs.getString("toastDuration", "1");
-        if (duration.equals("1")) new Toast(context).makeText(context, message, Toast.LENGTH_SHORT).show();
-        if (duration.equals("2")) new Toast(context).makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
 }
