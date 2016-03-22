@@ -7,13 +7,6 @@ import android.content.Intent;
 public class DeviceAdmin extends DeviceAdminReceiver {
 
     @Override
-    public void onEnabled(Context context, Intent intent) {
-        for (Task task : Main.getAllStoredTasks(context)) {
-            task.addAllWaitingActions(context);
-        }
-    }
-
-    @Override
     public void onDisabled(Context context, Intent intent) {
         for (Task task : Main.getAllStoredTasks(context)) {
             for (Action action : task.getActions()) {

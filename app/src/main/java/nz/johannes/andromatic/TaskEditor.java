@@ -11,9 +11,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -54,16 +56,20 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        populateTriggerList();
-        populateConditionsList();
-        populateActionsList();
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Main.showToast(this, String.valueOf(resultCode));
+        if (resultCode != Activity.RESULT_OK) {
+            for (Task task : Main.getAllStoredTasks(this)) {
+                for (Action action : task.getActions()) {
+                    if (action.getCommand().equals("Set lock mode")) task.removeAction(this, action);
+                }
+            }
+        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                recreate();
+            }
+        }, 0);
     }
 
     private void populateTriggerList() {
@@ -473,14 +479,14 @@ public class TaskEditor extends AppCompatActivity {
                         alert.show();
                         break;
                     case "Set lock mode":
-                        final String lockChoices[] = new String[]{"None", "PIN", "Gesture", "Fingerprint"};
+                        final String lockChoices[] = new String[]{"None", "PIN", "Password"};
                         alert.setItems(lockChoices, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 action.setCommand(actionChoice);
                                 action.setData(which);
-                                if (Main.checkOrRequestDeviceAdmin(getBaseContext(), activity)) task.addNewAction(getBaseContext(), action);
-                                else task.addNewActionToWaitList(getBaseContext(), action);
+                                task.addNewAction(getBaseContext(), action);
+                                Main.checkOrRequestDeviceAdmin(getBaseContext(), activity);
                                 populateActionsList();
                             }
                         });

@@ -1,6 +1,6 @@
 package nz.johannes.andromatic;
 
-import android.app.ActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
@@ -61,7 +61,23 @@ public class Action {
                 musicManager.setStreamVolume(AudioManager.STREAM_MUSIC, Math.round(mediaVolume), 0);
                 break;
             case "Set lock mode":
-                //TODO
+                DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                ComponentName admin = new ComponentName(context, DeviceAdmin.class);
+                if (!dpm.isAdminActive(admin)) return;
+                if (data == 0) {
+                    dpm.setPasswordMinimumLength(admin, 0);
+                    dpm.resetPassword("", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                }
+                if (data == 1) {
+                    dpm.setPasswordQuality(admin, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
+                    dpm.resetPassword("1234", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                    dpm.lockNow();
+                }
+                if (data == 2) {
+                    dpm.setPasswordQuality(admin, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+                    dpm.resetPassword("test", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                    dpm.lockNow();
+                }
                 break;
             case "Send SMS":
                 SmsManager.getDefault().sendTextMessage(multiData.get(1), null, multiData.get(2), null, null);
@@ -130,7 +146,7 @@ public class Action {
                             detail.setText(action.getMultiData().get(0) + " (" + action.getMultiData().get(1) + ")");
                             break;
                         case "Set lock mode":
-                            String lockChoices[] = new String[]{"None", "PIN", "Gesture", "Fingerprint"};
+                            String lockChoices[] = new String[]{"None", "PIN", "Password"};
                             detail.setText(lockChoices[action.getData()]);
                             break;
                     }

@@ -30,7 +30,6 @@ public class Task {
     private ArrayList<Trigger> triggers;
     private ArrayList<Condition> conditions;
     private ArrayList<Action> actions;
-    private ArrayList<Action> actionsWaitingForDeviceAdmin;
 
     public Task() {
 
@@ -95,20 +94,6 @@ public class Task {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
-    }
-
-    public void addNewActionToWaitList(Context context, Action action) {
-        actionsWaitingForDeviceAdmin.add(action);
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        String storeTask = new Gson().toJson(this);
-        editor.putString("task-" + name, storeTask).apply();
-    }
-
-    public void addAllWaitingActions(Context context) {
-        for (Action action : actionsWaitingForDeviceAdmin) {
-            this.addNewAction(context, action);
-        }
-        actionsWaitingForDeviceAdmin = null;
     }
 
     public void removeAction(Context context, Action action) {

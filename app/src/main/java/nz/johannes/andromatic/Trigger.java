@@ -71,6 +71,8 @@ public class Trigger {
                             break;
                         case "Interval":
                         case "Time":
+                            detail.setText(trigger.getMatch());
+                            break;
                         case "SMS received":
                             if (trigger.getExtraData().get(0).equals("Sender")) {
                                 if (trigger.getExtraData().get(1) != null)
