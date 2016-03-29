@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 public class BluetoothReceiver extends BroadcastReceiver {
 
@@ -12,6 +13,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
         BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
         String deviceName = bluetoothDevice.getName();
         String connType = (intent.getAction().equals(BluetoothDevice.ACTION_ACL_CONNECTED)) ? "Bluetooth connected" : "Bluetooth disconnected";
+        Log.i("Log", deviceName + " - " + intent.getAction());
         for (Task task : Main.getAllStoredTasks(context)) {
             for (Trigger trigger : task.getTriggers()) {
                 if (trigger.getType().equals(connType) && trigger.getMatch().equals(deviceName)) task.runTask(context);

@@ -3,6 +3,7 @@ package nz.johannes.andromatic;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 public class AlarmReceiver extends BroadcastReceiver {
 
@@ -12,6 +13,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             Task task = Main.getTask(context, intent.getData().getHost());
             task.runTask(context);
             task.setAlarms(context);
+            Log.i("Log", "Received");
         } catch (NullPointerException e) {
             // Task no longer exists but alarm was not unset
             e.printStackTrace();

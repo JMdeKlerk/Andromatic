@@ -61,22 +61,43 @@ public class Action {
                 musicManager.setStreamVolume(AudioManager.STREAM_MUSIC, Math.round(mediaVolume), 0);
                 break;
             case "Set lock mode":
-                DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-                ComponentName admin = new ComponentName(context, DeviceAdmin.class);
-                if (!dpm.isAdminActive(admin)) return;
-                if (data == 0) {
-                    dpm.setPasswordMinimumLength(admin, 0);
-                    dpm.resetPassword("", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                DevicePolicyManager lockManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                ComponentName lockerAdmin = new ComponentName(context, DeviceAdmin.class);
+                if (!lockManager.isAdminActive(lockerAdmin)) return;
+                switch (data) {
+                    case 0:
+                        lockManager.setPasswordMinimumLength(lockerAdmin, 0);
+                        lockManager.resetPassword("", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                        break;
+                    case 1:
+                        lockManager.setPasswordQuality(lockerAdmin, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
+                        lockManager.resetPassword(multiData.get(0), DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                        lockManager.lockNow();
+                        break;
+                    case 2:
+                        lockManager.setPasswordQuality(lockerAdmin, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+                        lockManager.resetPassword(multiData.get(0), DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                        lockManager.lockNow();
+                        break;
                 }
-                if (data == 1) {
-                    dpm.setPasswordQuality(admin, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
-                    dpm.resetPassword("1234", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
-                    dpm.lockNow();
-                }
-                if (data == 2) {
-                    dpm.setPasswordQuality(admin, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
-                    dpm.resetPassword("test", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
-                    dpm.lockNow();
+                break;
+            case "Set screen timeout":
+                DevicePolicyManager timeoutManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                ComponentName timeoutAdmin = new ComponentName(context, DeviceAdmin.class);
+                if (!timeoutManager.isAdminActive(timeoutAdmin)) return;
+                switch (data) {
+                    case 0:
+                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 15 * 1000);
+                    case 1:
+                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 30 * 1000);
+                    case 2:
+                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 60 * 1000);
+                    case 3:
+                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 120 * 1000);
+                    case 4:
+                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 300 * 1000);
+                    case 5:
+                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 600 * 1000);
                 }
                 break;
             case "Send SMS":
@@ -148,6 +169,10 @@ public class Action {
                         case "Set lock mode":
                             String lockChoices[] = new String[]{"None", "PIN", "Password"};
                             detail.setText(lockChoices[action.getData()]);
+                            break;
+                        case "Set screen timeout":
+                            String timeoutChoices[] = new String[]{"15 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes", "10 minutes"};
+                            detail.setText(timeoutChoices[action.getData()]);
                             break;
                     }
                 }

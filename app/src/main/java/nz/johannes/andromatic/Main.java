@@ -180,12 +180,14 @@ public class Main extends AppCompatActivity {
         return contactName;
     }
 
-    public static boolean checkOrRequestDeviceAdmin(Context context, Activity activity) {
+    public static boolean checkOrRequestDeviceAdmin(final Context context, final Activity activity) {
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        ComponentName component = new ComponentName(context, DeviceAdmin.class);
+        final ComponentName component = new ComponentName(context, DeviceAdmin.class);
         if (dpm.isAdminActive(component)) return true;
         Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, component);
+        intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                "Screen timeout and lock functions require the app to have device admin permissions.");
         activity.startActivityForResult(intent, 1);
         return false;
     }

@@ -15,6 +15,8 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -323,8 +325,9 @@ public class TaskEditor extends AppCompatActivity {
                                 ArrayList<String> extras = new ArrayList<>();
                                 extras.add(String.valueOf(hourOfDay));
                                 extras.add(String.valueOf(minute));
-                                if (hourOfDay > 12) {
+                                if (hourOfDay >= 12) {
                                     hourOfDay = hourOfDay - 12;
+                                    if (hourOfDay == 0) hourOfDay = 12;
                                     meridian = "PM";
                                 }
                                 String leadingZeroHour = (hourOfDay < 10) ? "0" : "";
@@ -380,7 +383,7 @@ public class TaskEditor extends AppCompatActivity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final Action action = new Action();
         final String actionChoices[] = new String[]{"Launch app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
-                "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode", "Send SMS"};
+                "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode", "Set screen timeout", "Send SMS"};
         alert.setItems(actionChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -479,14 +482,51 @@ public class TaskEditor extends AppCompatActivity {
                         alert.show();
                         break;
                     case "Set lock mode":
+                        if (!Main.checkOrRequestDeviceAdmin(getBaseContext(), activity)) return;
                         final String lockChoices[] = new String[]{"None", "PIN", "Password"};
                         alert.setItems(lockChoices, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 action.setCommand(actionChoice);
                                 action.setData(which);
+                                if (which == 0) {
+                                    task.addNewAction(getBaseContext(), action);
+                                    populateActionsList();
+                                } else {
+                                    alert.setItems(null, null);
+                                    view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
+                                    EditText textView = (EditText) view.findViewById(R.id.text);
+                                    textView.setHint((which == 1) ? "PIN" : "Password");
+                                    textView.setInputType((which == 1) ? InputType.TYPE_CLASS_NUMBER : InputType.TYPE_CLASS_TEXT);
+                                    textView.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                                    alert.setView(view);
+                                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            EditText password = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
+                                            ArrayList data = new ArrayList();
+                                            data.add(password.getText().toString());
+                                            action.setData(data);
+                                            task.addNewAction(getBaseContext(), action);
+                                            populateActionsList();
+                                        }
+                                    });
+                                    alert.setNegativeButton("Cancel", null);
+                                    alert.show();
+                                }
+                            }
+                        });
+                        alert.show();
+                        break;
+                    case "Set screen timeout":
+                        if (!Main.checkOrRequestDeviceAdmin(getBaseContext(), activity)) return;
+                        final String timeoutChoices[] = new String[]{"15 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes", "10 minutes"};
+                        alert.setItems(timeoutChoices, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                action.setCommand(actionChoice);
+                                action.setData(which);
                                 task.addNewAction(getBaseContext(), action);
-                                Main.checkOrRequestDeviceAdmin(getBaseContext(), activity);
                                 populateActionsList();
                             }
                         });
@@ -503,7 +543,7 @@ public class TaskEditor extends AppCompatActivity {
         alert.show();
     }
 
-    public static void setDynamicListHeight(ListView mListView) {
+    private static void setDynamicListHeight(ListView mListView) {
         ListAdapter mListAdapter = mListView.getAdapter();
         if (mListAdapter == null) return;
         int height = 0;
