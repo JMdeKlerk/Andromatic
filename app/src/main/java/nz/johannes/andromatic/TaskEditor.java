@@ -34,6 +34,8 @@ import android.widget.TimePicker;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class TaskEditor extends AppCompatActivity {
@@ -47,9 +49,7 @@ public class TaskEditor extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_taskedit);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        String taskName = getIntent().getStringExtra("task");
-        task = new Gson().fromJson(prefs.getString("task-" + taskName, ""), Task.class);
+        task = Main.getTask(this, getIntent().getStringExtra("task"));
         setTitle(task.getName());
         activity = this;
         populateTriggerList();
@@ -114,6 +114,12 @@ public class TaskEditor extends AppCompatActivity {
             }
         });
         for (Trigger trigger : task.getTriggers()) listItems.add(trigger);
+        Collections.sort(listItems, new Comparator<Trigger>() {
+            @Override
+            public int compare(Trigger lhs, Trigger rhs) {
+                return lhs.getType().compareTo(rhs.getType());
+            }
+        });
         listItems.add(new Trigger("Add new..."));
         adapter.notifyDataSetChanged();
         setDynamicListHeight(triggerList);
@@ -159,6 +165,12 @@ public class TaskEditor extends AppCompatActivity {
             }
         });
         for (Condition condition : task.getConditions()) listItems.add(condition);
+        Collections.sort(listItems, new Comparator<Condition>() {
+            @Override
+            public int compare(Condition lhs, Condition rhs) {
+                return lhs.getType().compareTo(rhs.getType());
+            }
+        });
         listItems.add(new Condition("Add new..."));
         adapter.notifyDataSetChanged();
         setDynamicListHeight(conditionList);
@@ -204,6 +216,12 @@ public class TaskEditor extends AppCompatActivity {
             }
         });
         for (Action action : task.getActions()) listItems.add(action);
+        Collections.sort(listItems, new Comparator<Action>() {
+            @Override
+            public int compare(Action lhs, Action rhs) {
+                return lhs.getCommand().compareTo(rhs.getCommand());
+            }
+        });
         Action addNew = new Action();
         addNew.setCommand("Add new...");
         listItems.add(addNew);
@@ -211,7 +229,7 @@ public class TaskEditor extends AppCompatActivity {
         setDynamicListHeight(actionList);
     }
 
-    public void addTrigger() {
+    private void addTrigger() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final String[] triggerChoices = new String[]{"Battery low", "Bluetooth connected", "Bluetooth disconnected", "Charger inserted",
                 "Charger removed", "Interval", "SMS received", "Time", "Wifi connected", "Wifi disconnected"};
@@ -372,175 +390,30 @@ public class TaskEditor extends AppCompatActivity {
         alert.show();
     }
 
-    public void addCondition() {
-        //TODO
-        Condition condition = new Condition("Wifi is connected");
-        task.addNewCondition(getBaseContext(), condition);
-        populateConditionsList();
-    }
-
-    public void addAction() {
-        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final Action action = new Action();
-        final String actionChoices[] = new String[]{"Launch app", "Enable wifi", "Disable wifi", "Enable bluetooth", "Disable bluetooth",
-                "Set ringer volume", "Set notification volume", "Set media volume", "Set lock mode", "Set screen timeout", "Send SMS"};
-        alert.setItems(actionChoices, new DialogInterface.OnClickListener() {
+    private void addCondition() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final String[] conditionChoices = new String[]{"Battery percentage", "Phone charging", "Phone not charging", "Time period",
+                "Wifi is connected", "Wifi not connected"};
+        alert.setItems(conditionChoices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                final String actionChoice = actionChoices[which];
-                switch (actionChoice) {
-                    case "Launch app":
-                        PackageManager pm = getPackageManager();
-                        final ArrayList<String> appChoices = new ArrayList<>();
-                        final ArrayList<String> appChoicePackage = new ArrayList<>();
-                        final ArrayList<String> appChoiceName = new ArrayList<>();
-                        Intent main = new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER);
-                        List<ResolveInfo> packages = pm.queryIntentActivities(main, 0);
-                        for (ResolveInfo appInfo : packages) {
-                            appChoices.add(appInfo.loadLabel(pm).toString());
-                            appChoicePackage.add(appInfo.activityInfo.packageName);
-                            appChoiceName.add(appInfo.activityInfo.name);
-                        }
-                        alert.setItems(appChoices.toArray(new String[appChoices.size()]), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                action.setCommand(actionChoice);
-                                ArrayList actionData = new ArrayList();
-                                actionData.add(appChoices.get(which));
-                                actionData.add(appChoicePackage.get(which));
-                                actionData.add(appChoiceName.get(which));
-                                action.setData(actionData);
-                                task.addNewAction(getBaseContext(), action);
-                                populateActionsList();
-                            }
-                        });
-                        alert.show();
-                        break;
-                    case "Set ringer volume":
-                    case "Set notification volume":
-                    case "Set media volume":
-                        alert.setItems(null, null);
-                        view = getLayoutInflater().inflate(R.layout.dialog_seekbar, null);
-                        ((SeekBar) view.findViewById(R.id.seek)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                            @Override
-                            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                TextView seekText = (TextView) view.findViewById(R.id.seek_text);
-                                seekText.setText(progress * 10 + "%");
-                            }
-
-                            @Override
-                            public void onStartTrackingTouch(SeekBar seekBar) {
-                            }
-
-                            @Override
-                            public void onStopTrackingTouch(SeekBar seekBar) {
-                            }
-                        });
-                        alert.setView(view);
-                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                action.setCommand(actionChoice);
-                                SeekBar seek = (SeekBar) ((AlertDialog) dialog).findViewById(R.id.seek);
-                                action.setData(seek.getProgress() * 10);
-                                task.addNewAction(getBaseContext(), action);
-                                populateActionsList();
-                            }
-                        });
-                        alert.setNegativeButton("Cancel", null);
-                        alert.show();
-                        break;
-                    case "Send SMS":
-                        view = getLayoutInflater().inflate(R.layout.dialog_sendmessage, null);
-                        textView = (AutoCompleteTextView) view.findViewById(R.id.to);
-                        textView.setHint("Test");
-                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "contacts"));
-                        textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            @Override
-                            public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                                String selection = ((TextView) view).getText().toString();
-                                selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
-                                textView.setText(selection);
-                            }
-                        });
-                        alert.setItems(null, null);
-                        alert.setView(view);
-                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                action.setCommand(actionChoice);
-                                EditText to = (EditText) ((AlertDialog) dialog).findViewById(R.id.to);
-                                EditText message = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
-                                ArrayList actionData = new ArrayList();
-                                actionData.add(Main.getNameFromNumber(getBaseContext(), to.getText().toString()));
-                                actionData.add(to.getText().toString());
-                                actionData.add(message.getText().toString());
-                                action.setData(actionData);
-                                task.addNewAction(getBaseContext(), action);
-                                populateActionsList();
-                            }
-                        });
-                        alert.setNegativeButton("Cancel", null);
-                        alert.show();
-                        break;
-                    case "Set lock mode":
-                        if (!Main.checkOrRequestDeviceAdmin(getBaseContext(), activity)) return;
-                        final String lockChoices[] = new String[]{"None", "PIN", "Password"};
-                        alert.setItems(lockChoices, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                action.setCommand(actionChoice);
-                                action.setData(which);
-                                if (which == 0) {
-                                    task.addNewAction(getBaseContext(), action);
-                                    populateActionsList();
-                                } else {
-                                    alert.setItems(null, null);
-                                    view = getLayoutInflater().inflate(R.layout.dialog_singleline, null);
-                                    EditText textView = (EditText) view.findViewById(R.id.text);
-                                    textView.setHint((which == 1) ? "PIN" : "Password");
-                                    textView.setInputType((which == 1) ? InputType.TYPE_CLASS_NUMBER : InputType.TYPE_CLASS_TEXT);
-                                    textView.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                                    alert.setView(view);
-                                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            EditText password = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
-                                            ArrayList data = new ArrayList();
-                                            data.add(password.getText().toString());
-                                            action.setData(data);
-                                            task.addNewAction(getBaseContext(), action);
-                                            populateActionsList();
-                                        }
-                                    });
-                                    alert.setNegativeButton("Cancel", null);
-                                    alert.show();
-                                }
-                            }
-                        });
-                        alert.show();
-                        break;
-                    case "Set screen timeout":
-                        if (!Main.checkOrRequestDeviceAdmin(getBaseContext(), activity)) return;
-                        final String timeoutChoices[] = new String[]{"15 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes", "10 minutes"};
-                        alert.setItems(timeoutChoices, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                action.setCommand(actionChoice);
-                                action.setData(which);
-                                task.addNewAction(getBaseContext(), action);
-                                populateActionsList();
-                            }
-                        });
-                        alert.show();
-                        break;
+                Condition condition = new Condition(conditionChoices[which]);
+                switch (conditionChoices[which]) {
                     default:
-                        action.setCommand(actionChoice);
-                        task.addNewAction(getBaseContext(), action);
-                        populateActionsList();
+                        task.addNewCondition(getBaseContext(), condition);
+                        populateConditionsList();
                         break;
                 }
             }
         });
         alert.show();
+    }
+
+    private void addAction() {
+        Intent intent = new Intent(this, AddComponent.class);
+        intent.putExtra("Task", task.getName());
+        intent.setAction("ACTION");
+        startActivityForResult(intent, 0);
     }
 
     private static void setDynamicListHeight(ListView mListView) {

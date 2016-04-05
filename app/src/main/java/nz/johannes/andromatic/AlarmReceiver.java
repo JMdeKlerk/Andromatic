@@ -13,7 +13,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             Task task = Main.getTask(context, intent.getData().getHost());
             task.runTask(context);
             task.setAlarms(context);
-            Log.i("Log", "Received");
         } catch (NullPointerException e) {
             // Task no longer exists but alarm was not unset
             e.printStackTrace();

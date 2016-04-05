@@ -162,8 +162,7 @@ public class Action {
                         case "Set media volume":
                             detail.setText(action.getData() + " percent");
                             break;
-                        case "Send SMS":
-                        case "Send email":
+                        case "Send SMS message":
                             detail.setText(action.getMultiData().get(0) + " (" + action.getMultiData().get(1) + ")");
                             break;
                         case "Set lock mode":

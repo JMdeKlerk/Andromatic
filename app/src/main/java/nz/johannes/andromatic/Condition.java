@@ -1,6 +1,12 @@
 package nz.johannes.andromatic;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.BatteryManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +28,30 @@ public class Condition {
         this.type = type;
     }
 
-    public boolean check() {
-        return true;
+    public boolean check(Context context) {
+        switch (type) {
+            case "Battery percentage":
+                break;
+            case "Phone charging":
+                Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+            case "Phone not charging":
+                intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                return !(plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB);
+            case "Time period":
+                break;
+            case "Wifi is connected":
+                ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                return wifiInfo.isConnected();
+            case "Wifi not connected":
+                connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                return wifiInfo.isConnected();
+        }
+        return false;
     }
 
     public String getType() {

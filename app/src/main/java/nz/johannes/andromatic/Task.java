@@ -48,7 +48,7 @@ public class Task {
     public void runTask(Context context) {
         taskLock.lock();
         for (Condition condition : conditions) {
-            if (!condition.check()) return;
+            if (!condition.check(context)) return;
         }
         Main.showToast(context, "Running task: " + this.getName());
         for (Action action : actions) {
@@ -204,10 +204,12 @@ public class Task {
                 if (taskName != null) taskName.setText(task.getName());
                 if (taskDetails != null) {
                     int triggerCount = task.getTriggers().size();
+                    int conditionCount = task.getConditions().size();
                     int actionCount = task.getActions().size();
                     String triggerNeedsAnS = (triggerCount == 1) ? " trigger, " : " triggers, ";
+                    String conditionNeedsAnS = (conditionCount == 1) ? " condition, " : " conditions, ";
                     String actionNeedsAnS = (actionCount == 1) ? " action)" : " actions)";
-                    taskDetails.setText("(" + triggerCount + triggerNeedsAnS + actionCount + actionNeedsAnS);
+                    taskDetails.setText("(" + triggerCount + triggerNeedsAnS + conditionCount + conditionNeedsAnS + actionCount + actionNeedsAnS);
                 }
             }
             return convertView;

@@ -34,6 +34,8 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class Main extends AppCompatActivity {
 
@@ -122,6 +124,12 @@ public class Main extends AppCompatActivity {
         for (Task task : getAllStoredTasks(this)) {
             listItems.add(task);
         }
+        Collections.sort(listItems, new Comparator<Task>() {
+            @Override
+            public int compare(Task lhs, Task rhs) {
+                return lhs.getName().compareTo(rhs.getName());
+            }
+        });
         adapter.notifyDataSetChanged();
     }
 

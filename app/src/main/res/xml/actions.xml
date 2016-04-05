@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceScreen android:title="Communication...">
+        <PreferenceScreen android:title="Call management...">
+            <Preference android:title="Start call"/>
+            <Preference android:title="Accept incoming call"/>
+            <Preference android:title="End call"/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="Speakerphone mode...">
+            <Preference android:title="Enable speakerphone"/>
+            <Preference android:title="Toggle speakerphone"/>
+            <Preference android:title="Disable speakerphone"/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="Microphone mode...">
+            <Preference android:title="Mute microphone"/>
+            <Preference android:title="Toggle microphone"/>
+            <Preference android:title="Unmute microphone"/>
+        </PreferenceScreen>
+        <Preference android:title="Send SMS message"/>
+    </PreferenceScreen>
+
+    <PreferenceScreen android:title="Media...">
+        <Preference android:title="Media play"/>
+        <Preference android:title="Media pause"/>
+        <Preference android:title="Media skip"/>
+        <Preference android:title="Set media volume"/>
+    </PreferenceScreen>
+
+    <PreferenceScreen android:title="Miscellaneous...">
+        <Preference android:title="Launch app"/>
+        <Preference android:title="Vibrate"/>
+        <Preference android:title="Play sound"/>
+        <Preference android:title="Flash LED"/>
+    </PreferenceScreen>
+
+    <PreferenceScreen android:title="Network...">
+        <PreferenceScreen android:title="Bluetooth mode...">
+            <Preference android:title="Enable bluetooth"/>
+            <Preference android:title="Toggle bluetooth"/>
+            <Preference android:title="Disable bluetooth"/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="Mobile data mode...">
+            <Preference android:title="Enable mobile data"/>
+            <Preference android:title="Toggle mobile data"/>
+            <Preference android:title="Disable mobile data"/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="Wifi mode...">
+            <Preference android:title="Enable wifi"/>
+            <Preference android:title="Toggle wifi"/>
+            <Preference android:title="Disable wifi"/>
+        </PreferenceScreen>
+    </PreferenceScreen>
+
+    <PreferenceScreen android:title="Phone settings...">
+        <Preference android:title="Set lock mode"/>
+        <Preference android:title="Set screen timeout"/>
+        <Preference android:title="Set ringer volume"/>
+        <Preference android:title="Set notification volume"/>
+    </PreferenceScreen>
+
+</PreferenceScreen>

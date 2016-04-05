@@ -32,6 +32,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nz.johannes.andromatic.Main"/>
         </activity>
+        <activity
+            android:name=".AddComponent"
+            android:theme="@style/Theme.AppCompat.Light.Dialog">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="nz.johannes.andromatic.Main"/>
+        </activity>
         <activity android:name=".Settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
