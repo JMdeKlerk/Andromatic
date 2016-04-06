@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceScreen android:title="Communication...">
+        <PreferenceScreen android:title="Incoming call...">
+            <Preference
+                android:key="Trigger.AnyIncomingCall"
+                android:title="Any"/>
+            <Preference
+                android:key="Trigger.IncomingCallByCaller"
+                android:title="By caller"/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="Call answered...">
+            <Preference
+                android:key="Trigger.AnyAnsweredCall"
+                android:title="Any"/>
+            <Preference
+                android:key="Trigger.AnsweredCallByCaller"
+                android:title="By caller"/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="Call ended...">
+            <Preference
+                android:key="Trigger.AnyEndedCall"
+                android:title="Any"/>
+            <Preference
+                android:key="Trigger.EndedCallByCaller"
+                android:title="By caller"/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="SMS received...">
+            <Preference
+                android:key="Trigger.AnySMS"
+                android:title="Any"/>
+            <Preference
+                android:key="Trigger.SMSByContent"
+                android:title="By content"/>
+            <Preference
+                android:key="Trigger.SMSBySender"
+                android:title="By sender"/>
+        </PreferenceScreen>
+    </PreferenceScreen>
+    <PreferenceScreen android:title="Miscellaneous...">
+        <Preference
+            android:key="Trigger.BatteryLow"
+            android:title="Batter low"/>
+        <Preference
+            android:key="Trigger.ChargerInserted"
+            android:title="Charger inserted"/>
+        <Preference
+            android:key="Trigger.ChargerRemoved"
+            android:title="Charger removed"/>
+        <PreferenceScreen android:title="Gesture">
+            <Preference
+                android:key="Trigger.Shake"
+                android:title="Shake"/>
+            <Preference
+                android:key="Trigger.FaceDown"
+                android:title="Face down"/>
+        </PreferenceScreen>
+        <Preference
+            android:key="Trigger.Interval"
+            android:title="Interval"/>
+        <Preference
+            android:key="Trigger.Time"
+            android:title="Time"/>
+    </PreferenceScreen>
+    <PreferenceScreen android:title="Networking...">
+        <Preference
+            android:key="Trigger.Bluetooth"
+            android:title="Bluetooth connection"/>
+        <Preference
+            android:key="Trigger.WifiConnected"
+            android:title="Wifi connected"/>
+        <Preference
+            android:key="Trigger.WifiDisconnected"
+            android:title="Wifi disconnected"/>
+    </PreferenceScreen>
+</PreferenceScreen>

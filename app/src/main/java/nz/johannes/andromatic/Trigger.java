@@ -16,16 +16,12 @@ public class Trigger {
     private String match;
     private ArrayList<String> extraData;
 
-    public Trigger() {
-
-    }
-
-    public Trigger(String type) {
-        this.type = type;
-    }
-
     public String getType() {
         return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getMatch() {

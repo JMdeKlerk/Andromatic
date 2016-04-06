@@ -41,8 +41,6 @@ import java.util.List;
 public class TaskEditor extends AppCompatActivity {
 
     private Task task;
-    private View view;
-    private AutoCompleteTextView textView;
     private Activity activity;
 
     @Override
@@ -59,7 +57,7 @@ public class TaskEditor extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != Activity.RESULT_OK) {
+        if (!Main.checkOrRequestDeviceAdmin(this, activity)) {
             for (Task task : Main.getAllStoredTasks(this)) {
                 for (Action action : task.getActions()) {
                     if (action.getCommand().equals("Set lock mode")) task.removeAction(this, action);
@@ -120,7 +118,9 @@ public class TaskEditor extends AppCompatActivity {
                 return lhs.getType().compareTo(rhs.getType());
             }
         });
-        listItems.add(new Trigger("Add new..."));
+        Trigger addNew = new Trigger();
+        addNew.setType("Add new...");
+        listItems.add(addNew);
         adapter.notifyDataSetChanged();
         setDynamicListHeight(triggerList);
     }
@@ -230,183 +230,14 @@ public class TaskEditor extends AppCompatActivity {
     }
 
     private void addTrigger() {
-        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final String[] triggerChoices = new String[]{"Battery low", "Bluetooth connected", "Bluetooth disconnected", "Charger inserted",
-                "Charger removed", "Interval", "SMS received", "Time", "Wifi connected", "Wifi disconnected"};
-        alert.setItems(triggerChoices, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                final Trigger trigger = new Trigger(triggerChoices[which]);
-                switch (triggerChoices[which]) {
-                    case "Bluetooth connected":
-                    case "Bluetooth disconnected":
-                        alert.setItems(null, null);
-                        view = getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
-                        textView = (AutoCompleteTextView) view.findViewById(R.id.text);
-                        textView.setHint("Device name");
-                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "bluetooth"));
-                        alert.setView(view);
-                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                AutoCompleteTextView deviceNameField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
-                                String device = deviceNameField.getText().toString();
-                                trigger.setMatch(device);
-                                task.addNewTrigger(getBaseContext(), trigger);
-                                populateTriggerList();
-                            }
-                        });
-                        alert.setNegativeButton("Cancel", null);
-                        alert.show();
-                        break;
-                    case "SMS received":
-                        final String[] typeChoices = new String[]{"Content", "Sender"};
-                        alert.setItems(typeChoices, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (typeChoices[which]) {
-                                    case "Content":
-                                        alert.setItems(null, null);
-                                        alert.setView(R.layout.dialog_incomingmessage);
-                                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                EditText matchText = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
-                                                RadioButton exact = (RadioButton) ((AlertDialog) dialog).findViewById(R.id.radio_exact);
-                                                String match = matchText.getText().toString();
-                                                trigger.setMatch(match);
-                                                ArrayList<String> extras = new ArrayList<>();
-                                                extras.add("Content");
-                                                extras.add(exact.isChecked() ? "Exact" : "Partial");
-                                                trigger.setExtraData(extras);
-                                                task.addNewTrigger(getBaseContext(), trigger);
-                                                populateTriggerList();
-                                            }
-                                        });
-                                        alert.setNegativeButton("Cancel", null);
-                                        alert.show();
-                                        break;
-                                    case "Sender":
-                                        alert.setItems(null, null);
-                                        view = getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
-                                        textView = (AutoCompleteTextView) view.findViewById(R.id.text);
-                                        textView.setHint("Name/number");
-                                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "contacts"));
-                                        textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                            @Override
-                                            public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
-                                                String selection = ((TextView) view).getText().toString();
-                                                selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
-                                                textView.setText(selection);
-                                            }
-                                        });
-                                        alert.setView(view);
-                                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                AutoCompleteTextView senderField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
-                                                String sender = senderField.getText().toString();
-                                                trigger.setMatch(sender);
-                                                ArrayList<String> extras = new ArrayList<>();
-                                                extras.add("Sender");
-                                                extras.add(Main.getNameFromNumber(getBaseContext(), sender));
-                                                trigger.setExtraData(extras);
-                                                task.addNewTrigger(getBaseContext(), trigger);
-                                                populateTriggerList();
-                                            }
-                                        });
-                                        alert.setNegativeButton("Cancel", null);
-                                        alert.show();
-                                        break;
-                                }
-                            }
-                        });
-                        alert.show();
-                        break;
-                    case "Interval":
-                        final String timeChoices[] = new String[]{"1 minute", "5 minutes", "10 minutes", "30 minutes", "60 minutes", "120 minutes"};
-                        alert.setItems(timeChoices, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                trigger.setMatch(timeChoices[which]);
-                                task.addNewTrigger(getBaseContext(), trigger);
-                                populateTriggerList();
-                            }
-                        });
-                        alert.show();
-                        break;
-                    case "Time":
-                        TimePickerDialog timePicker = new TimePickerDialog(TaskEditor.this, new TimePickerDialog.OnTimeSetListener() {
-                            @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                String meridian = "AM";
-                                ArrayList<String> extras = new ArrayList<>();
-                                extras.add(String.valueOf(hourOfDay));
-                                extras.add(String.valueOf(minute));
-                                if (hourOfDay >= 12) {
-                                    hourOfDay = hourOfDay - 12;
-                                    if (hourOfDay == 0) hourOfDay = 12;
-                                    meridian = "PM";
-                                }
-                                String leadingZeroHour = (hourOfDay < 10) ? "0" : "";
-                                String leadingZeroMinute = (minute < 10) ? "0" : "";
-                                trigger.setMatch(leadingZeroHour + hourOfDay + ":" + leadingZeroMinute + minute + " " + meridian);
-                                trigger.setExtraData(extras);
-                                task.addNewTrigger(getBaseContext(), trigger);
-                                populateTriggerList();
-                            }
-                        }, 0, 0, false);
-                        timePicker.setTitle(null);
-                        timePicker.show();
-                        break;
-                    case "Wifi connected":
-                    case "Wifi disconnected":
-                        alert.setItems(null, null);
-                        view = getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
-                        textView = (AutoCompleteTextView) view.findViewById(R.id.text);
-                        textView.setHint("SSID");
-                        textView.setAdapter(Main.getTextViewAdapter(getBaseContext(), "ssids"));
-                        alert.setView(view);
-                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                EditText ssidField = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
-                                String ssid = ssidField.getText().toString();
-                                trigger.setMatch(ssid);
-                                task.addNewTrigger(getBaseContext(), trigger);
-                                populateTriggerList();
-                            }
-                        });
-                        alert.setNegativeButton("Cancel", null);
-                        alert.show();
-                        break;
-                    default:
-                        task.addNewTrigger(getBaseContext(), trigger);
-                        populateTriggerList();
-                        break;
-                }
-            }
-        });
-        alert.show();
+        Intent intent = new Intent(this, AddComponent.class);
+        intent.putExtra("Task", task.getName());
+        intent.setAction("TRIGGER");
+        startActivityForResult(intent, 0);
     }
 
     private void addCondition() {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        final String[] conditionChoices = new String[]{"Battery percentage", "Phone charging", "Phone not charging", "Time period",
-                "Wifi is connected", "Wifi not connected"};
-        alert.setItems(conditionChoices, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Condition condition = new Condition(conditionChoices[which]);
-                switch (conditionChoices[which]) {
-                    default:
-                        task.addNewCondition(getBaseContext(), condition);
-                        populateConditionsList();
-                        break;
-                }
-            }
-        });
-        alert.show();
+
     }
 
     private void addAction() {

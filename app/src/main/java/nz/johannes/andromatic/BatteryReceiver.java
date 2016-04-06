@@ -11,13 +11,13 @@ public class BatteryReceiver extends BroadcastReceiver {
         String type = "";
         switch (intent.getAction()) {
             case "android.intent.action.ACTION_POWER_CONNECTED":
-                type = "Charger inserted";
+                type = "Trigger.ChargerInserted";
                 break;
             case "android.intent.action.ACTION_POWER_DISCONNECTED":
-                type = "Charger removed";
+                type = "Trigger.ChargerRemoved";
                 break;
             case "android.intent.action.BATTERY_LOW":
-                type = "Battery low";
+                type = "Trigger.BatteryLow";
                 break;
         }
         for (Task task : Main.getAllStoredTasks(context)) {

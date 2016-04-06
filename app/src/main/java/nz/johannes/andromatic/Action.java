@@ -25,7 +25,51 @@ public class Action {
 
     public void doAction(Context context) {
         switch (command) {
-            case "Launch app":
+            case "Action.StartCall":
+                // TODO
+                break;
+            case "Action.AcceptCall":
+                // TODO
+                break;
+            case "Action.EndCall":
+                // TODO
+                break;
+            case "Action.SpeakerphoneEnable":
+                // TODO
+                break;
+            case "Action.SpeakerphoneToggle":
+                // TODO
+                break;
+            case "Action.SpeakerphoneDisable":
+                // TODO
+                break;
+            case "Action.MicEnable":
+                // TODO
+                break;
+            case "Action.MicToggle":
+                // TODO
+                break;
+            case "Action.MicDisable":
+                // TODO
+                break;
+            case "Action.SendSMS":
+                SmsManager.getDefault().sendTextMessage(multiData.get(1), null, multiData.get(2), null, null);
+                break;
+            case "Action.MediaPlay":
+                // TODO
+                break;
+            case "Action.MediaPause":
+                // TODO
+                break;
+            case "Action.MediaSkip":
+                // TODO
+                break;
+            case "Action.MediaVolume":
+                AudioManager musicManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                float mediaVolume = ((float) musicManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)) / 100 * data;
+                musicManager.setStreamVolume(AudioManager.STREAM_MUSIC, Math.round(mediaVolume), 0);
+                break;
+            case "Action.LaunchApp":
                 ComponentName component = new ComponentName(multiData.get(1), multiData.get(2));
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -33,75 +77,92 @@ public class Action {
                 intent.setComponent(component);
                 context.startActivity(intent);
                 break;
-            case "Enable wifi":
-                ((WifiManager) context.getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(true);
+            case "Action.Vibrate":
+                // TODO
                 break;
-            case "Disable wifi":
-                ((WifiManager) context.getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(false);
+            case "Action.PlaySound":
+                // TODO
                 break;
-            case "Enable bluetooth":
+            case "Action.FlashLed":
+                // TODO
+                break;
+            case "Action.BluetoothEnable":
                 BluetoothAdapter.getDefaultAdapter().enable();
                 break;
-            case "Disable bluetooth":
+            case "Action.BluetoothToggle":
+                // TODO
+                break;
+            case "Action.BluetoothDisable":
                 BluetoothAdapter.getDefaultAdapter().disable();
                 break;
-            case "Set ringer volume":
+            case "Action.MobileDataEnable":
+                // TODO
+                break;
+            case "Action.MobileDataToggle":
+                // TODO
+                break;
+            case "Action.MobileDataDisable":
+                // TODO
+                break;
+            case "Action.WifiEnable":
+                ((WifiManager) context.getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(true);
+                break;
+            case "Action.WifiToggle":
+                // TODO
+                break;
+            case "Action.WifiDisable":
+                ((WifiManager) context.getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(false);
+                break;
+            case "Action.LockModeNone":
+                DevicePolicyManager lockNoneManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                ComponentName lockNoneAdmin = new ComponentName(context, DeviceAdmin.class);
+                if (!lockNoneManager.isAdminActive(lockNoneAdmin)) return;
+                lockNoneManager.setPasswordMinimumLength(lockNoneAdmin, 0);
+                lockNoneManager.resetPassword("", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                break;
+            case "Action.LockModePIN":
+                DevicePolicyManager lockPinManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                ComponentName lockPinAdmin = new ComponentName(context, DeviceAdmin.class);
+                if (!lockPinManager.isAdminActive(lockPinAdmin)) return;
+                lockPinManager.setPasswordQuality(lockPinAdmin, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
+                lockPinManager.resetPassword(multiData.get(0), DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                lockPinManager.lockNow();
+                break;
+            case "Action.LockModePassword":
+                DevicePolicyManager lockPassManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                ComponentName lockPassAdmin = new ComponentName(context, DeviceAdmin.class);
+                if (!lockPassManager.isAdminActive(lockPassAdmin)) return;
+                lockPassManager.setPasswordQuality(lockPassAdmin, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+                lockPassManager.resetPassword(multiData.get(0), DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
+                lockPassManager.lockNow();
+                break;
+            case "Action.Timeout15Sec":
+                // TODO
+                break;
+            case "Action.Timeout30Sec":
+                // TODO
+                break;
+            case "Action.Timeout1Min":
+                // TODO
+                break;
+            case "Action.Timeout2Min":
+                // TODO
+                break;
+            case "Action.Timeout5Min":
+                // TODO
+                break;
+            case "Action.Timeout10Min":
+                // TODO
+                break;
+            case "Action.RingerVolume":
                 AudioManager ringerManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
                 float ringerVolume = ((float) ringerManager.getStreamMaxVolume(AudioManager.STREAM_RING)) / 100 * data;
                 ringerManager.setStreamVolume(AudioManager.STREAM_RING, Math.round(ringerVolume), 0);
                 break;
-            case "Set notification volume":
+            case "Action.NotificationVolume":
                 AudioManager notifyManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
                 float notifyVolume = ((float) notifyManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION)) / 100 * data;
                 notifyManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, Math.round(notifyVolume), 0);
-                break;
-            case "Set media volume":
-                AudioManager musicManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-                float mediaVolume = ((float) musicManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)) / 100 * data;
-                musicManager.setStreamVolume(AudioManager.STREAM_MUSIC, Math.round(mediaVolume), 0);
-                break;
-            case "Set lock mode":
-                DevicePolicyManager lockManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-                ComponentName lockerAdmin = new ComponentName(context, DeviceAdmin.class);
-                if (!lockManager.isAdminActive(lockerAdmin)) return;
-                switch (data) {
-                    case 0:
-                        lockManager.setPasswordMinimumLength(lockerAdmin, 0);
-                        lockManager.resetPassword("", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
-                        break;
-                    case 1:
-                        lockManager.setPasswordQuality(lockerAdmin, DevicePolicyManager.PASSWORD_QUALITY_NUMERIC);
-                        lockManager.resetPassword(multiData.get(0), DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
-                        lockManager.lockNow();
-                        break;
-                    case 2:
-                        lockManager.setPasswordQuality(lockerAdmin, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
-                        lockManager.resetPassword(multiData.get(0), DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
-                        lockManager.lockNow();
-                        break;
-                }
-                break;
-            case "Set screen timeout":
-                DevicePolicyManager timeoutManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-                ComponentName timeoutAdmin = new ComponentName(context, DeviceAdmin.class);
-                if (!timeoutManager.isAdminActive(timeoutAdmin)) return;
-                switch (data) {
-                    case 0:
-                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 15 * 1000);
-                    case 1:
-                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 30 * 1000);
-                    case 2:
-                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 60 * 1000);
-                    case 3:
-                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 120 * 1000);
-                    case 4:
-                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 300 * 1000);
-                    case 5:
-                        timeoutManager.setMaximumTimeToLock(timeoutAdmin, 600 * 1000);
-                }
-                break;
-            case "Send SMS":
-                SmsManager.getDefault().sendTextMessage(multiData.get(1), null, multiData.get(2), null, null);
                 break;
         }
     }
