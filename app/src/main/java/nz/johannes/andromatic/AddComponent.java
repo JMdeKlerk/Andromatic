@@ -1,12 +1,31 @@
 package nz.johannes.andromatic;
 
+import android.app.AlertDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.TimePicker;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddComponent extends PreferenceActivity {
 
@@ -37,6 +56,10 @@ public class AddComponent extends PreferenceActivity {
 
     public static class TriggerFragment extends PreferenceFragment {
 
+        private View view;
+        private AutoCompleteTextView textView;
+        private AlertDialog.Builder alert;
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -48,6 +71,7 @@ public class AddComponent extends PreferenceActivity {
             if (preference instanceof PreferenceScreen) return false;
             final Trigger trigger = new Trigger();
             final String triggerKey = preference.getKey();
+            trigger.setType(triggerKey);
             switch (triggerKey) {
                 case "Trigger.IncomingCallByCaller":
                     // TODO
@@ -59,28 +83,121 @@ public class AddComponent extends PreferenceActivity {
                     // TODO
                     break;
                 case "Trigger.SMSByContent":
-                    // TODO
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_incomingmessage, null);
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            EditText matchText = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
+                            RadioButton exact = (RadioButton) ((AlertDialog) dialog).findViewById(R.id.radio_exact);
+                            String match = matchText.getText().toString();
+                            trigger.setMatch(match);
+                            ArrayList<String> extras = new ArrayList<>();
+                            extras.add(exact.isChecked() ? "Exact" : "Partial");
+                            trigger.setExtraData(extras);
+                            task.addNewTrigger(context, trigger);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
                     break;
                 case "Trigger.SMSBySender":
-                    // TODO
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                    textView.setHint("Name/number");
+                    textView.setAdapter(Main.getTextViewAdapter(context, "contacts"));
+                    textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+                            String selection = ((TextView) view).getText().toString();
+                            selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
+                            textView.setText(selection);
+                        }
+                    });
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AutoCompleteTextView senderField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String sender = senderField.getText().toString();
+                            trigger.setMatch(sender);
+                            ArrayList<String> extras = new ArrayList<>();
+                            extras.add(Main.getNameFromNumber(context, sender));
+                            trigger.setExtraData(extras);
+                            task.addNewTrigger(context, trigger);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
                     break;
                 case "Trigger.Interval":
-                    // TODO
+                    final String timeChoices[] = new String[]{"1 minute", "5 minutes", "10 minutes", "30 minutes", "60 minutes", "120 minutes"};
+                    alert.setItems(timeChoices, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            trigger.setMatch(timeChoices[which]);
+                            task.addNewTrigger(context, trigger);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.show();
                     break;
                 case "Trigger.Time":
-                    // TODO
+                    TimePickerDialog timePicker = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                            String meridian = "AM";
+                            ArrayList<String> extras = new ArrayList<>();
+                            extras.add(String.valueOf(hourOfDay));
+                            extras.add(String.valueOf(minute));
+                            if (hourOfDay >= 12) {
+                                hourOfDay = hourOfDay - 12;
+                                if (hourOfDay == 0) hourOfDay = 12;
+                                meridian = "PM";
+                            }
+                            String leadingZeroHour = (hourOfDay < 10) ? "0" : "";
+                            String leadingZeroMinute = (minute < 10) ? "0" : "";
+                            trigger.setMatch(leadingZeroHour + hourOfDay + ":" + leadingZeroMinute + minute + " " + meridian);
+                            trigger.setExtraData(extras);
+                            task.addNewTrigger(context, trigger);
+                            getActivity().finish();
+                        }
+                    }, 0, 0, false);
+                    timePicker.setTitle(null);
+                    timePicker.show();
                     break;
                 case "Trigger.Bluetooth":
-                    // TODO
-                    break;
                 case "Trigger.WifiConnected":
-                    // TODO
-                    break;
                 case "Trigger.WifiDisconnected":
-                    // TODO
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                    if (triggerKey.equals("Trigger.Bluetooth")) {
+                        textView.setHint("Device name");
+                        textView.setAdapter(Main.getTextViewAdapter(context, "bluetooth"));
+                    } else {
+                        textView.setHint("SSID");
+                        textView.setAdapter(Main.getTextViewAdapter(context, "ssids"));
+                    }
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            EditText textField = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String match = textField.getText().toString();
+                            trigger.setMatch(match);
+                            task.addNewTrigger(context, trigger);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
                     break;
                 default:
-                    trigger.setType(triggerKey);
                     task.addNewTrigger(context, trigger);
                     getActivity().finish();
             }
@@ -90,6 +207,10 @@ public class AddComponent extends PreferenceActivity {
     }
 
     public static class ActionFragment extends PreferenceFragment {
+
+        private View view;
+        private AutoCompleteTextView textView;
+        private AlertDialog.Builder alert;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -102,45 +223,149 @@ public class AddComponent extends PreferenceActivity {
             if (preference instanceof PreferenceScreen) return false;
             final Action action = new Action();
             final String actionType = preference.getKey();
+            action.setCommand(actionType);
             switch (actionType) {
                 case "Action.StartCall":
                     // TODO
                     break;
                 case "Action.SendSMS":
-                    // TODO
-                    break;
-                case "Action.MediaVolume":
-                    // TODO
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_sendmessage, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.to);
+                    textView.setHint("Test");
+                    textView.setAdapter(Main.getTextViewAdapter(context, "contacts"));
+                    textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+                            String selection = ((TextView) view).getText().toString();
+                            selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
+                            textView.setText(selection);
+                        }
+                    });
+                    alert.setItems(null, null);
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            EditText to = (EditText) ((AlertDialog) dialog).findViewById(R.id.to);
+                            EditText message = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
+                            ArrayList actionData = new ArrayList();
+                            actionData.add(Main.getNameFromNumber(context, to.getText().toString()));
+                            actionData.add(to.getText().toString());
+                            actionData.add(message.getText().toString());
+                            action.setData(actionData);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
                     break;
                 case "Action.LaunchApp":
-                    // TODO
+                    alert = new AlertDialog.Builder(context);
+                    PackageManager pm = getActivity().getPackageManager();
+                    final ArrayList<String> appChoices = new ArrayList<>();
+                    final ArrayList<String> appChoicePackage = new ArrayList<>();
+                    final ArrayList<String> appChoiceName = new ArrayList<>();
+                    Intent main = new Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER);
+                    List<ResolveInfo> packages = pm.queryIntentActivities(main, 0);
+                    for (ResolveInfo appInfo : packages) {
+                        appChoices.add(appInfo.loadLabel(pm).toString());
+                        appChoicePackage.add(appInfo.activityInfo.packageName);
+                        appChoiceName.add(appInfo.activityInfo.name);
+                    }
+                    alert.setItems(appChoices.toArray(new String[appChoices.size()]), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ArrayList actionData = new ArrayList();
+                            actionData.add(appChoices.get(which));
+                            actionData.add(appChoicePackage.get(which));
+                            actionData.add(appChoiceName.get(which));
+                            action.setData(actionData);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.show();
                     break;
                 case "Action.PlaySound":
                     // TODO
                     break;
-                case "Action.LockModePIN":
-                    // TODO
-                    break;
-                case "Action.LockModePassword":
-                    // TODO
-                    break;
                 case "Action.LockModeNone":
-                case "Action.Timeout15Sec":
-                case "Action.Timeout30Sec":
-                case "Action.Timeout1Min":
-                case "Action.Timeout2Min":
-                case "Action.Timeout5Min":
-                case "Action.Timeout10Min":
-                    Main.checkOrRequestDeviceAdmin(context, getActivity());
+                case "Action.LockModePIN":
+                case "Action.LockModePassword":
+                    if (!Main.checkOrRequestDeviceAdmin(context, getActivity())) return false;
+                    if (!actionType.equals("Action.LockModeNone")) {
+                        alert = new AlertDialog.Builder(context);
+                        view = getActivity().getLayoutInflater().inflate(R.layout.dialog_singleline, null);
+                        EditText textView = (EditText) view.findViewById(R.id.text);
+                        textView.setHint((actionType.equals("Action.LockModePIN")) ? "PIN" : "Password");
+                        textView.setInputType((actionType.equals("Action.LockModePIN")) ? InputType.TYPE_CLASS_NUMBER : InputType.TYPE_CLASS_TEXT);
+                        textView.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        alert.setView(view);
+                        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                EditText password = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
+                                ArrayList data = new ArrayList();
+                                data.add(password.getText().toString());
+                                action.setData(data);
+                                task.addNewAction(context, action);
+                                getActivity().finish();
+                            }
+                        });
+                        alert.setNegativeButton("Cancel", null);
+                        alert.show();
+                    } else {
+                        task.addNewAction(context, action);
+                        getActivity().finish();
+                    }
                     break;
+                case "Action.Timeout":
+                    if (!Main.checkOrRequestDeviceAdmin(context, getActivity())) return false;
+                    alert = new AlertDialog.Builder(context);
+                    final String timeoutChoices[] = new String[]{"15 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes", "10 minutes"};
+                    alert.setItems(timeoutChoices, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            action.setData(which);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.show();
+                    break;
+                case "Action.MediaVolume":
                 case "Action.RingerVolume":
-                    // TODO
-                    break;
                 case "Action.NotificationVolume":
-                    // TODO
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_seekbar, null);
+                    ((SeekBar) view.findViewById(R.id.seek)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            TextView seekText = (TextView) view.findViewById(R.id.seek_text);
+                            seekText.setText(progress * 10 + "%");
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                        }
+                    });
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            SeekBar seek = (SeekBar) ((AlertDialog) dialog).findViewById(R.id.seek);
+                            action.setData(seek.getProgress() * 10);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
                     break;
                 default:
-                    action.setCommand(actionType);
                     task.addNewAction(context, action);
                     getActivity().finish();
             }

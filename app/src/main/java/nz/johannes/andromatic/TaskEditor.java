@@ -60,7 +60,8 @@ public class TaskEditor extends AppCompatActivity {
         if (!Main.checkOrRequestDeviceAdmin(this, activity)) {
             for (Task task : Main.getAllStoredTasks(this)) {
                 for (Action action : task.getActions()) {
-                    if (action.getCommand().equals("Set lock mode")) task.removeAction(this, action);
+                    if (action.getCommand().startsWith("Action.LockMode") || action.getCommand().startsWith("Action.Timeout"))
+                        task.removeAction(this, action);
                 }
             }
         }
@@ -171,7 +172,9 @@ public class TaskEditor extends AppCompatActivity {
                 return lhs.getType().compareTo(rhs.getType());
             }
         });
-        listItems.add(new Condition("Add new..."));
+        Condition addNew = new Condition();
+        addNew.setType("Add new...");
+        listItems.add(addNew);
         adapter.notifyDataSetChanged();
         setDynamicListHeight(conditionList);
     }

@@ -118,26 +118,9 @@
                 android:key="Action.LockModePassword"
                 android:title="Password"/>
         </PreferenceScreen>
-        <PreferenceScreen android:title="Set screen timeout">
-            <Preference
-                android:key="Action.Timeout15Sec"
-                android:title="15 seconds"/>
-            <Preference
-                android:key="Action.Timeout30Sec"
-                android:title="30 seconds"/>
-            <Preference
-                android:key="Action.Timeout1Min"
-                android:title="1 minute"/>
-            <Preference
-                android:key="Action.Timeout2Min"
-                android:title="2 minutes"/>
-            <Preference
-                android:key="Action.Timeout5Min"
-                android:title="5 minutes"/>
-            <Preference
-                android:key="Action.Timeout10Min"
-                android:title="10 minutes"/>
-        </PreferenceScreen>
+        <Preference
+            android:key="Action.Timeout"
+            android:title="Set screen timeout"/>
         <Preference
             android:key="Action.RingerVolume"
             android:title="Set ringer volume"/>

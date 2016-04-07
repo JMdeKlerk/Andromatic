@@ -26,7 +26,7 @@ public class WifiReceiver extends BroadcastReceiver {
         if (currentState.equals(NetworkInfo.State.DISCONNECTED)) {
             ssid = prefs.getString("lastConnectedSSID", "");
         }
-        String connType = (currentState.equals(NetworkInfo.State.CONNECTED)) ? "Wifi connected" : "Wifi disconnected";
+        String connType = (currentState.equals(NetworkInfo.State.CONNECTED)) ? "Trigger.WifiConnected" : "Trigger.WifiDisconnected";
         for (Task task : Main.getAllStoredTasks(context)) {
             for (Trigger trigger : task.getTriggers()) {
                 if (trigger.getType().equals(connType) && trigger.getMatch().equals(ssid)) task.runTask(context);

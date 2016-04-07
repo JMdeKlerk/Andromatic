@@ -58,30 +58,9 @@ public class Trigger {
             if (trigger != null) {
                 TextView type = (TextView) convertView.findViewById(R.id.type);
                 TextView detail = (TextView) convertView.findViewById(R.id.detail);
-                if (type != null) {
-                    type.setText(trigger.getType());
-                    if (trigger.getMatch() != null) switch (trigger.getType()) {
-                        case "Bluetooth connected":
-                        case "Bluetooth disconnected":
-                            detail.setText("Device name: " + trigger.getMatch());
-                            break;
-                        case "Interval":
-                        case "Time":
-                            detail.setText(trigger.getMatch());
-                            break;
-                        case "SMS received":
-                            if (trigger.getExtraData().get(0).equals("Sender")) {
-                                if (trigger.getExtraData().get(1) != null)
-                                    detail.setText(trigger.getExtraData().get(1) + " (" + trigger.getMatch() + ")");
-                                else detail.setText(trigger.getMatch());
-                            } else detail.setText(trigger.getExtraData().get(1) + " match: \"" + trigger.getMatch() + "\"");
-                            break;
-                        case "Wifi connected":
-                        case "Wifi disconnected":
-                            detail.setText("SSID: " + trigger.getMatch());
-                            break;
-                    }
-                }
+                // TODO make human readable with per-command details
+                type.setText(trigger.getType());
+                if (trigger.getMatch() != null) detail.setText(trigger.getMatch());
             }
             return convertView;
         }

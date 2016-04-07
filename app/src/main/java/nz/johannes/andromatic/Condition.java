@@ -1,6 +1,5 @@
 package nz.johannes.andromatic;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -24,38 +23,38 @@ public class Condition {
 
     }
 
-    public Condition(String type) {
-        this.type = type;
-    }
-
     public boolean check(Context context) {
         switch (type) {
-            case "Battery percentage":
+            case "Condition.BatteryPercentage":
                 break;
-            case "Phone charging":
+            case "Condition.PhoneCharging":
                 Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
                 return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
-            case "Phone not charging":
+            case "Condition.PhoneNotCharging":
                 intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
                 return !(plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB);
-            case "Time period":
+            case "Condition.TimePeriod":
                 break;
-            case "Wifi is connected":
+            case "Condition.WifiConnected":
                 ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
                 return wifiInfo.isConnected();
-            case "Wifi not connected":
+            case "Condition.WifiNotConnected":
                 connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
                 wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                return wifiInfo.isConnected();
+                return !wifiInfo.isConnected();
         }
         return false;
     }
 
     public String getType() {
         return this.type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getMatch() {
@@ -84,10 +83,8 @@ public class Condition {
             if (condition != null) {
                 TextView type = (TextView) convertView.findViewById(R.id.type);
                 TextView detail = (TextView) convertView.findViewById(R.id.detail);
-                if (type != null) {
-                    type.setText(condition.getType());
-
-                }
+                // TODO make human readable with per-command details
+                type.setText(condition.getType());
             }
             return convertView;
         }

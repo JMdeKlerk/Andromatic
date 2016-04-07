@@ -15,8 +15,8 @@ public class DeviceAdmin extends DeviceAdminReceiver {
     public void onDisabled(Context context, Intent intent) {
         for (Task task : Main.getAllStoredTasks(context)) {
             for (Action action : task.getActions()) {
-                if (action.getCommand().equals("Set lock mode") ||
-                        action.getCommand().equals("Set screen timeout")) task.removeAction(context, action);
+                if (action.getCommand().startsWith("Action.LockMode") || action.getCommand().startsWith("Action.Timeout"))
+                    task.removeAction(context, action);
             }
         }
     }

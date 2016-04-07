@@ -136,22 +136,7 @@ public class Action {
                 lockPassManager.resetPassword(multiData.get(0), DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
                 lockPassManager.lockNow();
                 break;
-            case "Action.Timeout15Sec":
-                // TODO
-                break;
-            case "Action.Timeout30Sec":
-                // TODO
-                break;
-            case "Action.Timeout1Min":
-                // TODO
-                break;
-            case "Action.Timeout2Min":
-                // TODO
-                break;
-            case "Action.Timeout5Min":
-                // TODO
-                break;
-            case "Action.Timeout10Min":
+            case "Action.Timeout":
                 // TODO
                 break;
             case "Action.RingerVolume":
@@ -209,33 +194,9 @@ public class Action {
             if (action != null) {
                 TextView type = (TextView) convertView.findViewById(R.id.type);
                 TextView detail = (TextView) convertView.findViewById(R.id.detail);
-                if (type != null) {
-                    type.setText(action.getCommand());
-                }
-                if (detail != null) {
-                    if (hasExtraData) switch (action.getCommand()) {
-                        case "Launch app":
-                            detail.setText((String) action.getMultiData().get(0));
-                            break;
-                        case "Set brightness":
-                        case "Set ringer volume":
-                        case "Set notification volume":
-                        case "Set media volume":
-                            detail.setText(action.getData() + " percent");
-                            break;
-                        case "Send SMS message":
-                            detail.setText(action.getMultiData().get(0) + " (" + action.getMultiData().get(1) + ")");
-                            break;
-                        case "Set lock mode":
-                            String lockChoices[] = new String[]{"None", "PIN", "Password"};
-                            detail.setText(lockChoices[action.getData()]);
-                            break;
-                        case "Set screen timeout":
-                            String timeoutChoices[] = new String[]{"15 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes", "10 minutes"};
-                            detail.setText(timeoutChoices[action.getData()]);
-                            break;
-                    }
-                }
+                // TODO make human readable with per-command details
+                type.setText(action.getCommand());
+                if (action.getData() != -1) detail.setText(action.getData());
             }
             return convertView;
         }
