@@ -15,7 +15,8 @@ public class BluetoothReceiver extends BroadcastReceiver {
         String deviceName = bluetoothDevice.getName();
         for (Task task : Main.getAllStoredTasks(context)) {
             for (Trigger trigger : task.getTriggers()) {
-                if (trigger.getType().equals("Trigger.Bluetooth") && trigger.getMatch().equals(deviceName))
+                if (trigger.getType().equals("Trigger.Bluetooth")) task.runTask(context);
+                if (trigger.getType().equals("Trigger.BluetoothByDeviceName") && trigger.getMatch().equals(deviceName))
                     task.runTask(context);
             }
         }

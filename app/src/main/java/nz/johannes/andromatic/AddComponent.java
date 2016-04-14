@@ -1,5 +1,6 @@
 package nz.johannes.andromatic;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -7,6 +8,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -73,15 +76,6 @@ public class AddComponent extends PreferenceActivity {
             final String triggerKey = preference.getKey();
             trigger.setType(triggerKey);
             switch (triggerKey) {
-                case "Trigger.IncomingCallByCaller":
-                    // TODO
-                    break;
-                case "Trigger.AnsweredCallByCaller":
-                    // TODO
-                    break;
-                case "Trigger.EndedCallByCaller":
-                    // TODO
-                    break;
                 case "Trigger.SMSByContent":
                     alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_incomingmessage, null);
@@ -103,6 +97,9 @@ public class AddComponent extends PreferenceActivity {
                     alert.setNegativeButton("Cancel", null);
                     alert.show();
                     break;
+                case "Trigger.IncomingCallByCaller":
+                case "Trigger.AnsweredCallByCaller":
+                case "Trigger.EndedCallByCaller":
                 case "Trigger.SMSBySender":
                     alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
@@ -135,6 +132,7 @@ public class AddComponent extends PreferenceActivity {
                     alert.show();
                     break;
                 case "Trigger.Interval":
+                    alert = new AlertDialog.Builder(context);
                     final String timeChoices[] = new String[]{"1 minute", "5 minutes", "10 minutes", "30 minutes", "60 minutes", "120 minutes"};
                     alert.setItems(timeChoices, new DialogInterface.OnClickListener() {
                         @Override
@@ -170,9 +168,9 @@ public class AddComponent extends PreferenceActivity {
                     timePicker.setTitle(null);
                     timePicker.show();
                     break;
-                case "Trigger.Bluetooth":
-                case "Trigger.WifiConnected":
-                case "Trigger.WifiDisconnected":
+                case "Trigger.BluetoothByDeviceName":
+                case "Trigger.WifiConnectedBySSID":
+                case "Trigger.WifiDisconnectedBySSID":
                     alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
                     textView = (AutoCompleteTextView) view.findViewById(R.id.text);
@@ -226,9 +224,37 @@ public class AddComponent extends PreferenceActivity {
             action.setCommand(actionType);
             switch (actionType) {
                 case "Action.StartCall":
-                    // TODO
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                    textView.setHint("Name/number");
+                    textView.setAdapter(Main.getTextViewAdapter(context, "contacts"));
+                    textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+                            String selection = ((TextView) view).getText().toString();
+                            selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
+                            textView.setText(selection);
+                        }
+                    });
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AutoCompleteTextView senderField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String sender = senderField.getText().toString();
+                            ArrayList<String> extras = new ArrayList<>();
+                            extras.add(sender);
+                            extras.add(Main.getNameFromNumber(context, sender));
+                            action.setData(extras);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.show();
                     break;
                 case "Action.SendSMS":
+                    alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_sendmessage, null);
                     textView = (AutoCompleteTextView) view.findViewById(R.id.to);
                     textView.setHint("Test");
@@ -287,7 +313,11 @@ public class AddComponent extends PreferenceActivity {
                     alert.show();
                     break;
                 case "Action.PlaySound":
-                    // TODO
+                    Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
+                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
+                    this.startActivityForResult(intent, 2);
                     break;
                 case "Action.LockModeNone":
                 case "Action.LockModePIN":
@@ -370,6 +400,22 @@ public class AddComponent extends PreferenceActivity {
                     getActivity().finish();
             }
             return true;
+        }
+
+        @Override
+        public void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
+            if (resultCode == Activity.RESULT_OK && requestCode == 2) {
+                Uri uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                if (uri != null) {
+                    Action action = new Action();
+                    action.setCommand("Action.PlaySound");
+                    ArrayList<String> data = new ArrayList<>();
+                    data.add(uri.toString());
+                    action.setData(data);
+                    task.addNewAction(context, action);
+                    getActivity().finish();
+                }
+            }
         }
 
     }

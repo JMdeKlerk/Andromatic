@@ -7,7 +7,7 @@
                 android:title="Any"/>
             <Preference
                 android:key="Trigger.IncomingCallByCaller"
-                android:title="By caller"/>
+                android:title="By caller..."/>
         </PreferenceScreen>
         <PreferenceScreen android:title="Call answered...">
             <Preference
@@ -15,7 +15,7 @@
                 android:title="Any"/>
             <Preference
                 android:key="Trigger.AnsweredCallByCaller"
-                android:title="By caller"/>
+                android:title="By caller..."/>
         </PreferenceScreen>
         <PreferenceScreen android:title="Call ended...">
             <Preference
@@ -23,7 +23,7 @@
                 android:title="Any"/>
             <Preference
                 android:key="Trigger.EndedCallByCaller"
-                android:title="By caller"/>
+                android:title="By caller..."/>
         </PreferenceScreen>
         <PreferenceScreen android:title="SMS received...">
             <Preference
@@ -31,10 +31,10 @@
                 android:title="Any"/>
             <Preference
                 android:key="Trigger.SMSByContent"
-                android:title="By content"/>
+                android:title="By content..."/>
             <Preference
                 android:key="Trigger.SMSBySender"
-                android:title="By sender"/>
+                android:title="By sender..."/>
         </PreferenceScreen>
     </PreferenceScreen>
     <PreferenceScreen android:title="Miscellaneous...">
@@ -47,30 +47,45 @@
         <Preference
             android:key="Trigger.ChargerRemoved"
             android:title="Charger removed"/>
-        <PreferenceScreen android:title="Gesture">
-            <Preference
-                android:key="Trigger.Shake"
-                android:title="Shake"/>
-            <Preference
-                android:key="Trigger.FaceDown"
-                android:title="Face down"/>
-        </PreferenceScreen>
         <Preference
             android:key="Trigger.Interval"
-            android:title="Interval"/>
+            android:title="Interval..."/>
         <Preference
             android:key="Trigger.Time"
-            android:title="Time"/>
+            android:title="Time..."/>
     </PreferenceScreen>
-    <PreferenceScreen android:title="Networking...">
+    <PreferenceScreen android:title="Network...">
+        <PreferenceScreen android:title="Bluetooth connection...">
+            <Preference
+                android:key="Trigger.Bluetooth"
+                android:title="Any"/>
+            <Preference
+                android:key="Trigger.BluetoothByName"
+                android:title="By device name..."/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="Wifi connected...">
+            <Preference
+                android:key="Trigger.WifiConnected"
+                android:title="Any"/>
+            <Preference
+                android:key="Trigger.WifiConnectedBySSID"
+                android:title="By SSID..."/>
+        </PreferenceScreen>
+        <PreferenceScreen android:title="Wifi disconnected...">
+            <Preference
+                android:key="Trigger.WifiDisconnected"
+                android:title="Any"/>
+            <Preference
+                android:key="Trigger.WifiDisconnectedBySSID"
+                android:title="By SSID..."/>
+        </PreferenceScreen>
+    </PreferenceScreen>
+    <PreferenceScreen android:title="Sensors...">
         <Preference
-            android:key="Trigger.Bluetooth"
-            android:title="Bluetooth connection"/>
+            android:key="Trigger.Acceleration"
+            android:title="Acceleration..."/>
         <Preference
-            android:key="Trigger.WifiConnected"
-            android:title="Wifi connected"/>
-        <Preference
-            android:key="Trigger.WifiDisconnected"
-            android:title="Wifi disconnected"/>
+            android:key="Trigger.Proximity"
+            android:title="Proximity..."/>
     </PreferenceScreen>
 </PreferenceScreen>

@@ -18,6 +18,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -68,13 +69,6 @@ public class Main extends AppCompatActivity {
                 alert.show();
             }
         });
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString("lastConnectedSSID", "").equals("")) {
-            SharedPreferences.Editor editor = prefs.edit();
-            WifiManager manager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-            String ssid = manager.getConnectionInfo().getSSID().replace("\"", "");
-            editor.putString("lastConnectedSSID", ssid).apply();
-        }
     }
 
     @Override
@@ -175,6 +169,7 @@ public class Main extends AppCompatActivity {
         if (duration.equals("2")) new Toast(context).makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
+    @Nullable
     public static String getNameFromNumber(Context context, String number) {
         ContentResolver cr = context.getContentResolver();
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
@@ -200,6 +195,7 @@ public class Main extends AppCompatActivity {
         return false;
     }
 
+    @Nullable
     public static ArrayAdapter getTextViewAdapter(Context context, String type) {
         switch (type) {
             case "bluetooth":
@@ -230,6 +226,7 @@ public class Main extends AppCompatActivity {
             case "ssids":
                 WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
                 ArrayList<String> networks = new ArrayList<>();
+                if (wifi.getConfiguredNetworks() == null) return null;
                 for (WifiConfiguration network : wifi.getConfiguredNetworks()) {
                     String ssid = network.SSID.replace("\"", "");
                     if (!networks.contains(ssid)) networks.add(ssid);

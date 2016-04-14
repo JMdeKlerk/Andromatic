@@ -5,7 +5,7 @@
         <PreferenceScreen android:title="Call management...">
             <Preference
                 android:key="Action.StartCall"
-                android:title="Start call"/>
+                android:title="Start call..."/>
             <Preference
                 android:key="Action.AcceptCall"
                 android:title="Accept incoming call"/>
@@ -37,7 +37,7 @@
         </PreferenceScreen>
         <Preference
             android:key="Action.SendSMS"
-            android:title="Send SMS message"/>
+            android:title="Send SMS message..."/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Media...">
@@ -52,19 +52,19 @@
             android:title="Media skip"/>
         <Preference
             android:key="Action.MediaVolume"
-            android:title="Set media volume"/>
+            android:title="Set media volume..."/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Miscellaneous...">
         <Preference
             android:key="Action.LaunchApp"
-            android:title="Launch app"/>
+            android:title="Launch app..."/>
         <Preference
             android:key="Action.Vibrate"
             android:title="Vibrate"/>
         <Preference
             android:key="Action.PlaySound"
-            android:title="Play sound"/>
+            android:title="Play sound..."/>
         <Preference
             android:key="Action.FlashLED"
             android:title="Flash LED"/>
@@ -81,17 +81,6 @@
             <Preference
                 android:key="Action.BluetoothDisable"
                 android:title="Disable bluetooth"/>
-        </PreferenceScreen>
-        <PreferenceScreen android:title="Mobile data mode...">
-            <Preference
-                android:key="Action.MobileDataEnable"
-                android:title="Enable mobile data"/>
-            <Preference
-                android:key="Action.MobileDataToggle"
-                android:title="Toggle mobile data"/>
-            <Preference
-                android:key="Action.MobileDataDisable"
-                android:title="Disable mobile data"/>
         </PreferenceScreen>
         <PreferenceScreen android:title="Wifi mode...">
             <Preference
@@ -113,20 +102,20 @@
                 android:title="None"/>
             <Preference
                 android:key="Action.LockModePIN"
-                android:title="PIN"/>
+                android:title="PIN..."/>
             <Preference
                 android:key="Action.LockModePassword"
-                android:title="Password"/>
+                android:title="Password..."/>
         </PreferenceScreen>
         <Preference
             android:key="Action.Timeout"
-            android:title="Set screen timeout"/>
+            android:title="Set screen timeout..."/>
         <Preference
             android:key="Action.RingerVolume"
-            android:title="Set ringer volume"/>
+            android:title="Set ringer volume..."/>
         <Preference
             android:key="Action.NotificationVolume"
-            android:title="Set notification volume"/>
+            android:title="Set notification volume..."/>
     </PreferenceScreen>
 
 </PreferenceScreen>

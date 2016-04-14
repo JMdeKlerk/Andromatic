@@ -41,7 +41,6 @@ import java.util.List;
 public class TaskEditor extends AppCompatActivity {
 
     private Task task;
-    private Activity activity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +48,6 @@ public class TaskEditor extends AppCompatActivity {
         setContentView(R.layout.activity_taskedit);
         task = Main.getTask(this, getIntent().getStringExtra("task"));
         setTitle(task.getName());
-        activity = this;
         populateTriggerList();
         populateConditionsList();
         populateActionsList();
@@ -57,7 +55,7 @@ public class TaskEditor extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!Main.checkOrRequestDeviceAdmin(this, activity)) {
+        if (requestCode == 1 && resultCode != Activity.RESULT_OK) {
             for (Task task : Main.getAllStoredTasks(this)) {
                 for (Action action : task.getActions()) {
                     if (action.getCommand().startsWith("Action.LockMode") || action.getCommand().startsWith("Action.Timeout"))
