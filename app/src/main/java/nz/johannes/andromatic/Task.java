@@ -68,6 +68,7 @@ public class Task {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
+        Main.manageReceivers(context);
         setAlarms(context);
     }
 
@@ -77,6 +78,7 @@ public class Task {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
+        Main.manageReceivers(context);
         setAlarms(context);
     }
 

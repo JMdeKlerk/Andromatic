@@ -9,6 +9,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         for (Task task : Main.getAllStoredTasks(context)) {
+            Main.manageReceivers(context);
             task.setAlarms(context);
         }
     }

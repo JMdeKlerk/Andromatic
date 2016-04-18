@@ -41,18 +41,28 @@
         <Preference
             android:key="Trigger.BatteryLow"
             android:title="Batter low"/>
-        <Preference
-            android:key="Trigger.ChargerInserted"
-            android:title="Charger inserted"/>
-        <Preference
-            android:key="Trigger.ChargerRemoved"
-            android:title="Charger removed"/>
+        <PreferenceScreen android:title="Charger...">
+            <Preference
+                android:key="Trigger.ChargerInserted"
+                android:title="Charger inserted"/>
+            <Preference
+                android:key="Trigger.ChargerRemoved"
+                android:title="Charger removed"/>
+        </PreferenceScreen>
         <Preference
             android:key="Trigger.Interval"
             android:title="Interval..."/>
         <Preference
             android:key="Trigger.Time"
             android:title="Time..."/>
+        <PreferenceScreen android:title="Display...">
+            <Preference
+                android:key="Trigger.ScreenOn"
+                android:title="Display on"/>
+            <Preference
+                android:key="Trigger.ScreenOff"
+                android:title="Display off"/>
+        </PreferenceScreen>
     </PreferenceScreen>
     <PreferenceScreen android:title="Network...">
         <PreferenceScreen android:title="Bluetooth connection...">

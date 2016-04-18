@@ -65,9 +65,6 @@
         <Preference
             android:key="Action.PlaySound"
             android:title="Play sound..."/>
-        <Preference
-            android:key="Action.FlashLED"
-            android:title="Flash LED"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Network...">

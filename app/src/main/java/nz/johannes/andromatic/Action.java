@@ -125,9 +125,6 @@ public class Action {
             case "Action.PlaySound":
                 RingtoneManager.getRingtone(context, Uri.parse(multiData.get(0))).play();
                 break;
-            case "Action.FlashLed":
-                // TODO
-                break;
             case "Action.BluetoothEnable":
                 BluetoothAdapter.getDefaultAdapter().enable();
                 break;
@@ -173,7 +170,30 @@ public class Action {
                 lockPassManager.lockNow();
                 break;
             case "Action.Timeout":
-                // TODO
+                DevicePolicyManager timeoutManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                ComponentName timeoutAdmin = new ComponentName(context, DeviceAdmin.class);
+                if (!timeoutManager.isAdminActive(timeoutAdmin)) return;
+                int timeoutTimeMillis = -1;
+                switch (data) {
+                    case 0:
+                        timeoutTimeMillis = 15 * 1000;
+                        break;
+                    case 1:
+                        timeoutTimeMillis = 30 * 1000;
+                        break;
+                    case 2:
+                        timeoutTimeMillis = 60 * 1000;
+                        break;
+                    case 3:
+                        timeoutTimeMillis = 120 * 1000;
+                        break;
+                    case 4:
+                        timeoutTimeMillis = 300 * 1000;
+                        break;
+                    case 5:
+                        timeoutTimeMillis = 600 * 1000;
+                }
+                timeoutManager.setMaximumTimeToLock(timeoutAdmin, timeoutTimeMillis);
                 break;
             case "Action.RingerVolume":
                 AudioManager ringerManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
