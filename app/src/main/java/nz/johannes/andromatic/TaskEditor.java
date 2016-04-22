@@ -1,42 +1,21 @@
 package nz.johannes.andromatic;
 
-import android.app.Activity;
-import android.app.TimePickerDialog;
-import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.InputType;
-import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-
-import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.TimePicker;
-
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 public class TaskEditor extends AppCompatActivity {
 
@@ -55,20 +34,12 @@ public class TaskEditor extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1 && resultCode != Activity.RESULT_OK) {
-            for (Task task : Main.getAllStoredTasks(this)) {
-                for (Action action : task.getActions()) {
-                    if (action.getCommand().startsWith("Action.LockMode") || action.getCommand().startsWith("Action.Timeout"))
-                        task.removeAction(this, action);
-                }
-            }
-        }
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 recreate();
             }
-        }, 0);
+        }, 1);
     }
 
     private void populateTriggerList() {

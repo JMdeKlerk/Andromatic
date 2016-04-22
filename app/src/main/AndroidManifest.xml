@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
     <application
         android:allowBackup="true"
@@ -30,7 +31,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".TaskEditor">
+        <activity
+            android:name=".TaskEditor"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nz.johannes.andromatic.Main"/>
@@ -42,7 +45,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nz.johannes.andromatic.Main"/>
         </activity>
-        <activity android:name=".Settings">
+        <activity
+            android:name=".Settings"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nz.johannes.andromatic.Main"/>

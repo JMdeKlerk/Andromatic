@@ -1,15 +1,16 @@
 package nz.johannes.andromatic;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -17,6 +18,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -28,6 +30,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AddComponent extends PreferenceActivity {
@@ -62,6 +65,9 @@ public class AddComponent extends PreferenceActivity {
         private View view;
         private AutoCompleteTextView textView;
         private AlertDialog.Builder alert;
+        private static List<String> elevatedTriggers = Arrays.asList("Trigger.AnyIncomingCall", "Trigger.IncomingCallByCaller",
+                "Trigger.AnyAnsweredCall", "Trigger.AnsweredCallByCaller", "Trigger.AnyEndedCall", "Trigger.EndedCallByCaller", "Trigger.AnySMS",
+                "Trigger.SMSByContent", "Trigger.SMSBySender");
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -72,10 +78,52 @@ public class AddComponent extends PreferenceActivity {
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             if (preference instanceof PreferenceScreen) return false;
+            String triggerType = preference.getKey();
+            if (elevatedTriggers.contains(triggerType) && android.os.Build.VERSION.SDK_INT >= 23) {
+                switch (triggerType) {
+                    case "Trigger.AnyIncomingCall":
+                    case "Trigger.AnyAnsweredCall":
+                    case "Trigger.AnyEndedCall":
+                        if (Main.weHavePermission(context, Manifest.permission.READ_PHONE_STATE)) createTrigger(triggerType);
+                        else requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, elevatedTriggers.indexOf(triggerType));
+                        break;
+                    case "Trigger.IncomingCallByCaller":
+                    case "Trigger.AnsweredCallByCaller":
+                    case "Trigger.EndedCallByCaller":
+                        if (Main.weHavePermission(context, Manifest.permission.READ_CONTACTS) &&
+                                Main.weHavePermission(context, Manifest.permission.READ_PHONE_STATE))
+                            createTrigger(triggerType);
+                        else requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_CONTACTS},
+                                elevatedTriggers.indexOf(triggerType));
+                        break;
+                    case "Trigger.AnySMS":
+                    case "Trigger.SMSByContent":
+                        if (Main.weHavePermission(context, Manifest.permission.RECEIVE_SMS)) createTrigger(triggerType);
+                        else requestPermissions(new String[]{Manifest.permission.RECEIVE_SMS}, elevatedTriggers.indexOf(triggerType));
+                        break;
+                    case "Trigger.SMSBySender":
+                        if (Main.weHavePermission(context, Manifest.permission.READ_CONTACTS) &&
+                                Main.weHavePermission(context, Manifest.permission.RECEIVE_SMS)) {
+                            createTrigger(triggerType);
+                        } else requestPermissions(new String[]{Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_CONTACTS},
+                                elevatedTriggers.indexOf(triggerType));
+                        break;
+                }
+            } else createTrigger(triggerType);
+            return true;
+        }
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                createTrigger(elevatedTriggers.get(requestCode));
+            }
+        }
+
+        private void createTrigger(String triggerType) {
             final Trigger trigger = new Trigger();
-            final String triggerKey = preference.getKey();
-            trigger.setType(triggerKey);
-            switch (triggerKey) {
+            trigger.setType(triggerType);
+            switch (triggerType) {
                 case "Trigger.SMSByContent":
                     alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_incomingmessage, null);
@@ -174,7 +222,7 @@ public class AddComponent extends PreferenceActivity {
                     alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
                     textView = (AutoCompleteTextView) view.findViewById(R.id.text);
-                    if (triggerKey.equals("Trigger.Bluetooth")) {
+                    if (triggerType.equals("Trigger.Bluetooth")) {
                         textView.setHint("Device name");
                         textView.setAdapter(Main.getTextViewAdapter(context, "bluetooth"));
                     } else {
@@ -199,7 +247,6 @@ public class AddComponent extends PreferenceActivity {
                     task.addNewTrigger(context, trigger);
                     getActivity().finish();
             }
-            return true;
         }
 
     }
@@ -209,6 +256,8 @@ public class AddComponent extends PreferenceActivity {
         private View view;
         private AutoCompleteTextView textView;
         private AlertDialog.Builder alert;
+        private static List<String> elevatedActions = Arrays.asList("Action.StartCall", "Action.SendSMS", "Action.LockModeNone",
+                "Action.LockModePin", "Action.LockModePassword", "Action.Timeout");
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -219,8 +268,56 @@ public class AddComponent extends PreferenceActivity {
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             if (preference instanceof PreferenceScreen) return false;
+            String actionType = preference.getKey();
+            if (elevatedActions.contains(actionType) && android.os.Build.VERSION.SDK_INT >= 23) {
+                switch (actionType) {
+                    case "Action.StartCall":
+                        if (Main.weHavePermission(context, Manifest.permission.READ_CONTACTS) &&
+                                Main.weHavePermission(context, Manifest.permission.CALL_PHONE))
+                            createAction(actionType);
+                        else requestPermissions(new String[]{Manifest.permission.CALL_PHONE, Manifest.permission.READ_CONTACTS},
+                                elevatedActions.indexOf(actionType));
+                        break;
+                    case "Action.SendSMS":
+                        if (Main.weHavePermission(context, Manifest.permission.READ_CONTACTS) &&
+                                Main.weHavePermission(context, Manifest.permission.SEND_SMS))
+                            createAction(actionType);
+                        else requestPermissions(new String[]{Manifest.permission.SEND_SMS, Manifest.permission.READ_CONTACTS},
+                                elevatedActions.indexOf(actionType));
+                        break;
+                    case "Action.LockModeNone":
+                    case "Action.LockModePin":
+                    case "Action.LockModePassword":
+                    case "Action.Timeout":
+                        if (Main.weHavePermission(context, "device_admin")) createAction(actionType);
+                        else {
+                            ComponentName component = new ComponentName(context, DeviceAdmin.class);
+                            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, component);
+                            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                    "Screen timeout and lock functions require the app to have device admin permissions.");
+                            startActivityForResult(intent, elevatedActions.indexOf(actionType));
+                        }
+                        break;
+                }
+            } else createAction(actionType);
+            return true;
+        }
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                createAction(elevatedActions.get(requestCode));
+            }
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            if (resultCode == Activity.RESULT_OK) createAction(elevatedActions.get(requestCode));
+        }
+
+        private void createAction(String actionType) {
             final Action action = new Action();
-            final String actionType = preference.getKey();
             action.setCommand(actionType);
             switch (actionType) {
                 case "Action.StartCall":
@@ -313,16 +410,11 @@ public class AddComponent extends PreferenceActivity {
                     alert.show();
                     break;
                 case "Action.PlaySound":
-                    Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
-                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
-                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
-                    this.startActivityForResult(intent, 2);
+                    //TODO
                     break;
                 case "Action.LockModeNone":
                 case "Action.LockModePIN":
                 case "Action.LockModePassword":
-                    if (!Main.checkOrRequestDeviceAdmin(context, getActivity())) return false;
                     if (!actionType.equals("Action.LockModeNone")) {
                         alert = new AlertDialog.Builder(context);
                         view = getActivity().getLayoutInflater().inflate(R.layout.dialog_singleline, null);
@@ -346,11 +438,9 @@ public class AddComponent extends PreferenceActivity {
                         alert.show();
                     } else {
                         task.addNewAction(context, action);
-                        getActivity().finish();
                     }
                     break;
                 case "Action.Timeout":
-                    if (!Main.checkOrRequestDeviceAdmin(context, getActivity())) return false;
                     alert = new AlertDialog.Builder(context);
                     final String timeoutChoices[] = new String[]{"15 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes", "10 minutes"};
                     alert.setItems(timeoutChoices, new DialogInterface.OnClickListener() {
@@ -398,23 +488,6 @@ public class AddComponent extends PreferenceActivity {
                 default:
                     task.addNewAction(context, action);
                     getActivity().finish();
-            }
-            return true;
-        }
-
-        @Override
-        public void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
-            if (resultCode == Activity.RESULT_OK && requestCode == 2) {
-                Uri uri = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-                if (uri != null) {
-                    Action action = new Action();
-                    action.setCommand("Action.PlaySound");
-                    ArrayList<String> data = new ArrayList<>();
-                    data.add(uri.toString());
-                    action.setData(data);
-                    task.addNewAction(context, action);
-                    getActivity().finish();
-                }
             }
         }
 

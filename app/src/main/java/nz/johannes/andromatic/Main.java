@@ -1,6 +1,6 @@
 package nz.johannes.andromatic;
 
-import android.app.Activity;
+import android.Manifest;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -19,15 +19,14 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -227,7 +226,6 @@ public class Main extends AppCompatActivity {
         if (duration.equals("2")) new Toast(context).makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
-    @Nullable
     public static String getNameFromNumber(Context context, String number) {
         ContentResolver cr = context.getContentResolver();
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
@@ -241,19 +239,16 @@ public class Main extends AppCompatActivity {
         return contactName;
     }
 
-    public static boolean checkOrRequestDeviceAdmin(final Context context, final Activity activity) {
-        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        final ComponentName component = new ComponentName(context, DeviceAdmin.class);
-        if (dpm.isAdminActive(component)) return true;
-        Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, component);
-        intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                "Screen timeout and lock functions require the app to have device admin permissions.");
-        activity.startActivityForResult(intent, 1);
-        return false;
+    public static boolean weHavePermission(Context context, String permission) {
+        if (permission.equals("device_admin")) {
+            DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            ComponentName component = new ComponentName(context, DeviceAdmin.class);
+            return dpm.isAdminActive(component);
+        }
+        if (android.os.Build.VERSION.SDK_INT <= 23) return true;
+        return (ContextCompat.checkSelfPermission(context, permission) == 0);
     }
 
-    @Nullable
     public static ArrayAdapter getTextViewAdapter(Context context, String type) {
         switch (type) {
             case "bluetooth":
@@ -266,6 +261,7 @@ public class Main extends AppCompatActivity {
                 devices.toArray(devicesArray);
                 return new ArrayAdapter<>(context, android.R.layout.simple_dropdown_item_1line, devicesArray);
             case "contacts":
+                if (!weHavePermission(context, Manifest.permission.READ_CONTACTS)) return null;
                 ArrayList<String> contacts = new ArrayList<>();
                 Cursor people = context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
                 while (people.moveToNext()) {

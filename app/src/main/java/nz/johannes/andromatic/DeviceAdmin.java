@@ -8,7 +8,7 @@ public class DeviceAdmin extends DeviceAdminReceiver {
 
     @Override
     public CharSequence onDisableRequested(Context context, Intent intent) {
-        return "Disabling device admin will remove all triggers and actions relating to screen timeout and lock.";
+        return "Disabling device admin will remove all functions relating to screen timeout and lock.";
     }
 
     @Override

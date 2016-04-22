@@ -1,5 +1,6 @@
 package nz.johannes.andromatic;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (!Main.weHavePermission(context, Manifest.permission.RECEIVE_SMS)) return;
         SmsMessage[] messages;
         if (Build.VERSION.SDK_INT >= 19) messages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
         else {

@@ -1,5 +1,6 @@
 package nz.johannes.andromatic;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ public class CallReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (!Main.weHavePermission(context, Manifest.permission.READ_PHONE_STATE)) return;
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
         if (state.equals(lastState)) return;
         if (state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {

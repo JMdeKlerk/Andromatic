@@ -1,5 +1,6 @@
 package nz.johannes.andromatic;
 
+import android.Manifest;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
@@ -20,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +34,7 @@ public class Action {
     public void doAction(Context context) {
         switch (command) {
             case "Action.StartCall":
+                if (!Main.weHavePermission(context, Manifest.permission.CALL_PHONE)) return;
                 Intent call = new Intent(Intent.ACTION_CALL);
                 call.setData(Uri.parse("tel:" + multiData.get(0)));
                 call.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -83,6 +84,7 @@ public class Action {
                 ((AudioManager) context.getSystemService(Context.AUDIO_SERVICE)).setMicrophoneMute(true);
                 break;
             case "Action.SendSMS":
+                if (!Main.weHavePermission(context, Manifest.permission.SEND_SMS)) return;
                 SmsManager.getDefault().sendTextMessage(multiData.get(1), null, multiData.get(2), null, null);
                 break;
             case "Action.MediaPlay":
@@ -147,6 +149,7 @@ public class Action {
                 ((WifiManager) context.getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(false);
                 break;
             case "Action.LockModeNone":
+                if (!Main.weHavePermission(context, "device_admin")) return;
                 DevicePolicyManager lockNoneManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
                 ComponentName lockNoneAdmin = new ComponentName(context, DeviceAdmin.class);
                 if (!lockNoneManager.isAdminActive(lockNoneAdmin)) return;
@@ -154,6 +157,7 @@ public class Action {
                 lockNoneManager.resetPassword("", DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY);
                 break;
             case "Action.LockModePIN":
+                if (!Main.weHavePermission(context, "device_admin")) return;
                 DevicePolicyManager lockPinManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
                 ComponentName lockPinAdmin = new ComponentName(context, DeviceAdmin.class);
                 if (!lockPinManager.isAdminActive(lockPinAdmin)) return;
@@ -162,6 +166,7 @@ public class Action {
                 lockPinManager.lockNow();
                 break;
             case "Action.LockModePassword":
+                if (!Main.weHavePermission(context, "device_admin")) return;
                 DevicePolicyManager lockPassManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
                 ComponentName lockPassAdmin = new ComponentName(context, DeviceAdmin.class);
                 if (!lockPassManager.isAdminActive(lockPassAdmin)) return;
@@ -170,6 +175,7 @@ public class Action {
                 lockPassManager.lockNow();
                 break;
             case "Action.Timeout":
+                if (!Main.weHavePermission(context, "device_admin")) return;
                 DevicePolicyManager timeoutManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
                 ComponentName timeoutAdmin = new ComponentName(context, DeviceAdmin.class);
                 if (!timeoutManager.isAdminActive(timeoutAdmin)) return;
@@ -250,9 +256,72 @@ public class Action {
             if (action != null) {
                 TextView type = (TextView) convertView.findViewById(R.id.type);
                 TextView detail = (TextView) convertView.findViewById(R.id.detail);
-                // TODO make human readable with per-command details
-                type.setText(action.getCommand());
-                if (action.getData() != -1) detail.setText(String.valueOf(action.getData()));
+                switch (action.getCommand()) {
+                    case "Action.StartCall":
+                        type.setText("Start call");
+                        if (action.getMultiData().get(1) != null)
+                            detail.setText(action.getMultiData().get(1) + " (" + action.getMultiData().get(0) + ")");
+                        else detail.setText((String) action.getMultiData().get(0));
+                        break;/*
+                    case "Action.AcceptCall":
+                        break;
+                    case "Action.EndCall":
+                        break;
+                    case "Action.SpeakerphoneEnable":
+                        break;
+                    case "Action.SpeakerphoneToggle":
+                        break;
+                    case "Action.SpeakerphoneDisable":
+                        break;
+                    case "Action.MicEnable":
+                        break;
+                    case "Action.MicToggle":
+                        break;
+                    case "Action.MicDisable":
+                        break;
+                    case "Action.SendSMS":
+                        break;
+                    case "Action.MediaPlay":
+                        break;
+                    case "Action.MediaPause":
+                        break;
+                    case "Action.MediaSkip":
+                        break;
+                    case "Action.MediaVolume":
+                        break;
+                    case "Action.LaunchApp":
+                        break;
+                    case "Action.Vibrate":
+                        break;
+                    case "Action.PlaySound":
+                        break;
+                    case "Action.BluetoothEnable":
+                        break;
+                    case "Action.BluetoothToggle":
+                        break;
+                    case "Action.BluetoothDisable":
+                        break;
+                    case "Action.WifiEnable":
+                        break;
+                    case "Action.WifiToggle":
+                        break;
+                    case "Action.WifiDisable":
+                        break;
+                    case "Action.LockModeNone":
+                        break;
+                    case "Action.LockModePIN":
+                        break;
+                    case "Action.LockModePassword":
+                        break;
+                    case "Action.Timeout":
+                        break;
+                    case "Action.RingerVolume":
+                        break;
+                    case "Action.NotificationVolume":
+                        break;*/
+                    default:
+                        type.setText(action.getCommand());
+                }
             }
             return convertView;
         }
