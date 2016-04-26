@@ -222,7 +222,7 @@ public class AddComponent extends PreferenceActivity {
                     alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
                     textView = (AutoCompleteTextView) view.findViewById(R.id.text);
-                    if (triggerType.equals("Trigger.Bluetooth")) {
+                    if (triggerType.equals("Trigger.BluetoothByDeviceName")) {
                         textView.setHint("Device name");
                         textView.setAdapter(Main.getTextViewAdapter(context, "bluetooth"));
                     } else {
@@ -413,14 +413,14 @@ public class AddComponent extends PreferenceActivity {
                     //TODO
                     break;
                 case "Action.LockModeNone":
-                case "Action.LockModePIN":
+                case "Action.LockModePin":
                 case "Action.LockModePassword":
                     if (!actionType.equals("Action.LockModeNone")) {
                         alert = new AlertDialog.Builder(context);
                         view = getActivity().getLayoutInflater().inflate(R.layout.dialog_singleline, null);
                         EditText textView = (EditText) view.findViewById(R.id.text);
-                        textView.setHint((actionType.equals("Action.LockModePIN")) ? "PIN" : "Password");
-                        textView.setInputType((actionType.equals("Action.LockModePIN")) ? InputType.TYPE_CLASS_NUMBER : InputType.TYPE_CLASS_TEXT);
+                        textView.setHint((actionType.equals("Action.LockModePin")) ? "PIN" : "Password");
+                        textView.setInputType((actionType.equals("Action.LockModePin")) ? InputType.TYPE_CLASS_NUMBER : InputType.TYPE_CLASS_TEXT);
                         textView.setTransformationMethod(PasswordTransformationMethod.getInstance());
                         alert.setView(view);
                         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -437,7 +437,9 @@ public class AddComponent extends PreferenceActivity {
                         alert.setNegativeButton("Cancel", null);
                         alert.show();
                     } else {
+                        action.setData(0);
                         task.addNewAction(context, action);
+                        getActivity().finish();
                     }
                     break;
                 case "Action.Timeout":

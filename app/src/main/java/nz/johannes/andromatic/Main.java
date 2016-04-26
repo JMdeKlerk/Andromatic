@@ -245,7 +245,7 @@ public class Main extends AppCompatActivity {
             ComponentName component = new ComponentName(context, DeviceAdmin.class);
             return dpm.isAdminActive(component);
         }
-        if (android.os.Build.VERSION.SDK_INT <= 23) return true;
+        if (android.os.Build.VERSION.SDK_INT < 23) return true;
         return (ContextCompat.checkSelfPermission(context, permission) == 0);
     }
 

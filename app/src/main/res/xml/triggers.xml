@@ -40,7 +40,7 @@
     <PreferenceScreen android:title="Miscellaneous...">
         <Preference
             android:key="Trigger.BatteryLow"
-            android:title="Batter low"/>
+            android:title="Battery low"/>
         <PreferenceScreen android:title="Charger...">
             <Preference
                 android:key="Trigger.ChargerInserted"
@@ -58,10 +58,10 @@
         <PreferenceScreen android:title="Display...">
             <Preference
                 android:key="Trigger.ScreenOn"
-                android:title="Display on"/>
+                android:title="Device wakeup"/>
             <Preference
                 android:key="Trigger.ScreenOff"
-                android:title="Display off"/>
+                android:title="Device sleep"/>
         </PreferenceScreen>
     </PreferenceScreen>
     <PreferenceScreen android:title="Network...">
@@ -70,7 +70,7 @@
                 android:key="Trigger.Bluetooth"
                 android:title="Any"/>
             <Preference
-                android:key="Trigger.BluetoothByName"
+                android:key="Trigger.BluetoothByDeviceName"
                 android:title="By device name..."/>
         </PreferenceScreen>
         <PreferenceScreen android:title="Wifi connected...">

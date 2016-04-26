@@ -58,9 +58,100 @@ public class Trigger {
             if (trigger != null) {
                 TextView type = (TextView) convertView.findViewById(R.id.type);
                 TextView detail = (TextView) convertView.findViewById(R.id.detail);
-                // TODO make human readable with per-command details
-                type.setText(trigger.getType());
-                if (trigger.getMatch() != null) detail.setText(trigger.getMatch());
+                switch (trigger.getType()) {
+                    case "Trigger.AnyIncomingCall":
+                        type.setText("Any incoming call");
+                        break;
+                    case "Trigger.IncomingCallByCaller":
+                        type.setText("Incoming call");
+                        if (trigger.getExtraData().get(0) != null)
+                            detail.setText(trigger.getExtraData().get(0) + " (" + trigger.getMatch() + ")");
+                        else detail.setText(trigger.getMatch());
+                        break;
+                    case "Trigger.AnyAnsweredCall":
+                        type.setText("Any answered call");
+                        break;
+                    case "Trigger.AnsweredCallByCaller":
+                        type.setText("Answered call");
+                        if (trigger.getExtraData().get(0) != null)
+                            detail.setText(trigger.getExtraData().get(0) + " (" + trigger.getMatch() + ")");
+                        else detail.setText(trigger.getMatch());
+                        break;
+                    case "Trigger.AnyEndedCall":
+                        type.setText("Any ended call");
+                        break;
+                    case "Trigger.EndedCallByCaller":
+                        type.setText("Ended call");
+                        if (trigger.getExtraData().get(0) != null)
+                            detail.setText(trigger.getExtraData().get(0) + " (" + trigger.getMatch() + ")");
+                        else detail.setText(trigger.getMatch());
+                        break;
+                    case "Trigger.AnySMS":
+                        type.setText("Any received SMS");
+                        break;
+                    case "Trigger.SMSByContent":
+                        type.setText("SMS received");
+                        detail.setText(trigger.getExtraData().get(0) + " match: \"" + trigger.getMatch() + "\"");
+                        break;
+                    case "Trigger.SMSBySender":
+                        type.setText("SMS received");
+                        if (trigger.getExtraData().get(0) != null)
+                            detail.setText(trigger.getExtraData().get(0) + " (" + trigger.getMatch() + ")");
+                        else detail.setText(trigger.getMatch());
+                        break;
+                    case "Trigger.BatteryLow":
+                        type.setText("Battery low");
+                        break;
+                    case "Trigger.ChargerInserted":
+                        type.setText("Charger inserted");
+                        break;
+                    case "Trigger.ChargerRemoved":
+                        type.setText("Charger removed");
+                        break;
+                    case "Trigger.Interval":
+                        type.setText("Interval");
+                        detail.setText(trigger.getMatch());
+                        break;
+                    case "Trigger.Time":
+                        type.setText("Time");
+                        detail.setText(trigger.getMatch());
+                        break;
+                    case "Trigger.ScreenOn":
+                        type.setText("Device wakeup");
+                        break;
+                    case "Trigger.ScreenOff":
+                        type.setText("Device sleep");
+                        break;
+                    case "Trigger.Bluetooth":
+                        type.setText("Any bluetooth connection");
+                        break;
+                    case "Trigger.BluetoothByDeviceName":
+                        type.setText("Bluetooth connection");
+                        detail.setText(trigger.getMatch());
+                        break;
+                    case "Trigger.WifiConnected":
+                        type.setText("Wifi connected");
+                        break;
+                    case "Trigger.WifiConnectedBySSID":
+                        type.setText("Wifi connected");
+                        detail.setText(trigger.getMatch());
+                        break;
+                    case "Trigger.WifiDisconnected":
+                        type.setText("Wifi disconnected");
+                        break;
+                    case "Trigger.WifiDisconnectedBySSID":
+                        type.setText("Wifi disconnected");
+                        detail.setText(trigger.getMatch());
+                        break;
+                    case "Trigger.Acceleration":
+                        type.setText("Device acceleration");
+                        break;
+                    case "Trigger.Proximity":
+                        type.setText("Device proximity");
+                        break;
+                    default:
+                        type.setText(trigger.getType());
+                }
             }
             return convertView;
         }

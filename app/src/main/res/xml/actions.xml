@@ -93,12 +93,12 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Phone settings...">
-        <PreferenceScreen android:title="Set lock mode..">
+        <PreferenceScreen android:title="Set lock mode...">
             <Preference
                 android:key="Action.LockModeNone"
                 android:title="None"/>
             <Preference
-                android:key="Action.LockModePIN"
+                android:key="Action.LockModePin"
                 android:title="PIN..."/>
             <Preference
                 android:key="Action.LockModePassword"
