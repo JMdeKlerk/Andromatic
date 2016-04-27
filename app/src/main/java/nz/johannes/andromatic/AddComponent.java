@@ -11,6 +11,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -410,7 +412,28 @@ public class AddComponent extends PreferenceActivity {
                     alert.show();
                     break;
                 case "Action.PlaySound":
-                    //TODO
+                    alert = new AlertDialog.Builder(context);
+                    RingtoneManager manager = new RingtoneManager(context);
+                    manager.setType(RingtoneManager.TYPE_NOTIFICATION);
+                    Cursor cursor = manager.getCursor();
+                    final ArrayList<String> soundChoices = new ArrayList<>();
+                    final ArrayList<String> soundUris = new ArrayList<>();
+                    while (cursor.moveToNext()) {
+                        soundChoices.add(cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX));
+                        soundUris.add(cursor.getString(RingtoneManager.URI_COLUMN_INDEX));
+                    }
+                    alert.setItems(soundChoices.toArray(new String[soundChoices.size()]), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ArrayList actionData = new ArrayList();
+                            actionData.add(soundChoices.get(which));
+                            actionData.add(soundUris.get(which));
+                            action.setData(actionData);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.show();
                     break;
                 case "Action.LockModeNone":
                 case "Action.LockModePin":

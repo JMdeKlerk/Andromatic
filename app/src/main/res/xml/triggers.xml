@@ -55,14 +55,6 @@
         <Preference
             android:key="Trigger.Time"
             android:title="Time..."/>
-        <PreferenceScreen android:title="Display...">
-            <Preference
-                android:key="Trigger.ScreenOn"
-                android:title="Device wakeup"/>
-            <Preference
-                android:key="Trigger.ScreenOff"
-                android:title="Device sleep"/>
-        </PreferenceScreen>
     </PreferenceScreen>
     <PreferenceScreen android:title="Network...">
         <PreferenceScreen android:title="Bluetooth connection...">
@@ -90,12 +82,15 @@
                 android:title="By SSID..."/>
         </PreferenceScreen>
     </PreferenceScreen>
-    <PreferenceScreen android:title="Sensors...">
+    <PreferenceScreen android:title="Gestures...">
         <Preference
-            android:key="Trigger.Acceleration"
-            android:title="Acceleration..."/>
+            android:key="Trigger.Flip"
+            android:title="Flip"/>
         <Preference
-            android:key="Trigger.Proximity"
-            android:title="Proximity..."/>
+            android:key="Trigger.Shake"
+            android:title="Shake"/>
+        <Preference
+            android:key="Trigger.FaceDown"
+            android:title="Face down"/>
     </PreferenceScreen>
 </PreferenceScreen>

@@ -116,12 +116,6 @@ public class Trigger {
                         type.setText("Time");
                         detail.setText(trigger.getMatch());
                         break;
-                    case "Trigger.ScreenOn":
-                        type.setText("Device wakeup");
-                        break;
-                    case "Trigger.ScreenOff":
-                        type.setText("Device sleep");
-                        break;
                     case "Trigger.Bluetooth":
                         type.setText("Any bluetooth connection");
                         break;
@@ -143,11 +137,14 @@ public class Trigger {
                         type.setText("Wifi disconnected");
                         detail.setText(trigger.getMatch());
                         break;
-                    case "Trigger.Acceleration":
-                        type.setText("Device acceleration");
+                    case "Trigger.Shake":
+                        type.setText("Shake");
                         break;
-                    case "Trigger.Proximity":
-                        type.setText("Device proximity");
+                    case "Trigger.Flip":
+                        type.setText("Flip");
+                        break;
+                    case "Trigger.FaceDown":
+                        type.setText("Face down");
                         break;
                     default:
                         type.setText(trigger.getType());

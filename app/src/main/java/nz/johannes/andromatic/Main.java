@@ -4,11 +4,13 @@ import android.Manifest;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -180,12 +182,15 @@ public class Main extends AppCompatActivity {
                     case "Trigger.Interval":
                     case "Trigger.Time":
                         alarm = true;
+                        break;
                     case "Trigger.BatteryLow":
                     case "Trigger.ChargerInserted":
                     case "Trigger.ChargerRemoved":
                         battery = true;
+                        break;
                     case "Trigger.Bluetooth":
                         bluetooth = true;
+                        break;
                     case "Trigger.AnyIncomingCall":
                     case "Trigger.IncomingCallByCaller":
                     case "Trigger.AnyAnsweredCall":
@@ -193,10 +198,12 @@ public class Main extends AppCompatActivity {
                     case "Trigger.AnyEndedCall":
                     case "Trigger.EndedCallByCaller":
                         call = true;
+                        break;
                     case "Trigger.AnySMS":
                     case "Trigger.SMSByContent":
                     case "Trigger.SMSBySender":
                         sms = true;
+                        break;
                     case "Trigger.WifiConnected":
                     case "Trigger.WifiConnectedBySSID":
                     case "Trigger.WifiDisconnected":

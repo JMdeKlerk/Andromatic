@@ -125,7 +125,7 @@ public class Action {
                 ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
                 break;
             case "Action.PlaySound":
-                RingtoneManager.getRingtone(context, Uri.parse(multiData.get(0))).play();
+                RingtoneManager.getRingtone(context, Uri.parse(multiData.get(1))).play();
                 break;
             case "Action.BluetoothEnable":
                 BluetoothAdapter.getDefaultAdapter().enable();
@@ -315,7 +315,7 @@ public class Action {
                         break;
                     case "Action.PlaySound":
                         type.setText("Play sound");
-                        detail.setText((String) action.getMultiData().get(1));
+                        detail.setText((String) action.getMultiData().get(0));
                         break;
                     case "Action.BluetoothEnable":
                         type.setText("Enable bluetooth");
