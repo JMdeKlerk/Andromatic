@@ -14,6 +14,10 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
@@ -42,6 +46,8 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class Main extends AppCompatActivity {
+
+    private static ShakeSensor shakeSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +78,7 @@ public class Main extends AppCompatActivity {
                 alert.show();
             }
         });
+        shakeSensor = new ShakeSensor(this);
     }
 
     @Override
@@ -166,30 +173,29 @@ public class Main extends AppCompatActivity {
         return tasks;
     }
 
-    public static void manageReceivers(Context context) {
-        boolean alarm, battery, bluetooth, call, sms, wifi;
-        alarm = battery = bluetooth = call = sms = wifi = false;
+    public static void manageReceivers(final Context context) {
+        boolean[] receiverBools = new boolean[6];
+        boolean[] sensorBools = new boolean[2];
         PackageManager pm = context.getPackageManager();
-        ComponentName alarmReceiver = new ComponentName(context, AlarmReceiver.class);
-        ComponentName batteryReceiver = new ComponentName(context, BatteryReceiver.class);
-        ComponentName bluetoothReceiver = new ComponentName(context, BluetoothReceiver.class);
-        ComponentName callReceiver = new ComponentName(context, CallReceiver.class);
-        ComponentName smsReceiver = new ComponentName(context, SmsReceiver.class);
-        ComponentName wifiReceiver = new ComponentName(context, WifiReceiver.class);
+        SensorManager sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        ComponentName[] receivers = new ComponentName[]{new ComponentName(context, AlarmReceiver.class),
+                new ComponentName(context, BatteryReceiver.class), new ComponentName(context, BluetoothReceiver.class),
+                new ComponentName(context, CallReceiver.class), new ComponentName(context, SmsReceiver.class),
+                new ComponentName(context, WifiReceiver.class)};
         for (Task task : getAllStoredTasks(context)) {
             for (Trigger trigger : task.getTriggers()) {
                 switch (trigger.getType()) {
                     case "Trigger.Interval":
                     case "Trigger.Time":
-                        alarm = true;
+                        receiverBools[0] = true;
                         break;
                     case "Trigger.BatteryLow":
                     case "Trigger.ChargerInserted":
                     case "Trigger.ChargerRemoved":
-                        battery = true;
+                        receiverBools[1] = true;
                         break;
                     case "Trigger.Bluetooth":
-                        bluetooth = true;
+                        receiverBools[2] = true;
                         break;
                     case "Trigger.AnyIncomingCall":
                     case "Trigger.IncomingCallByCaller":
@@ -197,33 +203,35 @@ public class Main extends AppCompatActivity {
                     case "Trigger.AnsweredCallByCaller":
                     case "Trigger.AnyEndedCall":
                     case "Trigger.EndedCallByCaller":
-                        call = true;
+                        receiverBools[3] = true;
                         break;
                     case "Trigger.AnySMS":
                     case "Trigger.SMSByContent":
                     case "Trigger.SMSBySender":
-                        sms = true;
+                        receiverBools[4] = true;
                         break;
                     case "Trigger.WifiConnected":
                     case "Trigger.WifiConnectedBySSID":
                     case "Trigger.WifiDisconnected":
                     case "Trigger.WifiDisconnectedBySSID":
-                        wifi = true;
+                        receiverBools[5] = true;
+                        break;
+                    case "Trigger.Shake":
+                        sensorBools[0] = true;
+                        break;
                 }
             }
         }
-        if (alarm) pm.setComponentEnabledSetting(alarmReceiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        else pm.setComponentEnabledSetting(alarmReceiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-        if (battery) pm.setComponentEnabledSetting(batteryReceiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        else pm.setComponentEnabledSetting(batteryReceiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-        if (bluetooth) pm.setComponentEnabledSetting(bluetoothReceiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        else pm.setComponentEnabledSetting(bluetoothReceiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-        if (call) pm.setComponentEnabledSetting(callReceiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        else pm.setComponentEnabledSetting(callReceiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-        if (sms) pm.setComponentEnabledSetting(smsReceiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        else pm.setComponentEnabledSetting(smsReceiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-        if (wifi) pm.setComponentEnabledSetting(wifiReceiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-        else pm.setComponentEnabledSetting(wifiReceiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        for (int i = 0; i < receivers.length; i++) {
+            if (receiverBools[i])
+                pm.setComponentEnabledSetting(receivers[i], PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+            else pm.setComponentEnabledSetting(receivers[i], PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        }
+        if (sensorBools[0]) {
+            sensorManager.registerListener(shakeSensor, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        } else {
+            sensorManager.unregisterListener(shakeSensor);
+        }
     }
 
     public static void showToast(Context context, String message) {
