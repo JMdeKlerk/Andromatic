@@ -420,7 +420,7 @@ public class AddComponent extends PreferenceActivity {
                     final ArrayList<String> soundUris = new ArrayList<>();
                     while (cursor.moveToNext()) {
                         soundChoices.add(cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX));
-                        soundUris.add(cursor.getString(RingtoneManager.URI_COLUMN_INDEX));
+                        soundUris.add(cursor.getString(RingtoneManager.URI_COLUMN_INDEX) + "/" + cursor.getString(RingtoneManager.ID_COLUMN_INDEX));
                     }
                     alert.setItems(soundChoices.toArray(new String[soundChoices.size()]), new DialogInterface.OnClickListener() {
                         @Override

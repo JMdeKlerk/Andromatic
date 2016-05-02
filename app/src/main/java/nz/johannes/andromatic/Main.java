@@ -1,6 +1,7 @@
 package nz.johannes.andromatic;
 
 import android.Manifest;
+import android.app.Service;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -30,6 +31,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,13 +43,13 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
 public class Main extends AppCompatActivity {
-
-    private static ShakeSensor shakeSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +80,7 @@ public class Main extends AppCompatActivity {
                 alert.show();
             }
         });
-        shakeSensor = new ShakeSensor(this);
+        manageReceivers(this);
     }
 
     @Override
@@ -174,10 +176,10 @@ public class Main extends AppCompatActivity {
     }
 
     public static void manageReceivers(final Context context) {
+        context.stopService(new Intent(context, SensorService.class));
         boolean[] receiverBools = new boolean[6];
         boolean[] sensorBools = new boolean[2];
         PackageManager pm = context.getPackageManager();
-        SensorManager sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         ComponentName[] receivers = new ComponentName[]{new ComponentName(context, AlarmReceiver.class),
                 new ComponentName(context, BatteryReceiver.class), new ComponentName(context, BluetoothReceiver.class),
                 new ComponentName(context, CallReceiver.class), new ComponentName(context, SmsReceiver.class),
@@ -227,11 +229,9 @@ public class Main extends AppCompatActivity {
                 pm.setComponentEnabledSetting(receivers[i], PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
             else pm.setComponentEnabledSetting(receivers[i], PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
         }
-        if (sensorBools[0]) {
-            sensorManager.registerListener(shakeSensor, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-        } else {
-            sensorManager.unregisterListener(shakeSensor);
-        }
+        Intent intent = new Intent(context, SensorService.class);
+        intent.putExtra("shake", sensorBools[0]);
+        if (sensorBools[0]) context.startService(intent);
     }
 
     public static void showToast(Context context, String message) {
