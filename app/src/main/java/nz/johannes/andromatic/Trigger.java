@@ -143,8 +143,11 @@ public class Trigger {
                     case "Trigger.Flip":
                         type.setText("Flip");
                         break;
+                    case "Trigger.FaceUp":
+                        type.setText("Flip up");
+                        break;
                     case "Trigger.FaceDown":
-                        type.setText("Face down");
+                        type.setText("Flip down");
                         break;
                     default:
                         type.setText(trigger.getType());

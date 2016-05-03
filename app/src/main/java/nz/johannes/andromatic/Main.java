@@ -221,6 +221,11 @@ public class Main extends AppCompatActivity {
                     case "Trigger.Shake":
                         sensorBools[0] = true;
                         break;
+                    case "Trigger.Flip":
+                    case "Trigger.FaceUp":
+                    case "Trigger.FaceDown":
+                        sensorBools[1] = true;
+                        break;
                 }
             }
         }
@@ -231,7 +236,8 @@ public class Main extends AppCompatActivity {
         }
         Intent intent = new Intent(context, SensorService.class);
         intent.putExtra("shake", sensorBools[0]);
-        if (sensorBools[0]) context.startService(intent);
+        intent.putExtra("flip", sensorBools[1]);
+        if (sensorBools[0] || sensorBools[1]) context.startService(intent);
     }
 
     public static void showToast(Context context, String message) {

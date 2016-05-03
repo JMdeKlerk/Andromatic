@@ -101,6 +101,13 @@ public class Action {
                 pause.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PAUSE));
                 context.sendOrderedBroadcast(pause, null);
                 break;
+            case "Action.MediaPlayPause":
+                Intent playPause = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                playPause.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
+                context.sendOrderedBroadcast(playPause, null);
+                playPause.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
+                context.sendOrderedBroadcast(playPause, null);
+                break;
             case "Action.MediaSkip":
                 Intent skip = new Intent(Intent.ACTION_MEDIA_BUTTON);
                 skip.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_NEXT));
@@ -298,6 +305,9 @@ public class Action {
                         break;
                     case "Action.MediaPause":
                         type.setText("Pause media");
+                        break;
+                    case "Action.MediaPlayPause":
+                        type.setText("Media play/pause");
                         break;
                     case "Action.MediaSkip":
                         type.setText("Skip media");

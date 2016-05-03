@@ -84,13 +84,13 @@
     </PreferenceScreen>
     <PreferenceScreen android:title="Gestures...">
         <Preference
-            android:key="Trigger.Flip"
-            android:title="Flip"/>
-        <Preference
             android:key="Trigger.Shake"
             android:title="Shake"/>
         <Preference
+            android:key="Trigger.FaceUp"
+            android:title="Flip up"/>
+        <Preference
             android:key="Trigger.FaceDown"
-            android:title="Face down"/>
+            android:title="Flip down"/>
     </PreferenceScreen>
 </PreferenceScreen>

@@ -48,6 +48,9 @@
             android:key="Action.MediaPause"
             android:title="Media pause"/>
         <Preference
+            android:key="Action.MediaPlayPause"
+            android:title="Media play/pause"/>
+        <Preference
             android:key="Action.MediaSkip"
             android:title="Media skip"/>
         <Preference
