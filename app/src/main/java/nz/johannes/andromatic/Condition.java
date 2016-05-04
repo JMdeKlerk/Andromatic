@@ -12,21 +12,35 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Condition {
 
     private String type;
     private String match;
-
-    public Condition() {
-
-    }
+    private ArrayList<String> extraData;
 
     public boolean check(Context context) {
         switch (type) {
+            case "Condition.NoCall":
+                // TODO
+                return false;
+            case "Condition.AnyIncomingCall":
+                // TODO
+                return false;
+            case "Condition.IncomingCallByCaller":
+                // TODO
+                return false;
+            case "Condition.AnyCall":
+                // TODO
+                return false;
+            case "Condition.CallByCaller":
+                // TODO
+                return false;
             case "Condition.BatteryPercentage":
-                break;
+                // TODO
+                return false;
             case "Condition.PhoneCharging":
                 Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
@@ -36,15 +50,31 @@ public class Condition {
                 plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
                 return !(plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB);
             case "Condition.TimePeriod":
-                break;
+                // TODO
+                return false;
+            case "Condition.MobileDataActive":
+                // TODO
+                return false;
+            case "Condition.MobileDataInactive":
+                // TODO
+                return false;
             case "Condition.WifiConnected":
                 ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
                 return wifiInfo.isConnected();
+            case "Condition.WifiConnectedBySSID":
+                // TODO
+                return false;
             case "Condition.WifiNotConnected":
                 connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
                 wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
                 return !wifiInfo.isConnected();
+            case "Condition.FaceUp":
+                // TODO
+                return false;
+            case "Condition.FaceDown":
+                // TODO
+                return false;
         }
         return false;
     }
@@ -65,6 +95,14 @@ public class Condition {
         this.match = match;
     }
 
+    public ArrayList<String> getExtraData() {
+        return extraData;
+    }
+
+    public void setExtraData(ArrayList data) {
+        this.extraData = data;
+    }
+
     public class ConditionListViewAdapter extends ArrayAdapter<Condition> {
 
         public ConditionListViewAdapter(Context context, int resource, List<Condition> items) {
@@ -83,8 +121,65 @@ public class Condition {
             if (condition != null) {
                 TextView type = (TextView) convertView.findViewById(R.id.type);
                 TextView detail = (TextView) convertView.findViewById(R.id.detail);
-                // TODO make human readable with per-command details
-                type.setText(condition.getType());
+                switch (condition.getType()) {
+                    case "Condition.NoCall":
+                        type.setText("No call in progress");
+                        break;
+                    case "Condition.AnyIncomingCall":
+                        type.setText("Call incoming");
+                        break;
+                    case "Condition.IncomingCallByCaller":
+                        type.setText("Call incoming");
+                        if (condition.getExtraData().get(0) != null)
+                            detail.setText(condition.getExtraData().get(0) + " (" + condition.getMatch() + ")");
+                        else detail.setText(condition.getMatch());
+                        break;
+                    case "Condition.AnyCall":
+                        type.setText("Call in progress");
+                        break;
+                    case "Condition.CallByCaller":
+                        type.setText("Call in progress");
+                        if (condition.getExtraData().get(0) != null)
+                            detail.setText(condition.getExtraData().get(0) + " (" + condition.getMatch() + ")");
+                        else detail.setText(condition.getMatch());
+                        break;
+                    case "Condition.BatteryPercentage":
+                        type.setText("Battery percentage");
+                        detail.setText(condition.getMatch() + " percent");
+                        break;
+                    case "Condition.PhoneCharging":
+                        type.setText("Phone charging");
+                        break;
+                    case "Condition.PhoneNotCharging":
+                        type.setText("Phone not charging");
+                        break;
+                    case "Condition.TimePeriod":
+                        type.setText("Time period");
+                        // TODO set detail
+                        break;
+                    case "Condition.MobileDataActive":
+                        type.setText("Mobile data enabled");
+                        break;
+                    case "Condition.MobileDataInactive":
+                        type.setText("Mobile data disabled");
+                        break;
+                    case "Condition.WifiConnected":
+                        type.setText("Wifi connected");
+                        break;
+                    case "Condition.WifiConnectedBySSID":
+                        type.setText("Wifi connected");
+                        detail.setText(condition.getMatch());
+                        break;
+                    case "Condition.WifiNotConnected":
+                        type.setText("Wifi not connected");
+                        break;
+                    case "Condition.FaceUp":
+                        type.setText("Phone face-up");
+                        break;
+                    case "Condition.FaceDown":
+                        type.setText("Phone face-down");
+                        break;
+                }
             }
             return convertView;
         }

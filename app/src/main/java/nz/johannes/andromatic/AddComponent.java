@@ -20,7 +20,6 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -55,6 +54,7 @@ public class AddComponent extends PreferenceActivity {
                 getFragmentManager().beginTransaction().replace(android.R.id.content, new TriggerFragment()).commit();
                 break;
             case "CONDITION":
+                getFragmentManager().beginTransaction().replace(android.R.id.content, new ConditionFragment()).commit();
                 break;
             case "ACTION":
                 getFragmentManager().beginTransaction().replace(android.R.id.content, new ActionFragment()).commit();
@@ -68,8 +68,8 @@ public class AddComponent extends PreferenceActivity {
         private AutoCompleteTextView textView;
         private AlertDialog.Builder alert;
         private static List<String> elevatedTriggers = Arrays.asList("Trigger.AnyIncomingCall", "Trigger.IncomingCallByCaller",
-                "Trigger.AnyAnsweredCall", "Trigger.AnsweredCallByCaller", "Trigger.AnyEndedCall", "Trigger.EndedCallByCaller", "Trigger.AnySMS",
-                "Trigger.SMSByContent", "Trigger.SMSBySender");
+                "Trigger.AnyOutgoingCall", "Trigger.OutgoingCallByCaller", "Trigger.AnyAnsweredCall", "Trigger.AnsweredCallByCaller",
+                "Trigger.AnyEndedCall", "Trigger.EndedCallByCaller", "Trigger.AnySMS", "Trigger.SMSByContent", "Trigger.SMSBySender");
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -84,12 +84,14 @@ public class AddComponent extends PreferenceActivity {
             if (elevatedTriggers.contains(triggerType) && android.os.Build.VERSION.SDK_INT >= 23) {
                 switch (triggerType) {
                     case "Trigger.AnyIncomingCall":
+                    case "Trigger.AnyOutgoingCall":
                     case "Trigger.AnyAnsweredCall":
                     case "Trigger.AnyEndedCall":
                         if (Main.weHavePermission(context, Manifest.permission.READ_PHONE_STATE)) createTrigger(triggerType);
                         else requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, elevatedTriggers.indexOf(triggerType));
                         break;
                     case "Trigger.IncomingCallByCaller":
+                    case "Trigger.OutgoingCallByCaller":
                     case "Trigger.AnsweredCallByCaller":
                     case "Trigger.EndedCallByCaller":
                         if (Main.weHavePermission(context, Manifest.permission.READ_CONTACTS) &&
@@ -148,6 +150,7 @@ public class AddComponent extends PreferenceActivity {
                     alert.show();
                     break;
                 case "Trigger.IncomingCallByCaller":
+                case "Trigger.OutgoingCallByCaller":
                 case "Trigger.AnsweredCallByCaller":
                 case "Trigger.EndedCallByCaller":
                 case "Trigger.SMSBySender":
@@ -247,6 +250,122 @@ public class AddComponent extends PreferenceActivity {
                     break;
                 default:
                     task.addNewTrigger(context, trigger);
+                    getActivity().finish();
+            }
+        }
+
+    }
+
+    public static class ConditionFragment extends PreferenceFragment {
+
+        private View view;
+        private AutoCompleteTextView textView;
+        private AlertDialog.Builder alert;
+        private static List<String> elevatedConditions = Arrays.asList("Condition.NoCall", "Condition.AnyIncomingCall",
+                "Condition.IncomingCallByCaller", "Condition.AnyCall", "Condition.CallByCaller");
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.conditions);
+        }
+
+        @Override
+        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+            if (preference instanceof PreferenceScreen) return false;
+            String conditionType = preference.getKey();
+            if (elevatedConditions.contains(conditionType) && android.os.Build.VERSION.SDK_INT >= 23) {
+                switch (conditionType) {
+                    case "Condition.NoCall":
+                    case "Condition.AnyIncomingCall":
+                    case "Condition.AnyCall":
+                        if (Main.weHavePermission(context, Manifest.permission.READ_PHONE_STATE)) createCondition(conditionType);
+                        else requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, elevatedConditions.indexOf(conditionType));
+                        break;
+                    case "Condition.IncomingCallByCaller":
+                    case "Condition.CallByCaller":
+                        if (Main.weHavePermission(context, Manifest.permission.READ_CONTACTS) &&
+                                Main.weHavePermission(context, Manifest.permission.READ_PHONE_STATE))
+                            createCondition(conditionType);
+                        else requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_CONTACTS},
+                                elevatedConditions.indexOf(conditionType));
+                        break;
+                }
+            } else createCondition(conditionType);
+            return true;
+        }
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                createCondition(elevatedConditions.get(requestCode));
+            }
+        }
+
+        private void createCondition(String conditionType) {
+            final Condition condition = new Condition();
+            condition.setType(conditionType);
+            switch (conditionType) {
+                case "Condition.IncomingCallByCaller":
+                case "Condition.CallByCaller":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                    textView.setHint("Name/number");
+                    textView.setAdapter(Main.getTextViewAdapter(context, "contacts"));
+                    textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+                            String selection = ((TextView) view).getText().toString();
+                            selection = selection.substring(selection.indexOf("(") + 1, selection.indexOf(")"));
+                            textView.setText(selection);
+                        }
+                    });
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AutoCompleteTextView senderField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String sender = senderField.getText().toString();
+                            condition.setMatch(sender);
+                            ArrayList<String> extras = new ArrayList<>();
+                            extras.add(Main.getNameFromNumber(context, sender));
+                            condition.setExtraData(extras);
+                            task.addNewCondition(context, condition);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
+                    break;
+                case "Condition.BatteryPercentage":
+                    // TODO
+                    break;
+                case "Condition.TimePeriod":
+                    // TODO
+                    break;
+                case "Condition.WifiConnectedBySSID":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                    textView.setHint("SSID");
+                    textView.setAdapter(Main.getTextViewAdapter(context, "ssids"));
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            EditText textField = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String match = textField.getText().toString();
+                            condition.setMatch(match);
+                            task.addNewCondition(context, condition);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
+                    break;
+                default:
+                    task.addNewCondition(context, condition);
                     getActivity().finish();
             }
         }
@@ -372,7 +491,7 @@ public class AddComponent extends PreferenceActivity {
                         public void onClick(DialogInterface dialog, int id) {
                             EditText to = (EditText) ((AlertDialog) dialog).findViewById(R.id.to);
                             EditText message = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
-                            ArrayList actionData = new ArrayList();
+                            ArrayList<String> actionData = new ArrayList();
                             actionData.add(Main.getNameFromNumber(context, to.getText().toString()));
                             actionData.add(to.getText().toString());
                             actionData.add(message.getText().toString());
@@ -400,7 +519,7 @@ public class AddComponent extends PreferenceActivity {
                     alert.setItems(appChoices.toArray(new String[appChoices.size()]), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ArrayList actionData = new ArrayList();
+                            ArrayList<String> actionData = new ArrayList();
                             actionData.add(appChoices.get(which));
                             actionData.add(appChoicePackage.get(which));
                             actionData.add(appChoiceName.get(which));
@@ -425,7 +544,7 @@ public class AddComponent extends PreferenceActivity {
                     alert.setItems(soundChoices.toArray(new String[soundChoices.size()]), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ArrayList actionData = new ArrayList();
+                            ArrayList<String> actionData = new ArrayList();
                             actionData.add(soundChoices.get(which));
                             actionData.add(soundUris.get(which));
                             action.setData(actionData);

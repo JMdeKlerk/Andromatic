@@ -6,10 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 public class CallReceiver extends BroadcastReceiver {
 
-    private static String lastState;
+    private static String lastState = TelephonyManager.EXTRA_STATE_IDLE;
     private static String lastCaller;
 
     @Override
@@ -27,7 +28,7 @@ public class CallReceiver extends BroadcastReceiver {
                 }
             }
         }
-        if (state.equals(TelephonyManager.EXTRA_STATE_OFFHOOK) && lastState.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+        if (state.equals(TelephonyManager.EXTRA_STATE_OFFHOOK) && TelephonyManager.EXTRA_STATE_RINGING.equals(lastState)) {
             for (Task task : Main.getAllStoredTasks(context)) {
                 for (Trigger trigger : task.getTriggers()) {
                     if (trigger.getType().equals("Trigger.AnyAnsweredCall")) task.runTask(context);
@@ -36,7 +37,7 @@ public class CallReceiver extends BroadcastReceiver {
                 }
             }
         }
-        if (state.equals(TelephonyManager.EXTRA_STATE_IDLE) && lastState.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+        if (state.equals(TelephonyManager.EXTRA_STATE_IDLE) && TelephonyManager.EXTRA_STATE_OFFHOOK.equals(lastState)) {
             for (Task task : Main.getAllStoredTasks(context)) {
                 for (Trigger trigger : task.getTriggers()) {
                     if (trigger.getType().equals("Trigger.AnyEndedCall")) task.runTask(context);

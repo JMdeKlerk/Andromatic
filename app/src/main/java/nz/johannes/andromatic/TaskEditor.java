@@ -55,7 +55,7 @@ public class TaskEditor extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Trigger trigger = (Trigger) triggerList.getItemAtPosition(position);
                 if (trigger.getType().equals("Add new...")) {
-                    addTrigger();
+                    addComponent("TRIGGER");
                 }
             }
         });
@@ -64,7 +64,7 @@ public class TaskEditor extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 final Trigger triggerToDelete = (Trigger) triggerList.getItemAtPosition(position);
                 if (triggerToDelete.getType().equals("Add new...")) {
-                    addTrigger();
+                    addComponent("TRIGGER");
                     return true;
                 }
                 alert.setTitle("Delete trigger?");
@@ -108,7 +108,7 @@ public class TaskEditor extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Condition condition = (Condition) conditionList.getItemAtPosition(position);
                 if (condition.getType().equals("Add new...")) {
-                    addCondition();
+                    addComponent("CONDITION");
                 }
             }
         });
@@ -117,7 +117,7 @@ public class TaskEditor extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 final Condition conditionToDelete = (Condition) conditionList.getItemAtPosition(position);
                 if (conditionToDelete.getType().equals("Add new...")) {
-                    addCondition();
+                    addComponent("CONDITION");
                     return true;
                 }
                 alert.setTitle("Delete trigger?");
@@ -161,7 +161,7 @@ public class TaskEditor extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Action action = (Action) actionList.getItemAtPosition(position);
                 if (action.getCommand().equals("Add new...")) {
-                    addAction();
+                    addComponent("ACTION");
                 }
             }
         });
@@ -170,7 +170,7 @@ public class TaskEditor extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 final Action actionToDelete = (Action) actionList.getItemAtPosition(position);
                 if (actionToDelete.getCommand().equals("Add new...")) {
-                    addAction();
+                    addComponent("ACTION");
                     return true;
                 }
                 alert.setTitle("Delete action?");
@@ -200,21 +200,10 @@ public class TaskEditor extends AppCompatActivity {
         setDynamicListHeight(actionList);
     }
 
-    private void addTrigger() {
+    private void addComponent(String type) {
         Intent intent = new Intent(this, AddComponent.class);
         intent.putExtra("Task", task.getName());
-        intent.setAction("TRIGGER");
-        startActivityForResult(intent, 0);
-    }
-
-    private void addCondition() {
-
-    }
-
-    private void addAction() {
-        Intent intent = new Intent(this, AddComponent.class);
-        intent.putExtra("Task", task.getName());
-        intent.setAction("ACTION");
+        intent.setAction(type);
         startActivityForResult(intent, 0);
     }
 
