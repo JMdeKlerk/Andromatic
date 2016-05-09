@@ -82,6 +82,7 @@ public class Task {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
+        Main.manageReceivers(context);
     }
 
     public void removeCondition(Context context, Condition condition) {
@@ -89,6 +90,7 @@ public class Task {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
+        Main.manageReceivers(context);
     }
 
     public void addNewAction(Context context, Action action) {

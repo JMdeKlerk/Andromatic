@@ -12,6 +12,8 @@ import android.os.PowerManager;
 
 public class SensorService extends Service {
 
+    public static boolean faceUp;
+
     private static Context context;
     private static PowerManager.WakeLock wakeLock;
     private static ShakeSensor shakeSensor = new ShakeSensor();
@@ -107,12 +109,14 @@ public class SensorService extends Service {
                     zAxisAccel = zAxisAccelNew;
                     zAccelChanges = 0;
                     if (zAxisAccelNew < 0) {
+                        faceUp = false;
                         for (Task task : Main.getAllStoredTasks(context)) {
                             for (Trigger trigger : task.getTriggers()) {
                                 if (trigger.getType().equals("Trigger.FaceDown")) task.runTask(context);
                             }
                         }
                     } else if (zAxisAccelNew > 0) {
+                        faceUp = true;
                         for (Task task : Main.getAllStoredTasks(context)) {
                             for (Trigger trigger : task.getTriggers()) {
                                 if (trigger.getType().equals("Trigger.FaceUp")) task.runTask(context);

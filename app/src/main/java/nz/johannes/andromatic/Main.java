@@ -228,6 +228,10 @@ public class Main extends AppCompatActivity {
                         break;
                 }
             }
+            for (Condition condition : task.getConditions()) {
+                if (condition.getType().equals("Condition.FaceUp") || condition.getType().equals("Condition.FaceDown"))
+                    sensorBools[1] = true;
+            }
         }
         for (int i = 0; i < receivers.length; i++) {
             if (receiverBools[i])

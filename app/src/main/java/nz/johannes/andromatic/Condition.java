@@ -3,9 +3,14 @@ package nz.johannes.andromatic;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
+import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,17 +29,17 @@ public class Condition {
     public boolean check(Context context) {
         switch (type) {
             case "Condition.NoCall":
-                // TODO
-                return false;
+                TelephonyManager noCallChecker = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                return noCallChecker.getCallState() == TelephonyManager.CALL_STATE_IDLE;
             case "Condition.AnyIncomingCall":
-                // TODO
-                return false;
+                TelephonyManager incCallChecker = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                return incCallChecker.getCallState() == TelephonyManager.CALL_STATE_RINGING;
             case "Condition.IncomingCallByCaller":
                 // TODO
                 return false;
             case "Condition.AnyCall":
-                // TODO
-                return false;
+                TelephonyManager callChecker = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                return callChecker.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
             case "Condition.CallByCaller":
                 // TODO
                 return false;
@@ -53,11 +58,13 @@ public class Condition {
                 // TODO
                 return false;
             case "Condition.MobileDataActive":
-                // TODO
-                return false;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1)
+                    return android.provider.Settings.Global.getInt(context.getContentResolver(), "mobile_data", 1) == 1;
+                else return android.provider.Settings.Secure.getInt(context.getContentResolver(), "mobile_data", 1) == 1;
             case "Condition.MobileDataInactive":
-                // TODO
-                return false;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1)
+                    return !(android.provider.Settings.Global.getInt(context.getContentResolver(), "mobile_data", 1) == 1);
+                else return !(android.provider.Settings.Secure.getInt(context.getContentResolver(), "mobile_data", 1) == 1);
             case "Condition.WifiConnected":
                 ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -70,11 +77,9 @@ public class Condition {
                 wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
                 return !wifiInfo.isConnected();
             case "Condition.FaceUp":
-                // TODO
-                return false;
+                return SensorService.faceUp;
             case "Condition.FaceDown":
-                // TODO
-                return false;
+                return !SensorService.faceUp;
         }
         return false;
     }
@@ -179,6 +184,8 @@ public class Condition {
                     case "Condition.FaceDown":
                         type.setText("Phone face-down");
                         break;
+                    default:
+                        type.setText(condition.getType());
                 }
             }
             return convertView;
