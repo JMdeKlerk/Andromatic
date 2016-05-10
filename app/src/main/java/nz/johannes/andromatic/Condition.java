@@ -10,6 +10,7 @@ import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,14 +36,16 @@ public class Condition {
                 TelephonyManager incCallChecker = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                 return incCallChecker.getCallState() == TelephonyManager.CALL_STATE_RINGING;
             case "Condition.IncomingCallByCaller":
-                // TODO
-                return false;
+                TelephonyManager incCallByCallerChecker = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                return (incCallByCallerChecker.getCallState() == TelephonyManager.CALL_STATE_RINGING &&
+                        PhoneNumberUtils.compare(CallReceiver.lastCaller, match));
             case "Condition.AnyCall":
                 TelephonyManager callChecker = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                 return callChecker.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
             case "Condition.CallByCaller":
-                // TODO
-                return false;
+                TelephonyManager callByCallerChecker = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                return (callByCallerChecker.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK &&
+                        PhoneNumberUtils.compare(CallReceiver.lastCaller, match));
             case "Condition.BatteryPercentage":
                 // TODO
                 return false;

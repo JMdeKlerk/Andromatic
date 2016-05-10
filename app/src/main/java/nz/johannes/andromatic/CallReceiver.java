@@ -10,12 +10,16 @@ import android.util.Log;
 
 public class CallReceiver extends BroadcastReceiver {
 
+    public static String lastCaller;
     private static String lastState = TelephonyManager.EXTRA_STATE_IDLE;
-    private static String lastCaller;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (!Main.weHavePermission(context, Manifest.permission.READ_PHONE_STATE)) return;
+        if (intent.getAction().equals(Intent.ACTION_NEW_OUTGOING_CALL)) {
+            lastCaller = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER).toString();
+            return;
+        }
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
         if (state.equals(lastState)) return;
         if (state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {

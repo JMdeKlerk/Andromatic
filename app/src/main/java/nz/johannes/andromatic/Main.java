@@ -229,8 +229,16 @@ public class Main extends AppCompatActivity {
                 }
             }
             for (Condition condition : task.getConditions()) {
-                if (condition.getType().equals("Condition.FaceUp") || condition.getType().equals("Condition.FaceDown"))
-                    sensorBools[1] = true;
+                switch (condition.getType()) {
+                    case "Condition.IncomingCallByCaller":
+                    case "Condition.CallByCaller":
+                        receiverBools[3] = true;
+                        break;
+                    case "Condition.FaceUp":
+                    case "Condition.FaceDown":
+                        sensorBools[1] = true;
+                        break;
+                }
             }
         }
         for (int i = 0; i < receivers.length; i++) {
