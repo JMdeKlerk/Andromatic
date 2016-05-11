@@ -9,8 +9,8 @@
         android:title="Toast duration"/>
     <ListPreference
         android:defaultValue="1"
-        android:entries="@array/ToastDuration"
-        android:entryValues="@array/ToastDurationIntervalValues"
+        android:entries="@array/TaskThrottle"
+        android:entryValues="@array/TaskThrottleValues"
         android:key="taskThrottle"
         android:summary="Time in seconds before a task can run again"
         android:title="Task throttle"/>

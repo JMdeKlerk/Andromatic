@@ -42,7 +42,7 @@
         </activity>
         <activity
             android:name=".AddComponent"
-            android:theme="@style/Theme.AppCompat.Light.Dialog">
+            android:theme="@style/AppTheme.Dialog">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nz.johannes.andromatic.Main"/>

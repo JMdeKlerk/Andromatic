@@ -36,7 +36,7 @@ public class SensorService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) stopSelf();
+        if (intent == null) return START_STICKY;
         SensorManager sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);

@@ -29,6 +29,7 @@ public class Task {
     private ArrayList<Trigger> triggers;
     private ArrayList<Condition> conditions;
     private ArrayList<Action> actions;
+    private long lastRunTime;
 
     public Task() {
 
@@ -39,6 +40,7 @@ public class Task {
         triggers = new ArrayList<>();
         conditions = new ArrayList<>();
         actions = new ArrayList<>();
+        lastRunTime = 0;
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         String storeTask = new Gson().toJson(this);
         editor.putString("task-" + name, storeTask).apply();
@@ -46,13 +48,16 @@ public class Task {
 
     public void runTask(Context context) {
         taskLock.lock();
-        for (Condition condition : conditions) {
-            if (!condition.check(context)) return;
-        }
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int taskThrottle = Integer.parseInt(prefs.getString("taskThrottle", "0")) * 1000;
+        if (lastRunTime >= (System.currentTimeMillis() - taskThrottle)) return;
+        for (Condition condition : conditions) if (!condition.check(context)) return;
         Main.showToast(context, "Running task: " + this.getName());
-        for (Action action : actions) {
-            action.doAction(context);
-        }
+        for (Action action : actions) action.doAction(context);
+        lastRunTime = System.currentTimeMillis();
+        String storeTask = new Gson().toJson(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("task-" + name, storeTask).apply();
         taskLock.unlock();
     }
 

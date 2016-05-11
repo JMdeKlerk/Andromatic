@@ -9,9 +9,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,8 +75,8 @@ public class Condition {
                 NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
                 return wifiInfo.isConnected();
             case "Condition.WifiConnectedBySSID":
-                // TODO
-                return false;
+                WifiManager manager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+                return match.equals(manager.getConnectionInfo().getSSID().replace("\"", ""));
             case "Condition.WifiNotConnected":
                 connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
                 wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);

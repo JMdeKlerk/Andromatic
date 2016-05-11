@@ -356,7 +356,7 @@ public class AddComponent extends PreferenceActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             EditText textField = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
                             String match = textField.getText().toString();
-                            condition.setMatch(match);
+                            condition.setMatch(match.replace("\"", ""));
                             task.addNewCondition(context, condition);
                             getActivity().finish();
                         }
