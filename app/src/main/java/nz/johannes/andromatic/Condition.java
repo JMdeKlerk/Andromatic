@@ -3,10 +3,6 @@ package nz.johannes.andromatic;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -49,8 +45,15 @@ public class Condition {
                 return (callByCallerChecker.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK &&
                         PhoneNumberUtils.compare(CallReceiver.lastCaller, match));
             case "Condition.BatteryPercentage":
-                // TODO
-                return false;
+                Intent batteryIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                int rawBattery = batteryIntent.getIntExtra("level", -1);
+                double scale = batteryIntent.getIntExtra("scale", -1);
+                double level = -1;
+                if (rawBattery >= 0 && scale > 0) level = rawBattery / scale * 100;
+                Log.i("Log", "Raw: " + rawBattery + " Scale: " + scale);
+                Log.i("Log", "Level: " + level + " Req: " + match);
+                if (match.substring(0, 1).equals("<")) return level < Integer.parseInt(match.substring(1));
+                else return level > Integer.parseInt(match.substring(1));
             case "Condition.PhoneCharging":
                 Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
@@ -155,7 +158,8 @@ public class Condition {
                         break;
                     case "Condition.BatteryPercentage":
                         type.setText("Battery percentage");
-                        detail.setText(condition.getMatch() + " percent");
+                        String modifierText = condition.getMatch().substring(0, 1).equals("<") ? "Less than " : "Greater than ";
+                        detail.setText(modifierText + condition.getMatch().substring(1) + " percent");
                         break;
                     case "Condition.PhoneCharging":
                         type.setText("Phone charging");

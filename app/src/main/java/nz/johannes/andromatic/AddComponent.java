@@ -339,7 +339,36 @@ public class AddComponent extends PreferenceActivity {
                     alert.show();
                     break;
                 case "Condition.BatteryPercentage":
-                    // TODO
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_seekbar_greaterlesser, null);
+                    ((SeekBar) view.findViewById(R.id.seek)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            TextView seekText = (TextView) view.findViewById(R.id.seek_text);
+                            seekText.setText(progress + "%");
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                        }
+                    });
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            SeekBar seek = (SeekBar) ((AlertDialog) dialog).findViewById(R.id.seek);
+                            RadioButton greater = (RadioButton) ((AlertDialog) dialog).findViewById(R.id.radio_greater);
+                            String greaterThan = greater.isChecked() ? ">" : "<";
+                            condition.setMatch(greaterThan + seek.getProgress());
+                            task.addNewCondition(context, condition);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
                     break;
                 case "Condition.TimePeriod":
                     // TODO
