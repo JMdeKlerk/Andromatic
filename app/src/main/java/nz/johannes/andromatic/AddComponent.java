@@ -371,7 +371,70 @@ public class AddComponent extends PreferenceActivity {
                     alert.show();
                     break;
                 case "Condition.TimePeriod":
-                    // TODO
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_time_period, null);
+                    final TextView startTimeBox = (TextView) view.findViewById(R.id.start_time);
+                    final ArrayList<String> extras = new ArrayList<>(4);
+                    while (extras.size() < 4) extras.add("0");
+                    startTimeBox.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            TimePickerDialog timePicker = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+                                @Override
+                                public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                    String meridian = "AM";
+                                    extras.add(0, String.valueOf(hourOfDay));
+                                    extras.add(1, String.valueOf(minute));
+                                    if (hourOfDay >= 12) {
+                                        hourOfDay = hourOfDay - 12;
+                                        if (hourOfDay == 0) hourOfDay = 12;
+                                        meridian = "PM";
+                                    }
+                                    String leadingZeroHour = (hourOfDay < 10) ? "0" : "";
+                                    String leadingZeroMinute = (minute < 10) ? "0" : "";
+                                    startTimeBox.setText(leadingZeroHour + hourOfDay + ":" + leadingZeroMinute + minute + " " + meridian);
+                                }
+                            }, 0, 0, false);
+                            timePicker.setTitle(null);
+                            timePicker.show();
+                        }
+                    });
+                    final TextView endTimeBox = (TextView) view.findViewById(R.id.end_time);
+                    endTimeBox.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            TimePickerDialog timePicker = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+                                @Override
+                                public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                    String meridian = "AM";
+                                    extras.add(2, String.valueOf(hourOfDay));
+                                    extras.add(3, String.valueOf(minute));
+                                    if (hourOfDay >= 12) {
+                                        hourOfDay = hourOfDay - 12;
+                                        if (hourOfDay == 0) hourOfDay = 12;
+                                        meridian = "PM";
+                                    }
+                                    String leadingZeroHour = (hourOfDay < 10) ? "0" : "";
+                                    String leadingZeroMinute = (minute < 10) ? "0" : "";
+                                    endTimeBox.setText(leadingZeroHour + hourOfDay + ":" + leadingZeroMinute + minute + " " + meridian);
+                                }
+                            }, 0, 0, false);
+                            timePicker.setTitle(null);
+                            timePicker.show();
+                        }
+                    });
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            condition.setMatch(startTimeBox.getText() + " - " + endTimeBox.getText());
+                            condition.setExtraData(extras);
+                            task.addNewCondition(context, condition);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
                     break;
                 case "Condition.WifiConnectedBySSID":
                     alert = new AlertDialog.Builder(context);

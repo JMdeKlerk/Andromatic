@@ -31,6 +31,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -80,30 +81,6 @@ public class Main extends AppCompatActivity {
                 alert.show();
             }
         });
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean("firstRun", true)) {
-            AlertDialog.Builder firstRunDialog = new AlertDialog.Builder(this);
-            firstRunDialog.setMessage("Looks like this is your first time using this app. Thanks for purchasing Andromatic! " +
-                    "Would you like a brief explanation of terms used?");
-            firstRunDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // TODO show a tutorial, explain terms used
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putBoolean("firstRun", false);
-                    editor.commit();
-                }
-            });
-            firstRunDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putBoolean("firstRun", false);
-                    editor.commit();
-                }
-            });
-            firstRunDialog.show();
-        }
         manageReceivers(this);
     }
 

@@ -35,7 +35,7 @@
         </PreferenceScreen>
         <Preference
             android:key="Condition.TimePeriod"
-            android:title="Time..."/>
+            android:title="Time period..."/>
     </PreferenceScreen>
     <PreferenceScreen android:title="Network...">
         <Preference

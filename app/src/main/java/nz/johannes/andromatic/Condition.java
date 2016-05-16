@@ -169,7 +169,7 @@ public class Condition {
                         break;
                     case "Condition.TimePeriod":
                         type.setText("Time period");
-                        // TODO set detail
+                        detail.setText(condition.getMatch());
                         break;
                     case "Condition.MobileDataActive":
                         type.setText("Mobile data enabled");
