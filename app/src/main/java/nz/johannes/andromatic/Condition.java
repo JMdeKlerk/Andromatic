@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class Condition {
@@ -63,8 +64,14 @@ public class Condition {
                 plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
                 return !(plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB);
             case "Condition.TimePeriod":
-                // TODO
-                return false;
+                Calendar start = Calendar.getInstance();
+                start.set(0, 0, 0, Integer.parseInt(extraData.get(0)), Integer.parseInt(extraData.get(1)));
+                Calendar end = Calendar.getInstance();
+                end.set(0, 0, 0, Integer.parseInt(extraData.get(2)), Integer.parseInt(extraData.get(3)));
+                Calendar now = Calendar.getInstance();
+                now.set(0, 0, 0);
+                if (start.after(end)) end.add(Calendar.DATE, 1);
+                return (now.after(start) && now.before(end));
             case "Condition.MobileDataActive":
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1)
                     return android.provider.Settings.Global.getInt(context.getContentResolver(), "mobile_data", 1) == 1;
