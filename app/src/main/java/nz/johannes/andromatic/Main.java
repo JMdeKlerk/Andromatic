@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
@@ -24,7 +25,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,20 +34,21 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import tourguide.tourguide.ChainTourGuide;
-import tourguide.tourguide.Overlay;
-import tourguide.tourguide.Pointer;
-import tourguide.tourguide.Sequence;
-import tourguide.tourguide.ToolTip;
-import tourguide.tourguide.TourGuide;
-
 public class Main extends AppCompatActivity {
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,15 +73,17 @@ public class Main extends AppCompatActivity {
                         String name = nameField.getText().toString();
                         Task task = new Task(getBaseContext(), name);
                         populateTaskList();
+
                     }
                 });
                 alert.setNegativeButton("Cancel", null);
                 alert.show();
             }
         });
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean("firstRun", true)) showTutorial();
         manageReceivers(this);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -128,9 +131,7 @@ public class Main extends AppCompatActivity {
                 return true;
             }
         });
-        for (Task task : getAllStoredTasks(this)) {
-            listItems.add(task);
-        }
+        for (Task task : getAllStoredTasks(this)) listItems.add(task);
         Collections.sort(listItems, new Comparator<Task>() {
             @Override
             public int compare(Task lhs, Task rhs) {
@@ -278,8 +279,7 @@ public class Main extends AppCompatActivity {
             ComponentName component = new ComponentName(context, DeviceAdmin.class);
             return dpm.isAdminActive(component);
         }
-        if (android.os.Build.VERSION.SDK_INT < 23) return true;
-        return (ContextCompat.checkSelfPermission(context, permission) == 0);
+        return Build.VERSION.SDK_INT < 23 || (ContextCompat.checkSelfPermission(context, permission) == 0);
     }
 
     public static ArrayAdapter getTextViewAdapter(Context context, String type) {
@@ -328,13 +328,6 @@ public class Main extends AppCompatActivity {
             default:
                 return null;
         }
-    }
-
-    private void showTutorial() {
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        editor.putBoolean("firstRun", false);
-        editor.putBoolean("tourInProgress", true);
-        editor.commit();
     }
 
 }

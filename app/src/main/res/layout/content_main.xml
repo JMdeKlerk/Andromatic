@@ -23,7 +23,7 @@
 
     <TextView
         android:id="@+id/empty"
-        android:text="We've come up empty!\n Press the + button to add a new task."
+        android:text="No tasks found"
         android:layout_width="fill_parent"
         android:textColor="#999999"
         android:layout_height="fill_parent"
