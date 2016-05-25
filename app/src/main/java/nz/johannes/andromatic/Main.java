@@ -34,8 +34,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -43,12 +41,6 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class Main extends AppCompatActivity {
-
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,9 +73,6 @@ public class Main extends AppCompatActivity {
             }
         });
         manageReceivers(this);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -160,8 +149,7 @@ public class Main extends AppCompatActivity {
 
     public static Task getTask(Context context, String key) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        Task task = new Gson().fromJson(prefs.getString("task-" + key, ""), Task.class);
-        return task;
+        return new Gson().fromJson(prefs.getString("task-" + key, ""), Task.class);
     }
 
     public static ArrayList<Task> getAllStoredTasks(Context context) {
@@ -178,8 +166,10 @@ public class Main extends AppCompatActivity {
 
     public static void manageReceivers(final Context context) {
         context.stopService(new Intent(context, SensorService.class));
+        context.stopService(new Intent(context, HeadphoneService.class));
         boolean[] receiverBools = new boolean[6];
         boolean[] sensorBools = new boolean[2];
+        boolean headset = false;
         PackageManager pm = context.getPackageManager();
         ComponentName[] receivers = new ComponentName[]{new ComponentName(context, AlarmReceiver.class),
                 new ComponentName(context, BatteryReceiver.class), new ComponentName(context, BluetoothReceiver.class),
@@ -196,6 +186,10 @@ public class Main extends AppCompatActivity {
                     case "Trigger.ChargerInserted":
                     case "Trigger.ChargerRemoved":
                         receiverBools[1] = true;
+                        break;
+                    case "Trigger.HeadphonesInserted":
+                    case "Trigger.HeadphonesRemoved":
+                        headset = true;
                         break;
                     case "Trigger.Bluetooth":
                         receiverBools[2] = true;
@@ -247,10 +241,11 @@ public class Main extends AppCompatActivity {
                 pm.setComponentEnabledSetting(receivers[i], PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
             else pm.setComponentEnabledSetting(receivers[i], PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
         }
-        Intent intent = new Intent(context, SensorService.class);
-        intent.putExtra("shake", sensorBools[0]);
-        intent.putExtra("flip", sensorBools[1]);
-        if (sensorBools[0] || sensorBools[1]) context.startService(intent);
+        Intent sensorIntent = new Intent(context, SensorService.class);
+        sensorIntent.putExtra("shake", sensorBools[0]);
+        sensorIntent.putExtra("flip", sensorBools[1]);
+        if (sensorBools[0] || sensorBools[1]) context.startService(sensorIntent);
+        if (headset) context.startService(new Intent(context, HeadphoneService.class));
     }
 
     public static void showToast(Context context, String message) {

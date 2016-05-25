@@ -108,6 +108,12 @@ public class Trigger {
                     case "Trigger.ChargerRemoved":
                         type.setText("Charger removed");
                         break;
+                    case "Trigger.HeadphonesInserted":
+                        type.setText("Headphones inserted");
+                        break;
+                    case "Trigger.HeadphonesRemoved":
+                        type.setText("Headphones removed");
+                        break;
                     case "Trigger.Interval":
                         type.setText("Interval");
                         detail.setText(trigger.getMatch());

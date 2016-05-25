@@ -49,6 +49,14 @@
                 android:key="Trigger.ChargerRemoved"
                 android:title="Charger removed"/>
         </PreferenceScreen>
+        <PreferenceScreen android:title="Headphones...">
+            <Preference
+                android:key="Trigger.HeadphonesInserted"
+                android:title="Headphones inserted"/>
+            <Preference
+                android:key="Trigger.HeadphonesRemoved"
+                android:title="Headphones removed"/>
+        </PreferenceScreen>
         <Preference
             android:key="Trigger.Interval"
             android:title="Interval..."/>
