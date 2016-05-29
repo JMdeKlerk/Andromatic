@@ -14,4 +14,11 @@
         android:key="taskThrottle"
         android:summary="Time in seconds before a task can run again"
         android:title="Task throttle"/>
+    <ListPreference
+        android:defaultValue="2"
+        android:entries="@array/ShakeSensitivity"
+        android:entryValues="@array/ShakeSensitivityValues"
+        android:key="shakeSensitivity"
+        android:summary="Required motion level for shake trigger"
+        android:title="Shake sensitivity"/>
 </PreferenceScreen>

@@ -3,12 +3,14 @@ package nz.johannes.andromatic;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 
 public class SensorService extends Service {
 
@@ -79,7 +81,9 @@ public class SensorService extends Service {
             currentAcceleration = (float) Math.sqrt((double) (x * x + y * y + z * z));
             float delta = currentAcceleration - previousAcceleration;
             acceleration = acceleration * 0.9f + delta;
-            if (acceleration < 15 || (System.currentTimeMillis() - lastShook < 3000)) return;
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            int requiredAccel = Integer.parseInt(prefs.getString("shakeSensitivity", "15"));
+            if (acceleration < requiredAccel || (System.currentTimeMillis() - lastShook < 3000)) return;
             for (Task task : Main.getAllStoredTasks(context)) {
                 for (Trigger trigger : task.getTriggers()) {
                     if (trigger.getType().equals("Trigger.Shake")) {

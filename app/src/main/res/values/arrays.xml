@@ -22,4 +22,16 @@
         <item>30</item>
         <item>60</item>
     </string-array>
+    <string-array name="ShakeSensitivity">
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+        <item>Very High</item>
+    </string-array>
+    <string-array name="ShakeSensitivityValues">
+        <item>60</item>
+        <item>30</item>
+        <item>15</item>
+        <item>5</item>
+    </string-array>
 </resources>
