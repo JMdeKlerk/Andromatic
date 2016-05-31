@@ -159,7 +159,10 @@ public class Task {
                 calendar.set(Calendar.MINUTE, Integer.parseInt(trigger.getExtraData().get(1)));
                 calendar.set(Calendar.SECOND, 0);
                 if (calendar.getTimeInMillis() <= System.currentTimeMillis()) calendar.add(Calendar.HOUR_OF_DAY, 24);
-                if (android.os.Build.VERSION.SDK_INT >= 19) aManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+                if (android.os.Build.VERSION.SDK_INT >= 23)
+                    aManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+                else if (android.os.Build.VERSION.SDK_INT >= 19)
+                    aManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
                 else aManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
             }
         }

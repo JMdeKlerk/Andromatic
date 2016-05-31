@@ -1,6 +1,8 @@
 package nz.johannes.andromatic;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -25,6 +27,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,6 +40,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -165,8 +169,15 @@ public class Main extends AppCompatActivity {
     }
 
     public static void manageReceivers(final Context context) {
+        Log.i("Log", "Managing receivers");
         context.stopService(new Intent(context, SensorService.class));
         context.stopService(new Intent(context, HeadphoneService.class));
+        AlarmManager aManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent alarm = new Intent("nz.johannes.ALARM_INTENT");
+        alarm.putExtra("type", "checkServices");
+        alarm.setData(Uri.parse("task://checkServices/0"));
+        PendingIntent pi = PendingIntent.getBroadcast(context, 0, alarm, 0);
+        aManager.cancel(pi);
         boolean[] receiverBools = new boolean[6];
         boolean[] sensorBools = new boolean[2];
         boolean headset = false;
@@ -189,6 +200,7 @@ public class Main extends AppCompatActivity {
                         break;
                     case "Trigger.HeadphonesInserted":
                     case "Trigger.HeadphonesRemoved":
+                        receiverBools[0] = true;
                         headset = true;
                         break;
                     case "Trigger.Bluetooth":
@@ -215,11 +227,13 @@ public class Main extends AppCompatActivity {
                         break;
                     case "Trigger.Shake":
                         sensorBools[0] = true;
+                        receiverBools[0] = true;
                         break;
                     case "Trigger.Flip":
                     case "Trigger.FaceUp":
                     case "Trigger.FaceDown":
                         sensorBools[1] = true;
+                        receiverBools[0] = true;
                         break;
                 }
             }
@@ -232,6 +246,7 @@ public class Main extends AppCompatActivity {
                     case "Condition.FaceUp":
                     case "Condition.FaceDown":
                         sensorBools[1] = true;
+                        receiverBools[0] = true;
                         break;
                 }
             }
@@ -246,6 +261,12 @@ public class Main extends AppCompatActivity {
         sensorIntent.putExtra("flip", sensorBools[1]);
         if (sensorBools[0] || sensorBools[1]) context.startService(sensorIntent);
         if (headset) context.startService(new Intent(context, HeadphoneService.class));
+        if (sensorBools[0] || sensorBools[1] || headset) {
+            long time = System.currentTimeMillis() + (1000 * 60);
+            if (android.os.Build.VERSION.SDK_INT >= 23) aManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pi);
+            else if (android.os.Build.VERSION.SDK_INT >= 19) aManager.setExact(AlarmManager.RTC_WAKEUP, time, pi);
+            else aManager.set(AlarmManager.RTC_WAKEUP, time, pi);
+        }
     }
 
     public static void showToast(Context context, String message) {

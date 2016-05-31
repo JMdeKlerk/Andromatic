@@ -567,7 +567,7 @@ public class AddComponent extends PreferenceActivity {
                     alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_sendmessage, null);
                     textView = (AutoCompleteTextView) view.findViewById(R.id.to);
-                    textView.setHint("Test");
+                    textView.setHint("Name/number");
                     textView.setAdapter(Main.getTextViewAdapter(context, "contacts"));
                     textView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
