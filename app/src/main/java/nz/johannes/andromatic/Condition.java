@@ -9,7 +9,6 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,8 +50,6 @@ public class Condition {
                 double scale = batteryIntent.getIntExtra("scale", -1);
                 double level = -1;
                 if (rawBattery >= 0 && scale > 0) level = rawBattery / scale * 100;
-                Log.i("Log", "Raw: " + rawBattery + " Scale: " + scale);
-                Log.i("Log", "Level: " + level + " Req: " + match);
                 if (match.substring(0, 1).equals("<")) return level < Integer.parseInt(match.substring(1));
                 else return level > Integer.parseInt(match.substring(1));
             case "Condition.PhoneCharging":

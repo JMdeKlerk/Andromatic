@@ -27,7 +27,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,7 +39,6 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -169,7 +167,6 @@ public class Main extends AppCompatActivity {
     }
 
     public static void manageReceivers(final Context context) {
-        Log.i("Log", "Managing receivers");
         context.stopService(new Intent(context, SensorService.class));
         context.stopService(new Intent(context, HeadphoneService.class));
         AlarmManager aManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

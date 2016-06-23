@@ -122,6 +122,7 @@
 
         <service android:name=".SensorService"/>
         <service android:name=".HeadphoneService"/>
+        <service android:name=".TTSService"/>
 
     </application>
 

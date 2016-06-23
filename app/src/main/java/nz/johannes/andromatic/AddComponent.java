@@ -646,6 +646,15 @@ public class AddComponent extends PreferenceActivity {
                     });
                     alert.show();
                     break;
+                case "Action.TextToSpeech":
+                    // Placeholder, TODO
+                    ArrayList<String> actionData = new ArrayList();
+                    actionData.add("Current time");
+                    actionData.add("test");
+                    action.setData(actionData);
+                    task.addNewAction(context, action);
+                    getActivity().finish();
+                    break;
                 case "Action.LockModeNone":
                 case "Action.LockModePin":
                 case "Action.LockModePassword":

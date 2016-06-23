@@ -68,6 +68,9 @@
         <Preference
             android:key="Action.PlaySound"
             android:title="Play sound..."/>
+        <Preference
+            android:key="Action.TextToSpeech"
+            android:title="Text to speech..."/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Network...">

@@ -11,7 +11,9 @@ import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
@@ -22,7 +24,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class Action {
@@ -133,6 +137,18 @@ public class Action {
                 break;
             case "Action.PlaySound":
                 RingtoneManager.getRingtone(context, Uri.parse(multiData.get(1))).play();
+                break;
+            case "Action.TextToSpeech":
+                Intent tts = new Intent(context, TTSService.class);
+                switch (multiData.get(0)) {
+                    case "Current time":
+                        SimpleDateFormat formatter = new SimpleDateFormat("HH mm a");
+                        tts.putExtra("text", "The time is " + formatter.format(Calendar.getInstance().getTime()).toString());
+                        break;
+                    default:
+                        tts.putExtra("text", multiData.get(1));
+                }
+                context.startService(tts);
                 break;
             case "Action.BluetoothEnable":
                 BluetoothAdapter.getDefaultAdapter().enable();
@@ -260,119 +276,122 @@ public class Action {
                 vi = LayoutInflater.from(getContext());
                 convertView = hasExtraData ? vi.inflate(R.layout.default_list_row, null) : vi.inflate(R.layout.list_row_nodetail, null);
             }
-            if (action != null) {
-                TextView type = (TextView) convertView.findViewById(R.id.type);
-                TextView detail = (TextView) convertView.findViewById(R.id.detail);
-                switch (action.getCommand()) {
-                    case "Action.StartCall":
-                        type.setText("Start call");
-                        if (action.getMultiData().get(1) != null)
-                            detail.setText(action.getMultiData().get(1) + " (" + action.getMultiData().get(0) + ")");
-                        else detail.setText((String) action.getMultiData().get(0));
-                        break;
-                    case "Action.AcceptCall":
-                        type.setText("Accept call");
-                        break;
-                    case "Action.EndCall":
-                        type.setText("End call");
-                        break;
-                    case "Action.SpeakerphoneEnable":
-                        type.setText("Enable speakerphone");
-                        break;
-                    case "Action.SpeakerphoneToggle":
-                        type.setText("Toggle speakerphone");
-                        break;
-                    case "Action.SpeakerphoneDisable":
-                        type.setText("Disable speakerphone");
-                        break;
-                    case "Action.MicEnable":
-                        type.setText("Unmute microphone");
-                        break;
-                    case "Action.MicToggle":
-                        type.setText("Toggle microphone");
-                        break;
-                    case "Action.MicDisable":
-                        type.setText("Mute microphone");
-                        break;
-                    case "Action.SendSMS":
-                        type.setText("Send SMS message");
-                        if (action.getMultiData().get(1) != null)
-                            detail.setText(action.getMultiData().get(0) + " (" + action.getMultiData().get(1) + ")");
-                        else detail.setText((String) action.getMultiData().get(1));
-                        break;
-                    case "Action.MediaPlay":
-                        type.setText("Play media");
-                        break;
-                    case "Action.MediaPause":
-                        type.setText("Pause media");
-                        break;
-                    case "Action.MediaPlayPause":
-                        type.setText("Media play/pause");
-                        break;
-                    case "Action.MediaSkip":
-                        type.setText("Skip media");
-                        break;
-                    case "Action.MediaVolume":
-                        type.setText("Set media volume");
-                        detail.setText(action.getData() + " percent");
-                        break;
-                    case "Action.LaunchApp":
-                        type.setText("Launch app");
-                        detail.setText((String) action.getMultiData().get(0));
-                        break;
-                    case "Action.Vibrate":
-                        type.setText("Vibrate");
-                        break;
-                    case "Action.PlaySound":
-                        type.setText("Play sound");
-                        detail.setText((String) action.getMultiData().get(0));
-                        break;
-                    case "Action.BluetoothEnable":
-                        type.setText("Enable bluetooth");
-                        break;
-                    case "Action.BluetoothToggle":
-                        type.setText("Toggle bluetooth");
-                        break;
-                    case "Action.BluetoothDisable":
-                        type.setText("Disable bluetooth");
-                        break;
-                    case "Action.WifiEnable":
-                        type.setText("Enable wifi");
-                        break;
-                    case "Action.WifiToggle":
-                        type.setText("Toggle wifi");
-                        break;
-                    case "Action.WifiDisable":
-                        type.setText("Disable wifi");
-                        break;
-                    case "Action.LockModeNone":
-                        type.setText("Set lock mode");
-                        detail.setText("None");
-                        break;
-                    case "Action.LockModePin":
-                        type.setText("Set lock mode");
-                        detail.setText("PIN");
-                        break;
-                    case "Action.LockModePassword":
-                        type.setText("Set lock mode");
-                        detail.setText("Password");
-                        break;
-                    case "Action.Timeout":
-                        type.setText("Set screen timeout");
-                        String timeoutChoices[] = new String[]{"15 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes", "10 minutes"};
-                        detail.setText(timeoutChoices[action.getData()]);
-                        break;
-                    case "Action.RingerVolume":
-                        type.setText("Set ringer volume");
-                        detail.setText(action.getData() + " percent");
-                        break;
-                    case "Action.NotificationVolume":
-                        type.setText("Set notification volume");
-                        detail.setText(action.getData() + " percent");
-                        break;
-                    default:
-                        type.setText(action.getCommand());
-                }
+            TextView type = (TextView) convertView.findViewById(R.id.type);
+            TextView detail = (TextView) convertView.findViewById(R.id.detail);
+            switch (action.getCommand()) {
+                case "Action.StartCall":
+                    type.setText("Start call");
+                    if (action.getMultiData().get(1) != null)
+                        detail.setText(action.getMultiData().get(1) + " (" + action.getMultiData().get(0) + ")");
+                    else detail.setText((String) action.getMultiData().get(0));
+                    break;
+                case "Action.AcceptCall":
+                    type.setText("Accept call");
+                    break;
+                case "Action.EndCall":
+                    type.setText("End call");
+                    break;
+                case "Action.SpeakerphoneEnable":
+                    type.setText("Enable speakerphone");
+                    break;
+                case "Action.SpeakerphoneToggle":
+                    type.setText("Toggle speakerphone");
+                    break;
+                case "Action.SpeakerphoneDisable":
+                    type.setText("Disable speakerphone");
+                    break;
+                case "Action.MicEnable":
+                    type.setText("Unmute microphone");
+                    break;
+                case "Action.MicToggle":
+                    type.setText("Toggle microphone");
+                    break;
+                case "Action.MicDisable":
+                    type.setText("Mute microphone");
+                    break;
+                case "Action.SendSMS":
+                    type.setText("Send SMS message");
+                    if (action.getMultiData().get(1) != null)
+                        detail.setText(action.getMultiData().get(0) + " (" + action.getMultiData().get(1) + ")");
+                    else detail.setText((String) action.getMultiData().get(1));
+                    break;
+                case "Action.MediaPlay":
+                    type.setText("Play media");
+                    break;
+                case "Action.MediaPause":
+                    type.setText("Pause media");
+                    break;
+                case "Action.MediaPlayPause":
+                    type.setText("Media play/pause");
+                    break;
+                case "Action.MediaSkip":
+                    type.setText("Skip media");
+                    break;
+                case "Action.MediaVolume":
+                    type.setText("Set media volume");
+                    detail.setText(action.getData() + " percent");
+                    break;
+                case "Action.LaunchApp":
+                    type.setText("Launch app");
+                    detail.setText((String) action.getMultiData().get(0));
+                    break;
+                case "Action.Vibrate":
+                    type.setText("Vibrate");
+                    break;
+                case "Action.PlaySound":
+                    type.setText("Play sound");
+                    detail.setText((String) action.getMultiData().get(0));
+                    break;
+                case "Action.TextToSpeech":
+                    type.setText("Text to speech");
+                    if (action.getMultiData().get(1) != null) detail.setText((String) "\"" + action.getMultiData().get(1) + "\"");
+                    else detail.setText((String) action.getMultiData().get(0));
+                    break;
+                case "Action.BluetoothEnable":
+                    type.setText("Enable bluetooth");
+                    break;
+                case "Action.BluetoothToggle":
+                    type.setText("Toggle bluetooth");
+                    break;
+                case "Action.BluetoothDisable":
+                    type.setText("Disable bluetooth");
+                    break;
+                case "Action.WifiEnable":
+                    type.setText("Enable wifi");
+                    break;
+                case "Action.WifiToggle":
+                    type.setText("Toggle wifi");
+                    break;
+                case "Action.WifiDisable":
+                    type.setText("Disable wifi");
+                    break;
+                case "Action.LockModeNone":
+                    type.setText("Set lock mode");
+                    detail.setText("None");
+                    break;
+                case "Action.LockModePin":
+                    type.setText("Set lock mode");
+                    detail.setText("PIN");
+                    break;
+                case "Action.LockModePassword":
+                    type.setText("Set lock mode");
+                    detail.setText("Password");
+                    break;
+                case "Action.Timeout":
+                    type.setText("Set screen timeout");
+                    String timeoutChoices[] = new String[]{"15 seconds", "30 seconds", "1 minute", "2 minutes", "5 minutes", "10 minutes"};
+                    detail.setText(timeoutChoices[action.getData()]);
+                    break;
+                case "Action.RingerVolume":
+                    type.setText("Set ringer volume");
+                    detail.setText(action.getData() + " percent");
+                    break;
+                case "Action.NotificationVolume":
+                    type.setText("Set notification volume");
+                    detail.setText(action.getData() + " percent");
+                    break;
+                default:
+                    type.setText(action.getCommand());
             }
             return convertView;
         }
