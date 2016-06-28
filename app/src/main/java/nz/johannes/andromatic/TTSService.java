@@ -3,6 +3,7 @@ package nz.johannes.andromatic;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.Nullable;
@@ -39,6 +40,15 @@ public class TTSService extends Service implements TextToSpeech.OnInitListener {
                 else reader.speak(text, TextToSpeech.QUEUE_FLUSH, null);
                 stopSelf();
             }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (reader != null) {
+            reader.stop();
+            reader.shutdown();
         }
     }
 

@@ -74,11 +74,17 @@ public class AddComponent extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.triggers);
+            if (Main.userIsPremium(getActivity())) addPreferencesFromResource(R.xml.triggers);
+            else addPreferencesFromResource(R.xml.triggers_free);
         }
 
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+            if (preference.getSummary() != null) {
+                Main.purchasePremium(getActivity());
+                getActivity().finish();
+                return false;
+            }
             if (preference instanceof PreferenceScreen) return false;
             String triggerType = preference.getKey();
             if (elevatedTriggers.contains(triggerType) && android.os.Build.VERSION.SDK_INT >= 23) {
@@ -267,11 +273,17 @@ public class AddComponent extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.conditions);
+            if (Main.userIsPremium(getActivity())) addPreferencesFromResource(R.xml.conditions);
+            else addPreferencesFromResource(R.xml.conditions_free);
         }
 
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+            if (preference.getSummary() != null) {
+                Main.purchasePremium(getActivity());
+                getActivity().finish();
+                return false;
+            }
             if (preference instanceof PreferenceScreen) return false;
             String conditionType = preference.getKey();
             if (elevatedConditions.contains(conditionType) && android.os.Build.VERSION.SDK_INT >= 23) {
@@ -475,11 +487,17 @@ public class AddComponent extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.actions);
+            if (Main.userIsPremium(getActivity())) addPreferencesFromResource(R.xml.actions);
+            else addPreferencesFromResource(R.xml.actions_free);
         }
 
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+            if (preference.getSummary() != null) {
+                Main.purchasePremium(getActivity());
+                getActivity().finish();
+                return false;
+            }
             if (preference instanceof PreferenceScreen) return false;
             String actionType = preference.getKey();
             if (elevatedActions.contains(actionType) && android.os.Build.VERSION.SDK_INT >= 23) {

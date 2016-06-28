@@ -1,6 +1,7 @@
 package nz.johannes.andromatic;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
@@ -11,6 +12,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -20,6 +23,8 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
@@ -27,6 +32,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,17 +42,26 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.vending.billing.IInAppBillingService;
 import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class Main extends AppCompatActivity {
+public class Main extends AppCompatActivity implements ServiceConnection {
+
+    private static IInAppBillingService billingService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
+        serviceIntent.setPackage("com.android.vending");
+        bindService(serviceIntent, this, Context.BIND_AUTO_CREATE);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -81,6 +96,16 @@ public class Main extends AppCompatActivity {
     protected void onResume() {
         populateTaskList();
         super.onResume();
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        billingService = IInAppBillingService.Stub.asInterface(service);
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        billingService = null;
     }
 
     private void populateTaskList() {
@@ -145,8 +170,18 @@ public class Main extends AppCompatActivity {
             Intent settings = new Intent(this, Settings.class);
             startActivity(settings);
         }
+        if (id == R.id.action_upgrade) {
+            if (userIsPremium(this)) showToast(this, "You already have premium access.");
+            else purchasePremium(this);
+        }
         if (id == R.id.action_exit) finish();
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (billingService != null) unbindService(this);
     }
 
     public static Task getTask(Context context, String key) {
@@ -341,6 +376,31 @@ public class Main extends AppCompatActivity {
             default:
                 return null;
         }
+    }
+
+    public static void purchasePremium(Activity context) {
+        try {
+            Bundle buyIntentBundle = billingService.getBuyIntent(3, context.getPackageName(), "premium", "inapp", "");
+            PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
+            context.startIntentSenderForResult(pendingIntent.getIntentSender(), 1001, new Intent(), 0, 0, 0);
+        } catch (RemoteException | IntentSender.SendIntentException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean userIsPremium(Activity context) {
+        try {
+            Bundle ownedItems = billingService.getPurchases(3, context.getPackageName(), "inapp", null);
+            int response = ownedItems.getInt("RESPONSE_CODE");
+            if (response == 0 && ownedItems.getStringArrayList("INAPP_PURCHASE_ITEM_LIST").contains("premium")) {
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+                editor.putBoolean("premium", true).commit();
+                return true;
+            }
+        } catch (RemoteException | NullPointerException e) {
+        }
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean("premium", false);
     }
 
 }

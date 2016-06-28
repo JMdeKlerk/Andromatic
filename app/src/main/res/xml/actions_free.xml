@@ -8,9 +8,11 @@
                 android:title="Start call..."/>
             <Preference
                 android:key="Action.AcceptCall"
+                android:summary="Premium only"
                 android:title="Accept incoming call"/>
             <Preference
                 android:key="Action.EndCall"
+                android:summary="Premium only"
                 android:title="End call"/>
         </PreferenceScreen>
         <PreferenceScreen android:title="Speakerphone mode...">
@@ -19,6 +21,7 @@
                 android:title="Enable speakerphone"/>
             <Preference
                 android:key="Action.SpeakerphoneToggle"
+                android:summary="Premium only"
                 android:title="Toggle speakerphone"/>
             <Preference
                 android:key="Action.SpeakerphoneDisable"
@@ -30,6 +33,7 @@
                 android:title="Mute microphone"/>
             <Preference
                 android:key="Action.MicToggle"
+                android:summary="Premium only"
                 android:title="Toggle microphone"/>
             <Preference
                 android:key="Action.MicEnable"
@@ -37,6 +41,7 @@
         </PreferenceScreen>
         <Preference
             android:key="Action.SendSMS"
+            android:summary="Premium only"
             android:title="Send SMS message..."/>
     </PreferenceScreen>
 
@@ -49,6 +54,7 @@
             android:title="Media pause"/>
         <Preference
             android:key="Action.MediaPlayPause"
+            android:summary="Premium only"
             android:title="Media play/pause"/>
         <Preference
             android:key="Action.MediaSkip"
@@ -77,6 +83,7 @@
                 android:title="Enable bluetooth"/>
             <Preference
                 android:key="Action.BluetoothToggle"
+                android:summary="Premium only"
                 android:title="Toggle bluetooth"/>
             <Preference
                 android:key="Action.BluetoothDisable"
@@ -88,6 +95,7 @@
                 android:title="Enable wifi"/>
             <Preference
                 android:key="Action.WifiToggle"
+                android:summary="Premium only"
                 android:title="Toggle wifi"/>
             <Preference
                 android:key="Action.WifiDisable"
@@ -96,7 +104,9 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Phone settings...">
-        <PreferenceScreen android:title="Set lock mode...">
+        <PreferenceScreen
+            android:summary="Premium only"
+            android:title="Set lock mode...">
             <Preference
                 android:key="Action.LockModeNone"
                 android:title="None"/>
@@ -109,6 +119,7 @@
         </PreferenceScreen>
         <Preference
             android:key="Action.Timeout"
+            android:summary="Premium only"
             android:title="Set screen timeout..."/>
         <Preference
             android:key="Action.RingerVolume"
