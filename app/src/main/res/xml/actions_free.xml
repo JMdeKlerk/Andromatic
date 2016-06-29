@@ -21,7 +21,6 @@
                 android:title="Enable speakerphone"/>
             <Preference
                 android:key="Action.SpeakerphoneToggle"
-                android:summary="Premium only"
                 android:title="Toggle speakerphone"/>
             <Preference
                 android:key="Action.SpeakerphoneDisable"
@@ -33,7 +32,6 @@
                 android:title="Mute microphone"/>
             <Preference
                 android:key="Action.MicToggle"
-                android:summary="Premium only"
                 android:title="Toggle microphone"/>
             <Preference
                 android:key="Action.MicEnable"
@@ -54,7 +52,6 @@
             android:title="Media pause"/>
         <Preference
             android:key="Action.MediaPlayPause"
-            android:summary="Premium only"
             android:title="Media play/pause"/>
         <Preference
             android:key="Action.MediaSkip"
@@ -74,6 +71,17 @@
         <Preference
             android:key="Action.PlaySound"
             android:title="Play sound..."/>
+        <PreferenceScreen android:title="Text to speech...">
+            <Preference
+                android:key="Action.TTSTime"
+                android:title="Current time..."/>
+            <Preference
+                android:key="Action.TTSSMS"
+                android:title="Last SMS received..."/>
+            <Preference
+                android:key="Action.TTSCustom"
+                android:title="Custom..."/>
+        </PreferenceScreen>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Network...">
@@ -83,7 +91,6 @@
                 android:title="Enable bluetooth"/>
             <Preference
                 android:key="Action.BluetoothToggle"
-                android:summary="Premium only"
                 android:title="Toggle bluetooth"/>
             <Preference
                 android:key="Action.BluetoothDisable"
@@ -95,7 +102,6 @@
                 android:title="Enable wifi"/>
             <Preference
                 android:key="Action.WifiToggle"
-                android:summary="Premium only"
                 android:title="Toggle wifi"/>
             <Preference
                 android:key="Action.WifiDisable"

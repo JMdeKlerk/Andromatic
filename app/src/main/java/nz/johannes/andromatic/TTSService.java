@@ -1,46 +1,42 @@
 package nz.johannes.andromatic;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.Locale;
 
-public class TTSService extends Service implements TextToSpeech.OnInitListener {
+public class TTSService extends Service {
 
-    String text = "";
-    TextToSpeech reader;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        reader = new TextToSpeech(this, this);
-    }
+    private TextToSpeech reader;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        text = intent.getStringExtra("text");
-        return START_STICKY;
-    }
-
-    @Override
-    public void onInit(int status) {
-        if (status == TextToSpeech.SUCCESS) {
-            int result = reader.setLanguage(Locale.getDefault());
-            if (result == TextToSpeech.LANG_NOT_SUPPORTED || result == TextToSpeech.LANG_MISSING_DATA) {
-                Main.showToast(this, "Text-to-speech language data not found!");
-                stopSelf();
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) reader.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
-                else reader.speak(text, TextToSpeech.QUEUE_FLUSH, null);
-                stopSelf();
+        final Context context = this;
+        final String text = intent.getStringExtra("text");
+        reader = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = reader.setLanguage(Locale.getDefault());
+                    if (result == TextToSpeech.LANG_NOT_SUPPORTED || result == TextToSpeech.LANG_MISSING_DATA) {
+                        Main.showToast(context, "Text-to-speech language data not found!");
+                        stopSelf();
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) reader.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+                        else reader.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+                    }
+                }
             }
-        }
+        });
+        return START_NOT_STICKY;
     }
 
     @Override

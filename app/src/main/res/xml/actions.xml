@@ -68,6 +68,17 @@
         <Preference
             android:key="Action.PlaySound"
             android:title="Play sound..."/>
+        <PreferenceScreen android:title="Text to speech...">
+            <Preference
+                android:key="Action.TTSTime"
+                android:title="Current time..."/>
+            <Preference
+                android:key="Action.TTSSMS"
+                android:title="Last SMS received..."/>
+            <Preference
+                android:key="Action.TTSCustom"
+                android:title="Custom..."/>
+        </PreferenceScreen>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Network...">

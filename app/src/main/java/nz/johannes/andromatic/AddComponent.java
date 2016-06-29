@@ -20,6 +20,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -30,6 +31,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -79,7 +81,7 @@ public class AddComponent extends PreferenceActivity {
         }
 
         @Override
-        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+        public boolean onPreferenceTreeClick(final PreferenceScreen preferenceScreen, final Preference preference) {
             if (preference.getSummary() != null) {
                 Main.purchasePremium(getActivity());
                 getActivity().finish();
@@ -278,7 +280,7 @@ public class AddComponent extends PreferenceActivity {
         }
 
         @Override
-        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+        public boolean onPreferenceTreeClick(final PreferenceScreen preferenceScreen, Preference preference) {
             if (preference.getSummary() != null) {
                 Main.purchasePremium(getActivity());
                 getActivity().finish();
@@ -492,7 +494,7 @@ public class AddComponent extends PreferenceActivity {
         }
 
         @Override
-        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+        public boolean onPreferenceTreeClick(final PreferenceScreen preferenceScreen, Preference preference) {
             if (preference.getSummary() != null) {
                 Main.purchasePremium(getActivity());
                 getActivity().finish();
@@ -664,14 +666,30 @@ public class AddComponent extends PreferenceActivity {
                     });
                     alert.show();
                     break;
-                case "Action.TextToSpeech":
-                    // Placeholder, TODO
-                    ArrayList<String> actionData = new ArrayList();
-                    actionData.add("Current time");
-                    actionData.add("test");
-                    action.setData(actionData);
+                case "Action.TTSTime":
+                    action.setData(1);
                     task.addNewAction(context, action);
                     getActivity().finish();
+                    break;
+                case "Action.TTSCustom":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                    textView.setHint("Text...");
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AutoCompleteTextView textField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String text = textField.getText().toString();
+                            ArrayList<String> extras = new ArrayList<>();
+                            extras.add(text);
+                            action.setData(extras);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.show();
                     break;
                 case "Action.LockModeNone":
                 case "Action.LockModePin":

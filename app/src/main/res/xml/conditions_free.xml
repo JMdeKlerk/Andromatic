@@ -26,6 +26,7 @@
     <PreferenceScreen android:title="Miscellaneous...">
         <Preference
             android:key="Condition.BatteryPercentage"
+            android:summary="Premium only"
             android:title="Battery percentage..."/>
         <PreferenceScreen android:title="Charger...">
             <Preference

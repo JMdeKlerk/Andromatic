@@ -138,17 +138,16 @@ public class Action {
             case "Action.PlaySound":
                 RingtoneManager.getRingtone(context, Uri.parse(multiData.get(1))).play();
                 break;
-            case "Action.TextToSpeech":
-                Intent tts = new Intent(context, TTSService.class);
-                switch (multiData.get(0)) {
-                    case "Current time":
-                        SimpleDateFormat formatter = new SimpleDateFormat("HH mm a");
-                        tts.putExtra("text", "The time is " + formatter.format(Calendar.getInstance().getTime()).toString());
-                        break;
-                    default:
-                        tts.putExtra("text", multiData.get(1));
-                }
-                context.startService(tts);
+            case "Action.TTSTime":
+                Intent ttsTime = new Intent(context, TTSService.class);
+                SimpleDateFormat formatter = new SimpleDateFormat("HH mm a");
+                ttsTime.putExtra("text", "The time is " + formatter.format(Calendar.getInstance().getTime()).toString());
+                context.startService(ttsTime);
+                break;
+            case "Action.TTSCustom":
+                Intent ttsCustom = new Intent(context, TTSService.class);
+                ttsCustom.putExtra("text", multiData.get(0));
+                context.startService(ttsCustom);
                 break;
             case "Action.BluetoothEnable":
                 BluetoothAdapter.getDefaultAdapter().enable();
@@ -342,10 +341,13 @@ public class Action {
                     type.setText("Play sound");
                     detail.setText((String) action.getMultiData().get(0));
                     break;
-                case "Action.TextToSpeech":
+                case "Action.TTSTime":
                     type.setText("Text to speech");
-                    if (action.getMultiData().get(1) != null) detail.setText((String) "\"" + action.getMultiData().get(1) + "\"");
-                    else detail.setText((String) action.getMultiData().get(0));
+                    detail.setText("Current time");
+                    break;
+                case "Action.TTSCustom":
+                    type.setText("Text to speech");
+                    detail.setText((String) "\"" + action.getMultiData().get(0) + "\"");
                     break;
                 case "Action.BluetoothEnable":
                     type.setText("Enable bluetooth");
