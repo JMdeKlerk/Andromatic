@@ -74,9 +74,11 @@
         <PreferenceScreen android:title="Text to speech...">
             <Preference
                 android:key="Action.TTSTime"
+                android:summary="Premium only"
                 android:title="Current time..."/>
             <Preference
                 android:key="Action.TTSSMS"
+                android:summary="Premium only"
                 android:title="Last SMS received..."/>
             <Preference
                 android:key="Action.TTSCustom"

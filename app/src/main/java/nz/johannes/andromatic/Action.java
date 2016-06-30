@@ -4,18 +4,21 @@ import android.Manifest;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Vibrator;
-import android.speech.tts.TextToSpeech;
+import android.provider.Telephony;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -143,6 +146,18 @@ public class Action {
                 SimpleDateFormat formatter = new SimpleDateFormat("HH mm a");
                 ttsTime.putExtra("text", "The time is " + formatter.format(Calendar.getInstance().getTime()).toString());
                 context.startService(ttsTime);
+                break;
+            case "Action.TTSSMS":
+                Intent ttsSMS = new Intent(context, TTSService.class);
+                Cursor cursor = context.getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
+                if (cursor.moveToFirst()) {
+                    String msgData = "";
+                    for (int idx = 0; idx < cursor.getColumnCount(); idx++) msgData += " " + cursor.getColumnName(idx) + ":" + cursor.getString(idx);
+                    String from = Main.getNameFromNumber(context, cursor.getString(cursor.getColumnIndex("address")));
+                    String body = cursor.getString(cursor.getColumnIndex("body"));
+                    ttsSMS.putExtra("text", "SMS from " + from + "... " + body);
+                }
+                context.startService(ttsSMS);
                 break;
             case "Action.TTSCustom":
                 Intent ttsCustom = new Intent(context, TTSService.class);
@@ -344,6 +359,10 @@ public class Action {
                 case "Action.TTSTime":
                     type.setText("Text to speech");
                     detail.setText("Current time");
+                    break;
+                case "Action.TTSSMS":
+                    type.setText("Text to speech");
+                    detail.setText("Last SMS received");
                     break;
                 case "Action.TTSCustom":
                     type.setText("Text to speech");

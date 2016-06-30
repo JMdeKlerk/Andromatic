@@ -20,7 +20,6 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -31,7 +30,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -483,7 +481,7 @@ public class AddComponent extends PreferenceActivity {
         private View view;
         private AutoCompleteTextView textView;
         private AlertDialog.Builder alert;
-        private static List<String> elevatedActions = Arrays.asList("Action.StartCall", "Action.SendSMS", "Action.LockModeNone",
+        private static List<String> elevatedActions = Arrays.asList("Action.StartCall", "Action.SendSMS", "Action.TTSSMS", "Action.LockModeNone",
                 "Action.LockModePin", "Action.LockModePassword", "Action.Timeout");
 
         @Override
@@ -512,6 +510,7 @@ public class AddComponent extends PreferenceActivity {
                                 elevatedActions.indexOf(actionType));
                         break;
                     case "Action.SendSMS":
+                    case "Action.TTSSMS":
                         if (Main.weHavePermission(context, Manifest.permission.READ_CONTACTS) &&
                                 Main.weHavePermission(context, Manifest.permission.SEND_SMS))
                             createAction(actionType);
@@ -667,6 +666,11 @@ public class AddComponent extends PreferenceActivity {
                     alert.show();
                     break;
                 case "Action.TTSTime":
+                    action.setData(1);
+                    task.addNewAction(context, action);
+                    getActivity().finish();
+                    break;
+                case "Action.TTSSMS":
                     action.setData(1);
                     task.addNewAction(context, action);
                     getActivity().finish();
