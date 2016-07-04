@@ -50,6 +50,10 @@ import java.util.Comparator;
 
 public class Main extends AppCompatActivity implements ServiceConnection {
 
+
+    public static String TWITTER_CONSUMER_KEY = "ZqcNUNBdCV51qT95fgHTDDj2p";
+    public static String TWITTER_CONSUMER_SECRET = "o1x7oMl2nWHzm7ey6I0oprAOzg5qSzaIfoVWGT7p3phwKfoleZ";
+
     private static IInAppBillingService billingService;
 
     @Override

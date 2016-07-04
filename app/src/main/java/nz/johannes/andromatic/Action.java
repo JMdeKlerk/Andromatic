@@ -7,13 +7,16 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
@@ -26,11 +29,21 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.ConfigurationBuilder;
 
 public class Action {
 
@@ -247,6 +260,26 @@ public class Action {
                 AudioManager notifyManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
                 float notifyVolume = ((float) notifyManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION)) / 100 * data;
                 notifyManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, Math.round(notifyVolume), 0);
+                break;
+            case "Action.SendTweet":
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+                configBuilder.setOAuthConsumerKey(Main.TWITTER_CONSUMER_KEY);
+                configBuilder.setOAuthConsumerSecret(Main.TWITTER_CONSUMER_SECRET);
+                configBuilder.setOAuthAccessToken(prefs.getString("twitterToken", ""));
+                configBuilder.setOAuthAccessTokenSecret(prefs.getString("twitterSecret", ""));
+                TwitterFactory twitterFactory = new TwitterFactory(configBuilder.build());
+                final Twitter twitter = twitterFactory.getInstance();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            twitter.updateStatus("Test tweet from Andromatic");
+                        } catch (TwitterException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
                 break;
         }
     }

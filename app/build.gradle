@@ -8,8 +8,8 @@ android {
         applicationId "nz.johannes.andromatic"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 9
-        versionName "1.1.0"
+        versionCode 10
+        versionName "1.1.1"
     }
     buildTypes {
         release {
@@ -25,5 +25,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile files('libs/gson-2.5.jar')
-    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
+    compile files('libs/twitter4j-core-4.0.4.jar')
 }

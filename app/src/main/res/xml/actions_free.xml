@@ -136,5 +136,10 @@
             android:key="Action.NotificationVolume"
             android:title="Set notification volume..."/>
     </PreferenceScreen>
+    <PreferenceScreen android:title="Social media...">
+        <Preference
+            android:key="Action.SendTweet"
+            android:title="Update Twitter status..."/>
+    </PreferenceScreen>
 
 </PreferenceScreen>

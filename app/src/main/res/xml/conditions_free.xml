@@ -61,13 +61,14 @@
             android:title="Wifi not connected"/>
     </PreferenceScreen>
     <PreferenceScreen
-        android:summary="Premium only"
         android:title="Sensors...">
         <Preference
             android:key="Condition.FaceUp"
+            android:summary="Premium only"
             android:title="Phone face-up"/>
         <Preference
             android:key="Condition.FaceDown"
+            android:summary="Premium only"
             android:title="Phone face-down"/>
     </PreferenceScreen>
 </PreferenceScreen>
