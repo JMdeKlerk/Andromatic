@@ -12,6 +12,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
+import android.media.session.MediaController;
+import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -51,7 +53,7 @@ public class Action {
     private int data = -1;
     private ArrayList<String> multiData;
 
-    public void doAction(Context context) {
+    public void doAction(final Context context) {
         switch (command) {
             case "Action.StartCall":
                 if (!Main.weHavePermission(context, Manifest.permission.CALL_PHONE)) return;
@@ -62,11 +64,31 @@ public class Action {
                 if (callPermission) context.startActivity(call);
                 break;
             case "Action.AcceptCall":
-                Intent answerCall = new Intent(Intent.ACTION_MEDIA_BUTTON);
-                answerCall.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK));
-                context.sendOrderedBroadcast(answerCall, null);
-                answerCall.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK));
-                context.sendOrderedBroadcast(answerCall, null);
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    final MediaSessionManager mediaSessionManager = (MediaSessionManager) context.getApplicationContext()
+                            .getSystemService(Context.MEDIA_SESSION_SERVICE);
+                    try {
+                        Thread.sleep(2000);
+                        List<MediaController> mediaControllerList = mediaSessionManager.getActiveSessions
+                                (new ComponentName(context.getApplicationContext(), NotificationReceiverService.class));
+                        for (MediaController m : mediaControllerList) {
+                            if ("com.android.server.telecom".equals(m.getPackageName())) {
+                                m.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK));
+                                m.dispatchMediaButtonEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK));
+                                break;
+                            }
+                        }
+                    } catch (SecurityException | InterruptedException e) {
+                        if (e instanceof SecurityException) Main.showToast(context, "Could not accept call - notification access not granted!");
+                        else e.printStackTrace();
+                    }
+                } else {
+                    Intent answerCall = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                    answerCall.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK));
+                    context.sendOrderedBroadcast(answerCall, null);
+                    answerCall.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK));
+                    context.sendOrderedBroadcast(answerCall, null);
+                }
                 break;
             case "Action.EndCall":
                 try {

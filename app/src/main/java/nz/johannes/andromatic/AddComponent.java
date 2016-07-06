@@ -13,13 +13,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.support.v4.app.NotificationManagerCompat;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -33,6 +36,7 @@ import android.widget.TimePicker;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class AddComponent extends PreferenceActivity {
 
@@ -581,6 +585,32 @@ public class AddComponent extends PreferenceActivity {
                         }
                     });
                     alert.show();
+                    break;
+                case "Action.AcceptCall":
+                    Set<String> listeners = NotificationManagerCompat.getEnabledListenerPackages(context);
+                    if (!listeners.contains(context.getPackageName())) {
+                        alert = new AlertDialog.Builder(context);
+                        alert.setMessage("This function requires Andromatic to be granted access to notifications. Would you like to be taken to " +
+                                "the menu to enable this now?");
+                        alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
+                                getActivity().finish();
+                            }
+                        });
+                        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                getActivity().finish();
+                            }
+                        });
+                        task.addNewAction(context, action);
+                        alert.show();
+                    } else {
+                        task.addNewAction(context, action);
+                        getActivity().finish();
+                    }
                     break;
                 case "Action.SendSMS":
                     alert = new AlertDialog.Builder(context);

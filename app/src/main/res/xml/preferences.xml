@@ -21,8 +21,8 @@
         android:key="shakeSensitivity"
         android:summary="Required motion level for shake trigger"
         android:title="Shake sensitivity"/>
-    <Preference
+    <!--Preference
         android:key="twitterAccount"
         android:summary="Link your Twitter to enable related triggers and actions"
-        android:title="Twitter account"/>
+        android:title="Twitter account"/-->
 </PreferenceScreen>

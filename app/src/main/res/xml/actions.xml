@@ -65,7 +65,7 @@
         <Preference
             android:key="Action.Vibrate"
             android:title="Vibrate"/>
-        <Preference
+        <PreferenceScreen
             android:key="Action.PlaySound"
             android:title="Play sound..."/>
         <PreferenceScreen android:title="Text to speech...">
