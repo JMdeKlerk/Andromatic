@@ -65,9 +65,14 @@
         <Preference
             android:key="Action.Vibrate"
             android:title="Vibrate"/>
-        <PreferenceScreen
-            android:key="Action.PlaySound"
-            android:title="Play sound..."/>
+        <PreferenceScreen android:title="Play sound...">
+            <Preference
+                android:key="Action.PlaySoundNotification"
+                android:title="Notification..."/>
+            <Preference
+                android:key="Action.PlaySoundCustom"
+                android:title="Custom..."/>
+        </PreferenceScreen>
         <PreferenceScreen android:title="Text to speech...">
             <Preference
                 android:key="Action.TTSTime"

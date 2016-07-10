@@ -22,6 +22,7 @@ import android.preference.PreferenceScreen;
 import android.support.v4.app.NotificationManagerCompat;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -33,6 +34,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -549,7 +552,19 @@ public class AddComponent extends PreferenceActivity {
 
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            if (resultCode == Activity.RESULT_OK) createAction(elevatedActions.get(requestCode));
+            if (requestCode == 99 && resultCode == Activity.RESULT_OK) {
+                Action action = new Action();
+                action.setCommand("Action.PlaySoundCustom");
+                String customSoundUri = data.getData().toString();
+                File file = new File(customSoundUri);
+                String fileName = file.getName();
+                ArrayList<String> actionData = new ArrayList();
+                actionData.add(fileName);
+                actionData.add(customSoundUri);
+                action.setData(actionData);
+                task.addNewAction(context, action);
+                getActivity().finish();
+            } else if (resultCode == Activity.RESULT_OK) createAction(elevatedActions.get(requestCode));
         }
 
         private void createAction(String actionType) {
@@ -671,7 +686,7 @@ public class AddComponent extends PreferenceActivity {
                     });
                     alert.show();
                     break;
-                case "Action.PlaySound":
+                case "Action.PlaySoundNotification":
                     alert = new AlertDialog.Builder(context);
                     RingtoneManager manager = new RingtoneManager(context);
                     manager.setType(RingtoneManager.TYPE_NOTIFICATION);
@@ -694,6 +709,12 @@ public class AddComponent extends PreferenceActivity {
                         }
                     });
                     alert.show();
+                    break;
+                case "Action.PlaySoundCustom":
+                    Intent chooseCustomSound = new Intent();
+                    chooseCustomSound.setType("audio/*");
+                    chooseCustomSound.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                    startActivityForResult(chooseCustomSound, 99);
                     break;
                 case "Action.TTSTime":
                     action.setData(1);

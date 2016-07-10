@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -68,7 +69,6 @@ public class Action {
                     final MediaSessionManager mediaSessionManager = (MediaSessionManager) context.getApplicationContext()
                             .getSystemService(Context.MEDIA_SESSION_SERVICE);
                     try {
-                        Thread.sleep(2000);
                         List<MediaController> mediaControllerList = mediaSessionManager.getActiveSessions
                                 (new ComponentName(context.getApplicationContext(), NotificationReceiverService.class));
                         for (MediaController m : mediaControllerList) {
@@ -78,9 +78,8 @@ public class Action {
                                 break;
                             }
                         }
-                    } catch (SecurityException | InterruptedException e) {
-                        if (e instanceof SecurityException) Main.showToast(context, "Could not accept call - notification access not granted!");
-                        else e.printStackTrace();
+                    } catch (SecurityException e) {
+                        Main.showToast(context, "Could not accept call - notification access not granted!");
                     }
                 } else {
                     Intent answerCall = new Intent(Intent.ACTION_MEDIA_BUTTON);
@@ -173,8 +172,12 @@ public class Action {
             case "Action.Vibrate":
                 ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
                 break;
-            case "Action.PlaySound":
+            case "Action.PlaySoundNotification":
                 RingtoneManager.getRingtone(context, Uri.parse(multiData.get(1))).play();
+                break;
+            case "Action.PlaySoundCustom":
+                MediaPlayer mPlayer = MediaPlayer.create(context.getApplicationContext(), Uri.parse(multiData.get(1)));
+                mPlayer.start();
                 break;
             case "Action.TTSTime":
                 Intent ttsTime = new Intent(context, TTSService.class);
@@ -407,7 +410,11 @@ public class Action {
                 case "Action.Vibrate":
                     type.setText("Vibrate");
                     break;
-                case "Action.PlaySound":
+                case "Action.PlaySoundNotification":
+                    type.setText("Play sound");
+                    detail.setText((String) action.getMultiData().get(0));
+                    break;
+                case "Action.PlaySoundCustom":
                     type.setText("Play sound");
                     detail.setText((String) action.getMultiData().get(0));
                     break;
