@@ -18,6 +18,7 @@ import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
@@ -176,6 +177,9 @@ public class Action {
                 RingtoneManager.getRingtone(context, Uri.parse(multiData.get(1))).play();
                 break;
             case "Action.PlaySoundCustom":
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    context.getContentResolver().takePersistableUriPermission(Uri.parse(multiData.get(1)), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
                 MediaPlayer mPlayer = MediaPlayer.create(context.getApplicationContext(), Uri.parse(multiData.get(1)));
                 mPlayer.start();
                 break;

@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,11 +15,13 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.provider.MediaStore;
 import android.support.v4.app.NotificationManagerCompat;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
@@ -489,7 +492,7 @@ public class AddComponent extends PreferenceActivity {
         private AutoCompleteTextView textView;
         private AlertDialog.Builder alert;
         private static List<String> elevatedActions = Arrays.asList("Action.StartCall", "Action.SendSMS", "Action.TTSSMS", "Action.LockModeNone",
-                "Action.LockModePin", "Action.LockModePassword", "Action.Timeout");
+                "Action.LockModePin", "Action.LockModePassword", "Action.Timeout", "Action.PlaySoundNotification");
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -538,6 +541,9 @@ public class AddComponent extends PreferenceActivity {
                             startActivityForResult(intent, elevatedActions.indexOf(actionType));
                         }
                         break;
+                    case "Action.PlaySoundNotification":
+                        if (Main.weHavePermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)) createAction(actionType);
+                        else requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, elevatedActions.indexOf(actionType));
                 }
             } else createAction(actionType);
             return true;
@@ -556,8 +562,7 @@ public class AddComponent extends PreferenceActivity {
                 Action action = new Action();
                 action.setCommand("Action.PlaySoundCustom");
                 String customSoundUri = data.getData().toString();
-                File file = new File(customSoundUri);
-                String fileName = file.getName();
+                String fileName = data.getData().getLastPathSegment();
                 ArrayList<String> actionData = new ArrayList();
                 actionData.add(fileName);
                 actionData.add(customSoundUri);
