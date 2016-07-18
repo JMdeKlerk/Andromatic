@@ -43,7 +43,28 @@ public class Settings extends AppCompatActivity {
         }
 
         @Override
-        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, final Preference preference) {
+            if (preference.getSummary() != null && preference.getSummary().toString().startsWith("Logged in as")) {
+                final AlertDialog.Builder alert = new AlertDialog.Builder(this.getActivity());
+                alert.setTitle("Log out?");
+                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (preference.getKey()) {
+                            case "twitterAccount":
+                                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                                editor.remove("twitterID");
+                                editor.remove("twitterToken");
+                                editor.remove("twitterSecret");
+                                editor.commit();
+                                getActivity().recreate();
+                        }
+                    }
+                });
+                alert.setNegativeButton("No", null);
+                alert.show();
+                return true;
+            }
             if (preference.getKey().equals("twitterAccount")) {
                 final Handler handler = new Handler(Looper.getMainLooper()) {
                     @Override

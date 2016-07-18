@@ -292,6 +292,10 @@ public class Action {
                 break;
             case "Action.SendTweet":
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                if (prefs.getString("twitterToken", "").equals("")) {
+                    Main.showToast(context, "Twitter details not found");
+                    return;
+                }
                 ConfigurationBuilder configBuilder = new ConfigurationBuilder();
                 configBuilder.setOAuthConsumerKey(Main.TWITTER_CONSUMER_KEY);
                 configBuilder.setOAuthConsumerSecret(Main.TWITTER_CONSUMER_SECRET);
@@ -303,7 +307,7 @@ public class Action {
                     @Override
                     public void run() {
                         try {
-                            twitter.updateStatus("Test tweet from Andromatic");
+                            twitter.updateStatus(multiData.get(0));
                         } catch (TwitterException e) {
                             e.printStackTrace();
                         }
@@ -476,6 +480,10 @@ public class Action {
                 case "Action.NotificationVolume":
                     type.setText("Set notification volume");
                     detail.setText(action.getData() + " percent");
+                    break;
+                case "Action.SendTweet":
+                    type.setText("Update Twitter status");
+                    detail.setText("\"" + action.getMultiData().get(0) + "\"");
                     break;
                 default:
                     type.setText(action.getCommand());

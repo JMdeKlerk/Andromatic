@@ -10,6 +10,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
@@ -20,6 +21,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationManagerCompat;
@@ -86,12 +88,23 @@ public class AddComponent extends PreferenceActivity {
             super.onCreate(savedInstanceState);
             if (Main.userIsPremium(getActivity())) addPreferencesFromResource(R.xml.triggers);
             else addPreferencesFromResource(R.xml.triggers_free);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            if (!prefs.getString("twitterID", "").equals("")) {
+                Preference twitterPreference = findPreference("twitterScreen");
+                twitterPreference.setSummary("Logged in as " + prefs.getString("twitterID", ""));
+            }
         }
 
         @Override
         public boolean onPreferenceTreeClick(final PreferenceScreen preferenceScreen, final Preference preference) {
-            if (preference.getSummary() != null) {
+            if (preference.getSummary() != null && preference.getSummary().toString().equals("Premium only")) {
                 Main.purchasePremium(getActivity());
+                getActivity().finish();
+                return false;
+            }
+            if (preference.getSummary() != null && preference.getSummary().toString().equals("Not logged in")) {
+                Intent settings = new Intent(context, Settings.class);
+                startActivity(settings);
                 getActivity().finish();
                 return false;
             }
@@ -289,8 +302,14 @@ public class AddComponent extends PreferenceActivity {
 
         @Override
         public boolean onPreferenceTreeClick(final PreferenceScreen preferenceScreen, Preference preference) {
-            if (preference.getSummary() != null) {
+            if (preference.getSummary() != null && preference.getSummary().toString().equals("Premium only")) {
                 Main.purchasePremium(getActivity());
+                getActivity().finish();
+                return false;
+            }
+            if (preference.getSummary() != null && preference.getSummary().toString().equals("Not logged in")) {
+                Intent settings = new Intent(context, Settings.class);
+                startActivity(settings);
                 getActivity().finish();
                 return false;
             }
@@ -499,12 +518,23 @@ public class AddComponent extends PreferenceActivity {
             super.onCreate(savedInstanceState);
             if (Main.userIsPremium(getActivity())) addPreferencesFromResource(R.xml.actions);
             else addPreferencesFromResource(R.xml.actions_free);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            if (!prefs.getString("twitterID", "").equals("")) {
+                Preference twitterPreference = findPreference("twitterScreen");
+                twitterPreference.setSummary("Logged in as " + prefs.getString("twitterID", ""));
+            }
         }
 
         @Override
         public boolean onPreferenceTreeClick(final PreferenceScreen preferenceScreen, Preference preference) {
-            if (preference.getSummary() != null) {
+            if (preference.getSummary() != null && preference.getSummary().toString().equals("Premium only")) {
                 Main.purchasePremium(getActivity());
+                getActivity().finish();
+                return false;
+            }
+            if (preference.getSummary() != null && preference.getSummary().toString().equals("Not logged in")) {
+                Intent settings = new Intent(context, Settings.class);
+                startActivity(settings);
                 getActivity().finish();
                 return false;
             }
@@ -819,6 +849,23 @@ public class AddComponent extends PreferenceActivity {
                         public void onClick(DialogInterface dialog, int id) {
                             SeekBar seek = (SeekBar) ((AlertDialog) dialog).findViewById(R.id.seek);
                             action.setData(seek.getProgress() * 10);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
+                    break;
+                case "Action.SendTweet":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_multiline, null);
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            String text = ((EditText) ((AlertDialog) dialog).findViewById(R.id.text)).getText().toString();
+                            ArrayList data = new ArrayList();
+                            data.add(text);
+                            action.setData(data);
                             task.addNewAction(context, action);
                             getActivity().finish();
                         }
