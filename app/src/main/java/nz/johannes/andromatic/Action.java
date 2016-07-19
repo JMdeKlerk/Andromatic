@@ -291,6 +291,7 @@ public class Action {
                 notifyManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, Math.round(notifyVolume), 0);
                 break;
             case "Action.SendTweet":
+            case "Action.TwitterMessage":
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                 if (prefs.getString("twitterToken", "").equals("")) {
                     Main.showToast(context, "Twitter details not found");
@@ -307,7 +308,8 @@ public class Action {
                     @Override
                     public void run() {
                         try {
-                            twitter.updateStatus(multiData.get(0));
+                            if (command.equals("Action.SendTweet")) twitter.updateStatus(multiData.get(0));
+                            if (command.equals("Action.TwitterMessage")) twitter.sendDirectMessage(multiData.get(0), multiData.get(1));
                         } catch (TwitterException e) {
                             e.printStackTrace();
                         }
@@ -484,6 +486,10 @@ public class Action {
                 case "Action.SendTweet":
                     type.setText("Update Twitter status");
                     detail.setText("\"" + action.getMultiData().get(0) + "\"");
+                    break;
+                case "Action.TwitterMessage":
+                    type.setText("Send Twitter Message");
+                    detail.setText((String) action.getMultiData().get(0));
                     break;
                 default:
                     type.setText(action.getCommand());

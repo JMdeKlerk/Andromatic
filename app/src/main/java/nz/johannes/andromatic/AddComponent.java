@@ -859,6 +859,8 @@ public class AddComponent extends PreferenceActivity {
                 case "Action.SendTweet":
                     alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_multiline, null);
+                    EditText textView = (EditText) view.findViewById(R.id.text);
+                    textView.setHint("Tweet");
                     alert.setView(view);
                     alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
@@ -866,6 +868,27 @@ public class AddComponent extends PreferenceActivity {
                             ArrayList data = new ArrayList();
                             data.add(text);
                             action.setData(data);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
+                    break;
+                case "Action.TwitterMessage":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_sendmessage, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.to);
+                    textView.setHint("User");
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            EditText to = (EditText) ((AlertDialog) dialog).findViewById(R.id.to);
+                            EditText message = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
+                            ArrayList<String> actionData = new ArrayList();
+                            actionData.add(to.getText().toString());
+                            actionData.add(message.getText().toString());
+                            action.setData(actionData);
                             task.addNewAction(context, action);
                             getActivity().finish();
                         }
