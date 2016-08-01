@@ -33,6 +33,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import net.dean.jraw.RedditClient;
+import net.dean.jraw.http.UserAgent;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -291,30 +294,10 @@ public class Action {
                 notifyManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, Math.round(notifyVolume), 0);
                 break;
             case "Action.SendTweet":
+                SocialMediaManager.sendTweet(context, multiData.get(0));
+                break;
             case "Action.TwitterMessage":
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                if (prefs.getString("twitterToken", "").equals("")) {
-                    Main.showToast(context, "Twitter details not found");
-                    return;
-                }
-                ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-                configBuilder.setOAuthConsumerKey(Main.TWITTER_CONSUMER_KEY);
-                configBuilder.setOAuthConsumerSecret(Main.TWITTER_CONSUMER_SECRET);
-                configBuilder.setOAuthAccessToken(prefs.getString("twitterToken", ""));
-                configBuilder.setOAuthAccessTokenSecret(prefs.getString("twitterSecret", ""));
-                TwitterFactory twitterFactory = new TwitterFactory(configBuilder.build());
-                final Twitter twitter = twitterFactory.getInstance();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (command.equals("Action.SendTweet")) twitter.updateStatus(multiData.get(0));
-                            if (command.equals("Action.TwitterMessage")) twitter.sendDirectMessage(multiData.get(0), multiData.get(1));
-                        } catch (TwitterException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
+                SocialMediaManager.sendTwitterMessage(context, multiData.get(0), multiData.get(1));
                 break;
         }
     }

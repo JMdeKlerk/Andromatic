@@ -14,9 +14,12 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+
+import net.dean.jraw.RedditClient;
+import net.dean.jraw.http.UserAgent;
+import net.dean.jraw.http.oauth.Credentials;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -27,7 +30,7 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class Settings extends AppCompatActivity {
 
-    private static RequestToken requestToken;
+    private static RequestToken twitterRequestToken;
 
     public static class SettingsFragment extends PreferenceFragment {
 
@@ -96,8 +99,8 @@ public class Settings extends AppCompatActivity {
                             @Override
                             public void run() {
                                 try {
-                                    requestToken = twitter.getOAuthRequestToken();
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(requestToken.getAuthorizationURL()));
+                                    twitterRequestToken = twitter.getOAuthRequestToken();
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(twitterRequestToken.getAuthorizationURL()));
                                     startActivity(browserIntent);
                                 } catch (TwitterException e) {
                                 }
@@ -112,7 +115,7 @@ public class Settings extends AppCompatActivity {
                             @Override
                             public void run() {
                                 try {
-                                    AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, textView.getText().toString());
+                                    AccessToken accessToken = twitter.getOAuthAccessToken(twitterRequestToken, textView.getText().toString());
                                     SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
                                     editor.putString("twitterID", accessToken.getScreenName());
                                     editor.putString("twitterToken", accessToken.getToken());

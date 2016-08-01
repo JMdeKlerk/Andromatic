@@ -7,9 +7,10 @@ import android.content.Intent;
 public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         if ("checkServices".equals(intent.getStringExtra("type"))) {
-            Main.manageReceivers(context);
+            SocialMediaManager.check(context);
+            ReceiverManager.manageReceivers(context);
             return;
         }
         try {
@@ -18,7 +19,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             task.setAlarms(context);
         } catch (NullPointerException e) {
             // Task no longer exists but alarm was not unset
-            e.printStackTrace();
         }
     }
 

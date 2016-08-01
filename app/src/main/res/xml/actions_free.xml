@@ -165,16 +165,5 @@
                 android:key="Action.FacebookMessage"
                 android:title="Send Facebook message..."/>
         </PreferenceScreen>
-        <PreferenceScreen
-            android:key="redditScreen"
-            android:summary="Not logged in"
-            android:title="Reddit...">
-            <Preference
-                android:key="Action.RedditPost"
-                android:title="Post to Reddit..."/>
-            <Preference
-                android:key="Action.RedditMessage"
-                android:title="Send Reddit message..."/>
-        </PreferenceScreen>
     </PreferenceScreen>
 </PreferenceScreen>

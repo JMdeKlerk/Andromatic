@@ -158,6 +158,8 @@ public class AddComponent extends PreferenceActivity {
             trigger.setType(triggerType);
             switch (triggerType) {
                 case "Trigger.SMSByContent":
+                case "Trigger.NewTweetByContent":
+                case "Trigger.NewDMByContent":
                     alert = new AlertDialog.Builder(context);
                     view = getActivity().getLayoutInflater().inflate(R.layout.dialog_incomingmessage, null);
                     alert.setView(view);
@@ -270,6 +272,26 @@ public class AddComponent extends PreferenceActivity {
                             EditText textField = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
                             String match = textField.getText().toString();
                             trigger.setMatch(match);
+                            task.addNewTrigger(context, trigger);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
+                    break;
+                case "Trigger.NewTweetByUser":
+                case "Trigger.NewDMByUser":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                    textView.setHint("Username");
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AutoCompleteTextView senderField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String sender = senderField.getText().toString();
+                            trigger.setMatch(sender);
                             task.addNewTrigger(context, trigger);
                             getActivity().finish();
                         }

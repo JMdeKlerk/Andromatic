@@ -34,4 +34,16 @@
         <item>15</item>
         <item>5</item>
     </string-array>
+    <string-array name="SocialMedia">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>6 hours</item>
+    </string-array>
+    <string-array name="SocialMediaValues">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>360</item>
+    </string-array>
 </resources>

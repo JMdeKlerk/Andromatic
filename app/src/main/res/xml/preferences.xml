@@ -21,6 +21,14 @@
         android:key="shakeSensitivity"
         android:summary="Required motion level for shake trigger"
         android:title="Shake sensitivity"/>
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/SocialMedia"
+        android:entryValues="@array/SocialMediaValues"
+        android:key="socialMediaCheckInterval"
+        android:summary="How often social media triggers should check for updates"
+        android:title="Social media update frequency"/>
+    />
     <Preference
         android:key="twitterAccount"
         android:summary="Link your Twitter to enable related triggers and actions"
@@ -29,8 +37,4 @@
         android:key="facebookAccount"
         android:summary="Link your Facebook to enable related triggers and actions"
         android:title="Facebook account"/>
-    <Preference
-        android:key="redditAccount"
-        android:summary="Link your Reddit to enable related triggers and actions"
-        android:title="Reddit account"/>
 </PreferenceScreen>

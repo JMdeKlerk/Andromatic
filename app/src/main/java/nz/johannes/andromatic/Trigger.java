@@ -155,6 +155,28 @@ public class Trigger {
                     case "Trigger.FaceDown":
                         type.setText("Flip down");
                         break;
+                    case "Trigger.NewTweet":
+                        type.setText("Any new tweet");
+                        break;
+                    case "Trigger.NewTweetByContent":
+                        type.setText("New tweet");
+                        detail.setText(trigger.getExtraData().get(0) + " match: \"" + trigger.getMatch() + "\"");
+                        break;
+                    case "Trigger.NewTweetByUser":
+                        type.setText("New tweet");
+                        detail.setText("From user " + trigger.getMatch());
+                        break;
+                    case "Trigger.NewDM":
+                        type.setText("Any new tweet");
+                        break;
+                    case "Trigger.NewDMByContent":
+                        type.setText("New Twitter message");
+                        detail.setText(trigger.getExtraData().get(0) + " match: \"" + trigger.getMatch() + "\"");
+                        break;
+                    case "Trigger.NewDMByUser":
+                        type.setText("New Twitter message");
+                        detail.setText("From user " + trigger.getMatch());
+                        break;
                     default:
                         type.setText(trigger.getType());
                 }

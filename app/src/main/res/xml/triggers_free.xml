@@ -172,17 +172,14 @@
             android:title="Reddit...">
             <PreferenceScreen android:title="Post...">
                 <Preference
-                    android:key="Trigger.NewRedditPost"
-                    android:title="Any"/>
+                    android:key="Trigger.NewRedditPostBySubreddit"
+                    android:title="By subreddit..."/>
                 <Preference
                     android:key="Trigger.NewRedditPostByContent"
                     android:title="By content..."/>
                 <Preference
                     android:key="Trigger.NewRedditPostByUser"
                     android:title="By user..."/>
-                <Preference
-                    android:key="Trigger.NewRedditPostBySubreddit"
-                    android:title="By subreddit..."/>
             </PreferenceScreen>
             <PreferenceScreen android:title="Message...">
                 <Preference
