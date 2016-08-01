@@ -19,9 +19,10 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class SocialMediaManager {
 
+    public static String TWITTER_CONSUMER_KEY = "ZqcNUNBdCV51qT95fgHTDDj2p";
+    public static String TWITTER_CONSUMER_SECRET = "o1x7oMl2nWHzm7ey6I0oprAOzg5qSzaIfoVWGT7p3phwKfoleZ";
+
     private static long lastCheckTime;
-    private static String TWITTER_CONSUMER_KEY = "ZqcNUNBdCV51qT95fgHTDDj2p";
-    private static String TWITTER_CONSUMER_SECRET = "o1x7oMl2nWHzm7ey6I0oprAOzg5qSzaIfoVWGT7p3phwKfoleZ";
 
     public static void sendTweet(final Context context, final String tweet) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

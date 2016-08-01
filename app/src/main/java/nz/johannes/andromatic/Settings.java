@@ -17,10 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 
-import net.dean.jraw.RedditClient;
-import net.dean.jraw.http.UserAgent;
-import net.dean.jraw.http.oauth.Credentials;
-
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -84,8 +80,8 @@ public class Settings extends AppCompatActivity {
                 };
                 final AlertDialog.Builder alert = new AlertDialog.Builder(this.getActivity());
                 ConfigurationBuilder builder = new ConfigurationBuilder();
-                builder.setOAuthConsumerKey(Main.TWITTER_CONSUMER_KEY);
-                builder.setOAuthConsumerSecret(Main.TWITTER_CONSUMER_SECRET);
+                builder.setOAuthConsumerKey(SocialMediaManager.TWITTER_CONSUMER_KEY);
+                builder.setOAuthConsumerSecret(SocialMediaManager.TWITTER_CONSUMER_SECRET);
                 TwitterFactory factory = new TwitterFactory(builder.build());
                 final Twitter twitter = factory.getInstance();
                 View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_singleline, null);
