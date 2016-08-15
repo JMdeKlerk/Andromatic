@@ -77,6 +77,9 @@
                 android:summary="Premium only"
                 android:title="Custom..."/>
         </PreferenceScreen>
+        <Preference
+            android:key="Action.ShowNotification"
+            android:title="Show notification..."/>
         <PreferenceScreen android:title="Text to speech...">
             <Preference
                 android:key="Action.TTSTime"
@@ -142,6 +145,7 @@
             android:key="Action.NotificationVolume"
             android:title="Set notification volume..."/>
     </PreferenceScreen>
+
     <PreferenceScreen android:title="Social media...">
         <PreferenceScreen
             android:key="twitterScreen"
@@ -152,9 +156,10 @@
                 android:title="Update Twitter status..."/>
             <Preference
                 android:key="Action.TwitterMessage"
+                android:summary="Premium only"
                 android:title="Send Twitter message..."/>
         </PreferenceScreen>
-        <PreferenceScreen
+        <!--PreferenceScreen
             android:key="facebookScreen"
             android:summary="Not logged in"
             android:title="Facebook...">
@@ -164,6 +169,7 @@
             <Preference
                 android:key="Action.FacebookMessage"
                 android:title="Send Facebook message..."/>
-        </PreferenceScreen>
+        </PreferenceScreen-->
     </PreferenceScreen>
+
 </PreferenceScreen>

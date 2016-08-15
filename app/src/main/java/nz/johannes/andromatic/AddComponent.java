@@ -78,12 +78,16 @@ public class AddComponent extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            if (Main.userIsPremium(getActivity())) addPreferencesFromResource(R.xml.triggers);
+            if (Main.userIsPremium(getActivity()) || BuildConfig.DEBUG) addPreferencesFromResource(R.xml.triggers);
             else addPreferencesFromResource(R.xml.triggers_free);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             if (!prefs.getString("twitterID", "").equals("")) {
                 Preference twitterPreference = findPreference("twitterScreen");
                 twitterPreference.setSummary("Logged in as " + prefs.getString("twitterID", ""));
+            }
+            if (!prefs.getString("facebookID", "").equals("")) {
+                Preference facebookPreference = findPreference("facebookScreen");
+                facebookPreference.setSummary("Logged in as " + prefs.getString("facebookID", ""));
             }
         }
 
@@ -291,6 +295,76 @@ public class AddComponent extends PreferenceActivity {
                     alert.setNegativeButton("Cancel", null);
                     alert.show();
                     break;
+                case "Trigger.NewRedditPost":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_autocomplete, null);
+                    textView = (AutoCompleteTextView) view.findViewById(R.id.text);
+                    textView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+                    textView.setHint("Subreddit");
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AutoCompleteTextView subredditField = (AutoCompleteTextView) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String subreddit = subredditField.getText().toString();
+                            trigger.setMatch(subreddit);
+                            task.addNewTrigger(context, trigger);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
+                    break;
+                case "Trigger.NewRedditPostByUser":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_doublesingleline, null);
+                    EditText textView = (EditText) view.findViewById(R.id.text);
+                    textView.setHint("Subreddit");
+                    EditText detailView = (EditText) view.findViewById(R.id.detail);
+                    detailView.setHint("Username");
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            EditText subredditField = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String subreddit = subredditField.getText().toString();
+                            EditText usernameField = (EditText) ((AlertDialog) dialog).findViewById(R.id.detail);
+                            String username = usernameField.getText().toString();
+                            trigger.setMatch(subreddit);
+                            ArrayList<String> extras = new ArrayList<>();
+                            extras.add(username);
+                            trigger.setExtraData(extras);
+                            task.addNewTrigger(context, trigger);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
+                    break;
+                case "Trigger.NewRedditPostByTitle":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_redditpost, null);
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            EditText subredditField = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
+                            String subreddit = subredditField.getText().toString();
+                            EditText matchText = (EditText) ((AlertDialog) dialog).findViewById(R.id.content);
+                            RadioButton exact = (RadioButton) ((AlertDialog) dialog).findViewById(R.id.radio_exact);
+                            String match = matchText.getText().toString();
+                            trigger.setMatch(subreddit);
+                            ArrayList<String> extras = new ArrayList<>();
+                            extras.add(exact.isChecked() ? "Exact" : "Partial");
+                            extras.add(match);
+                            trigger.setExtraData(extras);
+                            task.addNewTrigger(context, trigger);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
+                    break;
                 default:
                     task.addNewTrigger(context, trigger);
                     getActivity().finish();
@@ -310,7 +384,7 @@ public class AddComponent extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            if (Main.userIsPremium(getActivity())) addPreferencesFromResource(R.xml.conditions);
+            if (Main.userIsPremium(getActivity()) || BuildConfig.DEBUG) addPreferencesFromResource(R.xml.conditions);
             else addPreferencesFromResource(R.xml.conditions_free);
         }
 
@@ -530,12 +604,16 @@ public class AddComponent extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            if (Main.userIsPremium(getActivity())) addPreferencesFromResource(R.xml.actions);
+            if (Main.userIsPremium(getActivity()) || BuildConfig.DEBUG) addPreferencesFromResource(R.xml.actions);
             else addPreferencesFromResource(R.xml.actions_free);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             if (!prefs.getString("twitterID", "").equals("")) {
                 Preference twitterPreference = findPreference("twitterScreen");
                 twitterPreference.setSummary("Logged in as " + prefs.getString("twitterID", ""));
+            }
+            if (!prefs.getString("facebookID", "").equals("")) {
+                Preference facebookPreference = findPreference("facebookScreen");
+                facebookPreference.setSummary("Logged in as " + prefs.getString("facebookID", ""));
             }
         }
 
@@ -764,6 +842,30 @@ public class AddComponent extends PreferenceActivity {
                     chooseCustomSound.setType("audio/*");
                     chooseCustomSound.setAction(Intent.ACTION_OPEN_DOCUMENT);
                     startActivityForResult(chooseCustomSound, 99);
+                    break;
+                case "Action.ShowNotification":
+                    alert = new AlertDialog.Builder(context);
+                    view = getActivity().getLayoutInflater().inflate(R.layout.dialog_doublesingleline, null);
+                    EditText titleView = (EditText) view.findViewById(R.id.text);
+                    titleView.setHint("Title");
+                    EditText detailView = (EditText) view.findViewById(R.id.detail);
+                    detailView.setHint("Message");
+                    alert.setItems(null, null);
+                    alert.setView(view);
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            EditText title = (EditText) ((AlertDialog) dialog).findViewById(R.id.text);
+                            EditText message = (EditText) ((AlertDialog) dialog).findViewById(R.id.detail);
+                            ArrayList<String> actionData = new ArrayList();
+                            actionData.add(title.getText().toString());
+                            actionData.add(message.getText().toString());
+                            action.setData(actionData);
+                            task.addNewAction(context, action);
+                            getActivity().finish();
+                        }
+                    });
+                    alert.setNegativeButton("Cancel", null);
+                    alert.show();
                     break;
                 case "Action.TTSTime":
                     action.setData(1);

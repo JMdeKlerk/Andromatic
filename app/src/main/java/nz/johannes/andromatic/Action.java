@@ -1,6 +1,7 @@
 package nz.johannes.andromatic;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
@@ -17,6 +18,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Vibrator;
+import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
@@ -31,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 public class Action {
 
@@ -165,6 +168,14 @@ public class Action {
                 }
                 MediaPlayer mPlayer = MediaPlayer.create(context.getApplicationContext(), Uri.parse(multiData.get(1)));
                 mPlayer.start();
+                break;
+            case "Action.ShowNotification":
+                NotificationCompat.Builder notification = new NotificationCompat.Builder(context);
+                notification.setSmallIcon(R.mipmap.ic_launcher);
+                notification.setContentTitle(multiData.get(0));
+                notification.setContentText(multiData.get(1));
+                int id = new Random().nextInt(10000);
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(id, notification.build());
                 break;
             case "Action.TTSTime":
                 Intent ttsTime = new Intent(context, TTSService.class);
@@ -391,6 +402,10 @@ public class Action {
                     type.setText("Play sound");
                     detail.setText((String) action.getMultiData().get(0));
                     break;
+                case "Action.ShowNotification":
+                    type.setText("Show notification");
+                    detail.setText(action.getMultiData().get(0) + " - " + action.getMultiData().get(1));
+                    break;
                 case "Action.TTSTime":
                     type.setText("Text to speech");
                     detail.setText("Current time");
@@ -401,7 +416,7 @@ public class Action {
                     break;
                 case "Action.TTSCustom":
                     type.setText("Text to speech");
-                    detail.setText((String) "\"" + action.getMultiData().get(0) + "\"");
+                    detail.setText("\"" + action.getMultiData().get(0) + "\"");
                     break;
                 case "Action.BluetoothEnable":
                     type.setText("Enable bluetooth");

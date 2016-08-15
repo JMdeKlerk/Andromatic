@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
     <PreferenceScreen android:title="Communication...">
         <PreferenceScreen android:title="Incoming call...">
             <Preference
@@ -42,6 +43,7 @@
                 android:title="By sender..."/>
         </PreferenceScreen>
     </PreferenceScreen>
+
     <PreferenceScreen android:title="Miscellaneous...">
         <Preference
             android:key="Trigger.BatteryLow"
@@ -69,6 +71,7 @@
             android:key="Trigger.Time"
             android:title="Time..."/>
     </PreferenceScreen>
+
     <PreferenceScreen android:title="Network...">
         <PreferenceScreen android:title="Bluetooth connection...">
             <Preference
@@ -98,6 +101,7 @@
                 android:title="By SSID..."/>
         </PreferenceScreen>
     </PreferenceScreen>
+
     <PreferenceScreen android:title="Gestures...">
         <Preference
             android:key="Trigger.Shake"
@@ -111,6 +115,7 @@
             android:summary="Premium only"
             android:title="Flip down"/>
     </PreferenceScreen>
+
     <PreferenceScreen android:title="Social Media...">
         <PreferenceScreen
             android:key="twitterScreen"
@@ -122,9 +127,11 @@
                     android:title="Any"/>
                 <Preference
                     android:key="Trigger.NewTweetByContent"
+                    android:summary="Premium only"
                     android:title="By content..."/>
                 <Preference
                     android:key="Trigger.NewTweetByUser"
+                    android:summary="Premium only"
                     android:title="By user..."/>
             </PreferenceScreen>
             <PreferenceScreen android:title="Direct message...">
@@ -133,13 +140,15 @@
                     android:title="Any"/>
                 <Preference
                     android:key="Trigger.NewDMByContent"
+                    android:summary="Premium only"
                     android:title="By content..."/>
                 <Preference
                     android:key="Trigger.NewDMByUser"
+                    android:summary="Premium only"
                     android:title="By sender..."/>
             </PreferenceScreen>
         </PreferenceScreen>
-        <PreferenceScreen
+        <!--PreferenceScreen
             android:key="facebookScreen"
             android:summary="Not logged in"
             android:title="Facebook...">
@@ -165,33 +174,21 @@
                     android:key="Trigger.NewFacebookMessageByUser"
                     android:title="By sender..."/>
             </PreferenceScreen>
-        </PreferenceScreen>
+        </PreferenceScreen-->
         <PreferenceScreen
             android:key="redditScreen"
-            android:summary="Not logged in"
             android:title="Reddit...">
-            <PreferenceScreen android:title="Post...">
-                <Preference
-                    android:key="Trigger.NewRedditPostBySubreddit"
-                    android:title="By subreddit..."/>
-                <Preference
-                    android:key="Trigger.NewRedditPostByContent"
-                    android:title="By content..."/>
-                <Preference
-                    android:key="Trigger.NewRedditPostByUser"
-                    android:title="By user..."/>
-            </PreferenceScreen>
-            <PreferenceScreen android:title="Message...">
-                <Preference
-                    android:key="Trigger.NewRedditMessage"
-                    android:title="Any"/>
-                <Preference
-                    android:key="Trigger.NewRedditMessageByContent"
-                    android:title="By content..."/>
-                <Preference
-                    android:key="Trigger.NewRedditMessageByUser"
-                    android:title="By sender..."/>
-            </PreferenceScreen>
+            <Preference
+                android:key="Trigger.NewRedditPost"
+                android:title="New post..."/>
+            <Preference
+                android:key="Trigger.NewRedditPostByTitle"
+                android:summary="Premium only"
+                android:title="New post by title..."/>
+            <Preference
+                android:key="Trigger.NewRedditPostByUser"
+                android:summary="Premium only"
+                android:title="New post by user..."/>
         </PreferenceScreen>
     </PreferenceScreen>
 </PreferenceScreen>

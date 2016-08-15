@@ -177,6 +177,19 @@ public class Trigger {
                         type.setText("New Twitter message");
                         detail.setText("From user " + trigger.getMatch());
                         break;
+                    case "Trigger.NewRedditPost":
+                        type.setText("New Reddit post");
+                        detail.setText("/r/" + trigger.getMatch());
+                        break;
+                    case "Trigger.NewRedditPostByUser":
+                        type.setText("New Reddit post");
+                        detail.setText("/r/" + trigger.getMatch() + " - by user " + trigger.getExtraData().get(0));
+                        break;
+                    case "Trigger.NewRedditPostByTitle":
+                        type.setText("New Reddit post");
+                        detail.setText("/r/" + trigger.getMatch() + " - " + trigger.getExtraData().get(0).toLowerCase() +
+                                " match: \"" + trigger.getExtraData().get(1) + "\"");
+                        break;
                     default:
                         type.setText(trigger.getType());
                 }

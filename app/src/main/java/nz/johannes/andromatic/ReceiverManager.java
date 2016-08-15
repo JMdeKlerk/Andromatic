@@ -82,6 +82,7 @@ public class ReceiverManager {
                     case "Trigger.NewTweet":
                     case "Trigger.NewTweetByContent":
                     case "Trigger.NewTweetByUser":
+                    case "Trigger.NewRedditPost":
                         socialMedia = true;
                         receiverBools[0] = true;
                         break;
@@ -113,7 +114,7 @@ public class ReceiverManager {
         if (headset) context.startService(new Intent(context, HeadphoneService.class));
         if (sensorBools[0] || sensorBools[1] || headset || socialMedia) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            int interval = socialMedia ? prefs.getInt("socialMediaCheckInterval", 15) : 60;
+            int interval = socialMedia ? Integer.parseInt(prefs.getString("socialMediaCheckInterval", "15")) : 60;
             long time = System.currentTimeMillis() + (1000 * 60 * interval);
             if (android.os.Build.VERSION.SDK_INT >= 23) aManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pi);
             else if (android.os.Build.VERSION.SDK_INT >= 19) aManager.setExact(AlarmManager.RTC_WAKEUP, time, pi);

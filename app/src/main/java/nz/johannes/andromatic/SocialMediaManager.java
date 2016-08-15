@@ -7,6 +7,16 @@ import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 
 import twitter4j.DirectMessage;
@@ -84,7 +94,7 @@ public class SocialMediaManager {
                     case "Trigger.NewDMByUser":
                         checkTwitterMessages(context, task, trigger);
                         break;
-                    case "Trigger.NewRedditPostBySubreddit":
+                    case "Trigger.NewRedditPost":
                         checkRedditPosts(context, task, trigger);
                         break;
                 }
@@ -193,7 +203,59 @@ public class SocialMediaManager {
     }
 
     private static void checkRedditPosts(final Context context, final Task task, final Trigger trigger) {
-
+        final Handler handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message inputMessage) {
+                task.runTask(context);
+            }
+        };
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Date date = new Date(lastCheckTime);
+                    String url = "https://www.reddit.com/r/" + trigger.getMatch() + "/search/.json?restrict_sr=true&sort=new";
+                    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setRequestProperty("User-Agent", "Andromatic " + BuildConfig.VERSION_NAME);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) response.append(inputLine);
+                    in.close();
+                    JsonObject responseJson = new JsonParser().parse(response.toString()).getAsJsonObject();
+                    JsonArray posts = responseJson.getAsJsonObject("data").getAsJsonArray("children");
+                    for (JsonElement post : posts) {
+                        JsonObject postObject = post.getAsJsonObject();
+                        JsonObject postData = (JsonObject) postObject.get("data");
+                        long createdRaw = Math.round(postData.get("created_utc").getAsFloat());
+                        Date created = new Date(createdRaw * 1000);
+                        String username = postData.get("author").getAsString();
+                        String title = postData.get("title").getAsString();
+                        switch (trigger.getType()) {
+                            case "Trigger.NewRedditPost":
+                                if (created.after(date)) handler.sendMessage(new Message());
+                                break;
+                            case "Trigger.NewRedditPostByUser":
+                                if (created.after(date) && trigger.getExtraData().equals(username)) handler.sendMessage(new Message());
+                                break;
+                            case "Trigger.NewRedditPostByTitle":
+                                if (created.after(date)) {
+                                    if (trigger.getExtraData().get(0).equals("Exact") &&
+                                            title.equalsIgnoreCase(trigger.getMatch()))
+                                        handler.sendMessage(new Message());
+                                    if (trigger.getExtraData().get(0).equals("Partial") &&
+                                            title.toLowerCase().contains(trigger.getMatch().toLowerCase()))
+                                        handler.sendMessage(new Message());
+                                }
+                                break;
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
 }

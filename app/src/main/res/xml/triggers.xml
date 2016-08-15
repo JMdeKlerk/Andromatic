@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
     <PreferenceScreen android:title="Communication...">
         <PreferenceScreen android:title="Incoming call...">
             <Preference
@@ -37,6 +38,7 @@
                 android:title="By sender..."/>
         </PreferenceScreen>
     </PreferenceScreen>
+
     <PreferenceScreen android:title="Miscellaneous...">
         <Preference
             android:key="Trigger.BatteryLow"
@@ -64,6 +66,7 @@
             android:key="Trigger.Time"
             android:title="Time..."/>
     </PreferenceScreen>
+
     <PreferenceScreen android:title="Network...">
         <PreferenceScreen android:title="Bluetooth connection...">
             <Preference
@@ -90,6 +93,7 @@
                 android:title="By SSID..."/>
         </PreferenceScreen>
     </PreferenceScreen>
+
     <PreferenceScreen android:title="Gestures...">
         <Preference
             android:key="Trigger.Shake"
@@ -101,4 +105,75 @@
             android:key="Trigger.FaceDown"
             android:title="Flip down"/>
     </PreferenceScreen>
+
+    <PreferenceScreen android:title="Social Media...">
+        <PreferenceScreen
+            android:key="twitterScreen"
+            android:summary="Not logged in"
+            android:title="Twitter...">
+            <PreferenceScreen android:title="Tweet...">
+                <Preference
+                    android:key="Trigger.NewTweet"
+                    android:title="Any"/>
+                <Preference
+                    android:key="Trigger.NewTweetByContent"
+                    android:title="By content..."/>
+                <Preference
+                    android:key="Trigger.NewTweetByUser"
+                    android:title="By user..."/>
+            </PreferenceScreen>
+            <PreferenceScreen android:title="Direct message...">
+                <Preference
+                    android:key="Trigger.NewDM"
+                    android:title="Any"/>
+                <Preference
+                    android:key="Trigger.NewDMByContent"
+                    android:title="By content..."/>
+                <Preference
+                    android:key="Trigger.NewDMByUser"
+                    android:title="By sender..."/>
+            </PreferenceScreen>
+        </PreferenceScreen>
+        <!--PreferenceScreen
+            android:key="facebookScreen"
+            android:summary="Not logged in"
+            android:title="Facebook...">
+            <PreferenceScreen android:title="Post...">
+                <Preference
+                    android:key="Trigger.NewFacebookPost"
+                    android:title="Any"/>
+                <Preference
+                    android:key="Trigger.NewFacebookPostByContent"
+                    android:title="By content..."/>
+                <Preference
+                    android:key="Trigger.NewFacebookPostByUser"
+                    android:title="By user..."/>
+            </PreferenceScreen>
+            <PreferenceScreen android:title="Message...">
+                <Preference
+                    android:key="Trigger.NewFacebookMessage"
+                    android:title="Any"/>
+                <Preference
+                    android:key="Trigger.NewFacebookMessageByContent"
+                    android:title="By content..."/>
+                <Preference
+                    android:key="Trigger.NewFacebookMessageByUser"
+                    android:title="By sender..."/>
+            </PreferenceScreen>
+        </PreferenceScreen-->
+        <PreferenceScreen
+            android:key="redditScreen"
+            android:title="Reddit...">
+            <Preference
+                android:key="Trigger.NewRedditPost"
+                android:title="New post..."/>
+            <Preference
+                android:key="Trigger.NewRedditPostByTitle"
+                android:title="New post by title..."/>
+            <Preference
+                android:key="Trigger.NewRedditPostByUser"
+                android:title="New post by user..."/>
+        </PreferenceScreen>
+    </PreferenceScreen>
+
 </PreferenceScreen>
