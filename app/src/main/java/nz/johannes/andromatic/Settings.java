@@ -17,19 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
-
-import org.json.JSONObject;
-
-import java.util.Arrays;
-
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -40,7 +27,6 @@ import twitter4j.conf.ConfigurationBuilder;
 public class Settings extends AppCompatActivity {
 
     private static RequestToken twitterRequestToken;
-    private static CallbackManager callbackManager;
 
     public static class SettingsFragment extends PreferenceFragment {
 
@@ -67,21 +53,12 @@ public class Settings extends AppCompatActivity {
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        switch (preference.getKey()) {
-                            case "twitterAccount":
-                                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-                                editor.remove("twitterID");
-                                editor.remove("twitterToken");
-                                editor.remove("twitterSecret");
-                                editor.commit();
-                                getActivity().recreate();
-                            case "facebookAccount":
-                                editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-                                editor.remove("facebookID");
-                                editor.remove("facebookToken");
-                                editor.commit();
-                                getActivity().recreate();
-                        }
+                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                        editor.remove("twitterID");
+                        editor.remove("twitterToken");
+                        editor.remove("twitterSecret");
+                        editor.commit();
+                        getActivity().recreate();
                     }
                 });
                 alert.setNegativeButton("No", null);
@@ -121,7 +98,7 @@ public class Settings extends AppCompatActivity {
                                 try {
                                     twitterRequestToken = twitter.getOAuthRequestToken();
                                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(twitterRequestToken.getAuthorizationURL()));
-                                    startActivity(browserIntent);
+                                    if (isAdded()) startActivity(browserIntent);
                                 } catch (TwitterException e) {
                                 }
                             }
@@ -141,7 +118,7 @@ public class Settings extends AppCompatActivity {
                                     editor.putString("twitterToken", accessToken.getToken());
                                     editor.putString("twitterSecret", accessToken.getTokenSecret());
                                     editor.commit();
-                                } catch (TwitterException e) {
+                                } catch (IllegalStateException | TwitterException e) {
                                 }
                                 handler.sendMessage(new Message());
                             }
@@ -151,54 +128,14 @@ public class Settings extends AppCompatActivity {
                 alert.setNegativeButton("Cancel", null);
                 alert.show();
             }
-            if (preference.getKey().equals("facebookAccount")) {
-                FacebookSdk.sdkInitialize(getActivity());
-                LoginManager loginManager = LoginManager.getInstance();
-                loginManager.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-                    @Override
-                    public void onSuccess(final LoginResult loginResult) {
-                        GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
-                            @Override
-                            public void onCompleted(JSONObject me, GraphResponse response) {
-                                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-                                editor.putString("facebookID", me.optString("name"));
-                                editor.putString("facebookToken", loginResult.getAccessToken().getToken());
-                                editor.commit();
-                                Main.showToast(getActivity(), "Facebook account linked successfully.");
-                                Preference facebookPreference = findPreference("facebookAccount");
-                                facebookPreference.setSummary("Logged in as " + me.optString("name"));
-                            }
-                        });
-                        request.executeAsync();
-                    }
-
-                    @Override
-                    public void onCancel() {
-                    }
-
-                    @Override
-                    public void onError(FacebookException error) {
-                        Main.showToast(getActivity(), "Error connecting to Facebook");
-                    }
-                });
-                loginManager.logInWithPublishPermissions(getActivity(), Arrays.asList("publish_actions"));
-            }
             return true;
         }
-
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsFragment()).commit();
-        callbackManager = CallbackManager.Factory.create();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
 }

@@ -27,14 +27,9 @@
         android:entryValues="@array/SocialMediaValues"
         android:key="socialMediaCheckInterval"
         android:summary="How often social media triggers should check for updates"
-        android:title="Social media update frequency"/>
-    />
+        android:title="Social media update rate"/>
     <Preference
         android:key="twitterAccount"
         android:summary="Link your Twitter to enable related triggers and actions"
         android:title="Twitter account"/>
-    <!--Preference
-        android:key="facebookAccount"
-        android:summary="Link your Facebook to enable related triggers and actions"
-        android:title="Facebook account"/-->
 </PreferenceScreen>

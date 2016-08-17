@@ -82,12 +82,10 @@ public class AddComponent extends PreferenceActivity {
             else addPreferencesFromResource(R.xml.triggers_free);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             if (!prefs.getString("twitterID", "").equals("")) {
-                Preference twitterPreference = findPreference("twitterScreen");
-                twitterPreference.setSummary("Logged in as " + prefs.getString("twitterID", ""));
-            }
-            if (!prefs.getString("facebookID", "").equals("")) {
-                Preference facebookPreference = findPreference("facebookScreen");
-                facebookPreference.setSummary("Logged in as " + prefs.getString("facebookID", ""));
+                Preference[] twitterPrefs = new Preference[]{findPreference("tweetScreen"), findPreference("twitterMessageScreen")};
+                for (Preference preference : twitterPrefs) {
+                    preference.setSummary("");
+                }
             }
         }
 
@@ -608,12 +606,10 @@ public class AddComponent extends PreferenceActivity {
             else addPreferencesFromResource(R.xml.actions_free);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             if (!prefs.getString("twitterID", "").equals("")) {
-                Preference twitterPreference = findPreference("twitterScreen");
-                twitterPreference.setSummary("Logged in as " + prefs.getString("twitterID", ""));
-            }
-            if (!prefs.getString("facebookID", "").equals("")) {
-                Preference facebookPreference = findPreference("facebookScreen");
-                facebookPreference.setSummary("Logged in as " + prefs.getString("facebookID", ""));
+                Preference[] twitterPrefs = new Preference[]{findPreference("Action.SendTweet"), findPreference("Action.TwitterMessage")};
+                for (Preference preference : twitterPrefs) {
+                    if (preference.getSummary().equals("Not logged in")) preference.setSummary("");
+                }
             }
         }
 

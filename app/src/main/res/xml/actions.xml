@@ -138,28 +138,14 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Social media...">
-        <PreferenceScreen
-            android:key="twitterScreen"
+        <Preference
+            android:key="Action.SendTweet"
             android:summary="Not logged in"
-            android:title="Twitter...">
-            <Preference
-                android:key="Action.SendTweet"
-                android:title="Update Twitter status..."/>
-            <Preference
-                android:key="Action.TwitterMessage"
-                android:title="Send Twitter message..."/>
-        </PreferenceScreen>
-        <!--PreferenceScreen
-            android:key="facebookScreen"
+            android:title="Update Twitter status..."/>
+        <Preference
+            android:key="Action.TwitterMessage"
             android:summary="Not logged in"
-            android:title="Facebook...">
-            <Preference
-                android:key="Action.UpdateFacebook"
-                android:title="Update Facebook status..."/>
-            <Preference
-                android:key="Action.FacebookMessage"
-                android:title="Send Facebook message..."/>
-        </PreferenceScreen-->
+            android:title="Send Twitter message..."/>
     </PreferenceScreen>
 
 </PreferenceScreen>
