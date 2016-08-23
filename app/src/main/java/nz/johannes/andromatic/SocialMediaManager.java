@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -152,6 +153,7 @@ public class SocialMediaManager {
     }
 
     private static void checkTwitterMessages(final Context context, final Task task, final Trigger trigger) {
+        Log.i("Log", "Checking twitter messages");
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
         configBuilder.setOAuthConsumerKey(TWITTER_CONSUMER_KEY);
@@ -174,7 +176,10 @@ public class SocialMediaManager {
                     Date date = new Date(lastCheckTime);
                     switch (trigger.getType()) {
                         case "Trigger.NewDM":
-                            for (DirectMessage message : messages) if (message.getCreatedAt().after(date)) handler.sendMessage(new Message());
+                            for (DirectMessage message : messages) {
+                                if (message.getCreatedAt().after(date)) handler.sendMessage(new Message());
+                                else Log.i("Log", message.getCreatedAt().toString() + " : " + date.toString());
+                            }
                             break;
                         case "Trigger.NewDMByContent":
                             for (DirectMessage message : messages) {

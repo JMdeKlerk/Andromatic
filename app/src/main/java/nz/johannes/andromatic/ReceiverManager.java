@@ -82,6 +82,9 @@ public class ReceiverManager {
                     case "Trigger.NewTweet":
                     case "Trigger.NewTweetByContent":
                     case "Trigger.NewTweetByUser":
+                    case "Trigger.NewDM":
+                    case "Trigger.NewDMByContent":
+                    case "Trigger.NewDMByUser":
                     case "Trigger.NewRedditPost":
                         socialMedia = true;
                         receiverBools[0] = true;

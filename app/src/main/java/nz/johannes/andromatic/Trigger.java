@@ -167,7 +167,7 @@ public class Trigger {
                         detail.setText("From user " + trigger.getMatch());
                         break;
                     case "Trigger.NewDM":
-                        type.setText("Any new tweet");
+                        type.setText("Any new Twitter message");
                         break;
                     case "Trigger.NewDMByContent":
                         type.setText("New Twitter message");

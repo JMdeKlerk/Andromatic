@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class Action {
@@ -179,8 +180,8 @@ public class Action {
                 break;
             case "Action.TTSTime":
                 Intent ttsTime = new Intent(context, TTSService.class);
-                SimpleDateFormat formatter = new SimpleDateFormat("HH mm a");
-                ttsTime.putExtra("text", "The time is " + formatter.format(Calendar.getInstance().getTime()).toString());
+                SimpleDateFormat formatter = new SimpleDateFormat("HH mm a", Locale.getDefault());
+                ttsTime.putExtra("text", "The time is " + formatter.format(Calendar.getInstance().getTime()));
                 context.startService(ttsTime);
                 break;
             case "Action.TTSSMS":
