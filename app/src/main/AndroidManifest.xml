@@ -60,12 +60,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nz.johannes.andromatic.Main"/>
         </activity>
-        <activity
-            android:name="com.facebook.FacebookActivity"
-            android:configChanges=
-                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
 
         <receiver
             android:name=".AlarmReceiver"
@@ -145,10 +139,6 @@
                 <action android:name="android.service.notification.NotificationListenerService"/>
             </intent-filter>
         </service>
-
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id"/>
 
     </application>
 

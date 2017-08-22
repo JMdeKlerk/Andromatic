@@ -627,7 +627,7 @@ public class AddComponent extends PreferenceActivity {
                 return false;
             }
             if (preference instanceof PreferenceScreen) return false;
-            String actionType = preference.getKey();
+            final String actionType = preference.getKey();
             if (elevatedActions.contains(actionType) && android.os.Build.VERSION.SDK_INT >= 23) {
                 switch (actionType) {
                     case "Action.StartCall":
@@ -652,11 +652,21 @@ public class AddComponent extends PreferenceActivity {
                         if (Main.weHavePermission(context, "device_admin")) createAction(actionType);
                         else {
                             ComponentName component = new ComponentName(context, DeviceAdmin.class);
-                            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                            final Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
                             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, component);
                             intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
                                     "Screen timeout and lock functions require the app to have device admin permissions.");
-                            startActivityForResult(intent, elevatedActions.indexOf(actionType));
+                            AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+                            alertDialog.setTitle("Device Admin Required");
+                            alertDialog.setMessage("This action requires device admin permissions to function. You will now be taken to security settings to enable this permission.");
+                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                            startActivityForResult(intent, elevatedActions.indexOf(actionType));
+                                        }
+                                    });
+                            alertDialog.show();
                         }
                         break;
                     case "Action.PlaySoundNotification":

@@ -277,6 +277,8 @@ public class Main extends AppCompatActivity implements ServiceConnection {
             Bundle buyIntentBundle = billingService.getBuyIntent(3, context.getPackageName(), "premium", "inapp", "");
             PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
             context.startIntentSenderForResult(pendingIntent.getIntentSender(), 1001, new Intent(), 0, 0, 0);
+        } catch (NullPointerException e) {
+            showToast(context, "Purchase failed - could not contact Google Play.");
         } catch (RemoteException | IntentSender.SendIntentException e) {
             e.printStackTrace();
         }
@@ -292,6 +294,7 @@ public class Main extends AppCompatActivity implements ServiceConnection {
                 return true;
             }
         } catch (RemoteException | NullPointerException e) {
+            e.printStackTrace();
         }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean("premium", false);
